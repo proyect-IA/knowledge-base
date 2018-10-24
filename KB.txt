@@ -1,0 +1,37 @@
+[
+
+class(Nombre, Padre, [[Propiedad, Valor], [Antecedente=>Consecuente, Valor]], [], []),
+
+class(top,none,[],[],[]),
+
+class(comestible, top, [[graspable, 1], [not(on_discount), 2]], [], []),
+
+class(food, comestible, [], [], []),
+
+class(cereal, food, [[inv=>0, 2], [shelf=>p4, 4]], [], [	
+	[id => c1, [[brand=>kellogs, 2]],[]]
+   	]),
+
+class(drink, comestible, [[age=>all, 3]], [], []),
+
+class(soda, drink, [[inv=>1, 4], [shelf=>p4, 4]], [], [	
+	[id => s1, [brand=>coke],[]]
+   	]),
+
+class(beer, drink, [[age=>18, 4],[inv=>1,4],[shelf=>sh2,4]], [], [	
+	[id => b1, [[brand=>heineken],4],[]]
+   	]),
+   	
+class(dairy, comestible, [[inv=>1,4],[shelf=>p4,4]], [], [	
+	[id => d1, [[brand=>cream,4],[on_discount,4]],[]]
+   	]),
+
+class(states, top, [], [], []),
+
+class(events, top, [], [], []),
+
+class(orders, top, [], [], []),
+
+class(failed_orders, top, [], [], [])
+
+]
