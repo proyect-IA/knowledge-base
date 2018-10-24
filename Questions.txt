@@ -1,0 +1,8 @@
+Preguntas:
+
+-¿Es necesario ordenar las preferencias siempre?
+-¿Se pueden hacer las consultas "arrastrando" la variable KB?
+     -¿Una instancia de una clase ("individuo") va a tener las relaciones de las clases de las cuales hereda
+     y además las que definamos para individou en particular?
+-¿Guardar variables en momeria?
+-¿Consulta tipo?....  abrir(KB), predicado(KB), write(resultado).  [????]
