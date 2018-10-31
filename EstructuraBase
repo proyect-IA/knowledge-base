@@ -1,3 +1,8 @@
 [
-class(nombreClase,nombrePadre,[ [propiedad => (valor,peso), propiedad] ,[ (propiedad=>valor)=>>propiedad],relaciones,individuos),
+class(nombreClase,nombrePadre,[ [propiedad => (valor,peso), propiedad] ,[ (propiedad=>valor)=>>(propiedad,peso)],relaciones,individuos),
+
+class(top,none,[],[],[]).
+
+//Aqui esta un ejemplo de como seran con las preferencias
+class(comida,top,[ [sabor, salada => (si,0)],[(sabor, salada=>si) =>> (deliciosa,2) )]],[],[]),
 ]
