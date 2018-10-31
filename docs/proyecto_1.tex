@@ -1,0 +1,104 @@
+\documentclass[letterpaper,11pt]{article}
+\usepackage[utf8x]{inputenc}
+\usepackage[bottom=1.6cm,top=1.6cm,left=2.2cm,right=2.6cm]{geometry}
+\usepackage[spanish,mexico]{babel}
+%\usepackage{listings}
+\usepackage[many]{tcolorbox}
+\tcbuselibrary{listings}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{enumitem}
+\setenumerate{itemsep=2pt,topsep=0pt, itemindent=4pt, labelindent=2pt}
+
+\author{Edgar de Jesús Vázquez Silva}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{setspace}
+
+\definecolor{dkgreen}{rgb}{0,0.7,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+
+
+\lstset{%frame=tb,
+  language=Python,
+  aboveskip=-2mm,
+  belowskip=-2mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3,
+  emph={ },
+  emphstyle={\color{red}},
+}
+
+\newtcblisting{code}{
+  listing only,
+  %hbox,
+  %colframe=cyan,
+  colback=gray!10,
+  %left skip=1pt,
+  listing options={
+   % frame=single,
+    mathescape=true,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    numbersep=2pt,
+  },
+}
+
+\renewcommand{\qedsymbol}{$\blacksquare$}
+\addto\captionsspanish{\renewcommand\proofname{Prueba}}
+
+\setlength{\parskip}{0cm}
+\onehalfspacing
+
+\begin{document}
+\setlength{\parskip}{0cm}
+\begin{center}
+{\bf \large Proyecto 1: Knwledge Data Base}\\
+Yoshio \\
+Raul\\
+Andric\\
+Edgar de Jesús Vázquez Silva\\
+Noviembre, 6,  2018\\
+\vspace{0.2in}
+\textbf{Inteligencia Artificial  2019-1}\\
+Prof. Dr. Pineda\\
+\end{center}
+
+\vspace{\baselineskip}
+
+Este proyecto consiste en construir una representación de la una base de conocimeinto,
+en mundo abierto con implementación en Prolog.\\
+
+Para la resolución de los requerimientos del proyecto se propone la siguiente metodología 
+de una clase con las siguientes relaciones:\\
+
+\begin{itemize}
+  \item{nombre}
+  \item{Padre}
+  \item{Hijos}
+  \item{Propiedades}
+  \item{Relaciones}
+  \item{Relaciones}
+\end{itemize}
+
+$class(nombre, padre, propiedades, relaciones, individios)$\\
+
+\begin{itemize}
+  \item{nombre: (átomo en prolog)}
+  \item{Padre: (átomo en prolog)}
+  \item{Propiedades: Lista en prolog, Propiedades:$[$     $]$, $atributo => valor$}
+  \item{Relaciones}
+  \item{Relaciones}
+\end{itemize}
+
+\end{document}
