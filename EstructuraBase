@@ -1,8 +1,6 @@
 [
-class(nombreClase,nombrePadre,[ [propiedad => (valor,peso), propiedad] ,[ (propiedad=>valor)=>>(propiedad,peso)],relaciones,individuos),
-
-class(top,none,[],[],[]).
-
-//Aqui esta un ejemplo de como seran con las preferencias
-class(comida,top,[ [sabor, salada => (si,0)],[(sabor, salada=>si) =>> (deliciosa,2) )]],[],[]),
+class(top,none,[],[],[]),
+class(animales,top,[],[],[]),
+class(mamiferos,animales,[[ponen_huevos=>(si,0), vuelan=>(no,0)]],[],[]),
+class(raton,mamiferos,[],[],[])
 ]
