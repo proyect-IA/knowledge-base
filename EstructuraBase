@@ -1,0 +1,3 @@
+[
+class(nombreClase,nombrePadre,[ [propiedad => (valor,peso), propiedad] ,[ (propiedad=>valor)=>>propiedad],relaciones,individuos),
+]
