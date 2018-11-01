@@ -17,8 +17,6 @@ guardar(KB):-
 
 %--------------------------------------------------------------------------------------------------------
 
-
-
 %predicados auxiliares para el manejo de archivos -------------------------------------------------------
 
 readclauses(InStream,W) :-
@@ -141,16 +139,82 @@ obtener_individuos_hijos_descendientes([_|T],[],Individuos,Respaldo):-
 obtener_individuos_hijos_descendientes(T,Respaldo,Individuos,Respaldo).
 %--------------------------------------------------------------------------------------------------------
 
-
-
-
 %Aqui obtenemos la extensión de una propiedad -----------------------------------------------------------
 
+extension_propiedad(Propiedad,KB,Extension):-
+obtener_extension_propiedad(top,Propiedad,[],KB,Extension).
+
+obtener_extension_propiedad(Padre,PropiedadBuscar,PropiedadesPropidas,KB,Extension):-
+obtener_hijos(Padre,KB,Hijos),			%se obtienen inicialmente los hijos de la raiz
+obtener_propiedades_clase(Padre,KB,PropiedadesClase),
+append(PropiedadesPropidas,PropiedadesClase,PropiedadesHerencia),
+bajar_por_hijos(Padre,Hijos,PropiedadBuscar,PropiedadesHerencia,KB,Extension).
+
+obtener_extension_propiedad([],_,_,_,_).
+
+obtener_propiedades_individuos_clase(Clase,PropiedadBuscar,PropiedadesHeredadas,[class(Clase,_,_,_,[[id=>Nombre,[A|B],_]|Otros])|_],Extension):-
+buscar_propiedad(PropiedadBuscar,[A|B],ValorPorDefecto),
+append([Nombre],[ValorPorDefecto],Extension).
+
+obtener_propiedades_individuos_clase(Clase,PropiedadBuscar,PropiedadesHeredadas,[class(Clase,_,_,_,[[id=>Nombre,[],_]|Otros])|_],Extension):-
+buscar_propiedad(PropiedadBuscar,PropiedadesHeredadas,ValorPorDefecto),
+append([Nombre],[ValorPorDefecto],Extension).
+
+obtener_propiedades_individuos_clase(Clase,PropiedadBuscar,PropiedadesHeredadas,[class(Clase,_,_,_,[[id=>Nombre,[],_]|[]])|_],Extension):-
+buscar_propiedad(PropiedadBuscar,PropiedadesHeredadas,ValorPorDefecto),
+append([Nombre],[ValorPorDefecto],Extension).
+
+obtener_propiedades_individuos_clase(Clase,PropiedadBuscar,PropiedadesHeredadas,[class(Clase,_,_,_,[[id=>Nombre,[A|B],_]|[]])|_],Extension):-
+buscar_propiedad(PropiedadBuscar,[A|B],ValorPorDefecto),
+append([Nombre],[ValorPorDefecto],Extension).
+
+obtener_propiedades_individuos_clase(Clase,PropiedadBuscar,PropiedadesHeredadas,[H|T],Extension):-
+obtener_propiedades_individuos_clase(Clase,PropiedadBuscar,PropiedadesHeredadas,T,Extension).
+
+obtener_propiedades_individuos_clase(_,_,_,[],_).
+
+%si no se encuentra la propiedad se dice que no
+buscar_propiedad(_,[],no).
+
+%propiedades que son positivas
+buscar_propiedad(Propiedad, [Propiedad=>(Valor,_)|T],R):-
+append([],Valor,R).
+
+buscar_propiedad(Propiedad,[_|T],Valor):-
+buscar_propiedad(Propiedad,T,Valor).
+
+obtener_propiedades_clase(_,[],[]).
+obtener_propiedades_clase(Clase,[class(Clase,_,[[A|B]|_],_,_)|_], [A|B]).
+obtener_propiedades_clase(Clase,[class(Clase,_,[[A|B]],_,_)|_], [A|B]).
+
+%se llama recurisavamente hasta encontrar la clase correspondiente y obtener las propiedadades
+obtener_propiedades_clase(Clase,[H|T],Propiedades):-
+obtener_propiedades_clase(Clase,T,Propiedades).
+
+obtener_hijos(Padre,[class(Hija,Padre,_,_,_)|Resto],Hijos):-
+obtener_hijos(Padre,Resto,Hermanos),
+append([Hija],Hermanos,Hijos).
+
+obtener_hijos(Padre,[A|B],Hijo):-
+obtener_hijos(Padre,B,Hijo).
+
+obtener_hijos(_,[],[]).
+
+bajar_por_hijos(Padre,[],PropiedadBuscar,PropiedadesHerencia,KB,Extension):-
+obtener_propiedades_individuos_clase(Padre,PropiedadBuscar,PropiedadesHerencia,KB,Extension).
+
+bajar_por_hijos(Padre,Hijos,PropiedadBuscar,PropiedadesHerencia,KB,Extension):-
+recorre_hijos(Hijos,PropiedadBuscar,PropiedadesHerencia,KB,Extension).
+
+recorre_hijos([P|H],PropiedadBuscar,KB,Propiedades,Extension):-
+obtener_extension_propiedad(P,PropiedadBuscar,KB,Propiedades,ExtensionNueva),
+recorre_hijos(H,PropiedadBuscar,KB,Propiedades,ExtensionNueva2),
+append(ExtensionNueva2,ExtensionNueva,Extension).
+
+recorre_hijos([],_,_,_,_).
+recorre_hijos(_,_,[],_,_).
+
 %--------------------------------------------------------------------------------------------------------
-
-
-
-
 
 %definicion de los operadores ---------------------------------------------------------------------------
 
