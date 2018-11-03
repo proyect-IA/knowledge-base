@@ -147,38 +147,44 @@ obtener_individuos_hijos_descendientes([_|T],[],Individuos,Respaldo):-
 
 %Aqui obtenemos la extensión de una propiedad -----------------------------------------------------------
 
+%predicado principal para obtener la extensión de una propiedad
 extension_propiedad(Propiedad,KB,Extension):-
-	obtener_extension_propiedad(top,Propiedad,[],KB,Extension).
+	obtener_extension_propiedad(top,Propiedad,[],KB,Extension,[]).
 
-obtener_extension_propiedad(Padre,PropiedadBuscar,PropiedadesPropidas,KB,Extension):-
+/* predica que permite obtener la extensión de una propiedad, regresa los individios que la poseen ya sea por que la tiene propiamente, es heredada o inferida */
+obtener_extension_propiedad(Padre,PropiedadBuscar,PropiedadesPropidas,KB,Extension,PreferenciasHeredadas):-
 	obtener_hijos(Padre,KB,Hijos),			
 	obtener_propiedades_clase(Padre,KB,PropiedadesClase),
+	obtener_preferencias_clase(Padre,KB,PreferenciasClase),
 	append(PropiedadesClase,PropiedadesPropidas,PropiedadesHerencia),
-	bajar_por_hijos_propiedad(Padre,Hijos,PropiedadBuscar,PropiedadesHerencia,KB,Extension).
+	append(PreferenciasClase,PreferenciasHeredadas,PreferenciasHerencia),
+	bajar_por_hijos_propiedad(Padre,Hijos,PropiedadBuscar,PropiedadesHerencia,KB,Extension,PreferenciasHerencia).
 
+%predicado base que detine la recursividad de prolog
 obtener_extension_propiedad([],_,_,_,[]).
 
-obtener_propiedades_individuos_clase(Clase,PropiedadBuscar,PropiedadesHeredadas,[class(Clase,_,_,_,[[id=>Nombre,[A|B],_]|Otros])|_],Extension):-
+%predicado que busca una clase en especifico y despues obtiene sus individuos
+obtener_propiedades_individuos_clase(Clase,PropiedadBuscar,PropiedadesHeredadas,[class(Clase,_,_,_,[[id=>Nombre,[A|B],_]|Otros])|_],Extension,PreferenciasHerencia):-
 	append([A|B],PropiedadesHeredadas,PropiedadesMescladaz),
 	buscar_propiedad(PropiedadBuscar,PropiedadesMescladaz,ValorPorDefecto),
 	append([Nombre],[ValorPorDefecto],Val1),
 	extraer_propiedades_individuos(PropiedadBuscar,PropiedadesHeredadas,Otros,DemasValores),
 	append([Val1],DemasValores,Extension).
 
-obtener_propiedades_individuos_clase(Clase,PropiedadBuscar,PropiedadesHeredadas,[class(Clase,_,_,_,[[id=>Nombre,[],_]|Otros])|_],Extension):-
+obtener_propiedades_individuos_clase(Clase,PropiedadBuscar,PropiedadesHeredadas,[class(Clase,_,_,_,[[id=>Nombre,[],_]|Otros])|_],Extension,PreferenciasHerencia):-
 	buscar_propiedad(PropiedadBuscar,PropiedadesHeredadas,ValorPorDefecto),
 	append([Nombre],[ValorPorDefecto],Val1),
 	extraer_propiedades_individuos(PropiedadBuscar,PropiedadesHeredadas,Otros,DemasValores),
 	append([Val1],DemasValores,Extension).
 
-obtener_propiedades_individuos_clase(Clase,PropiedadBuscar,PropiedadesHeredadas,[class(Clase,_,_,_,[[id=>Nombre,[],_]|[]])|_],Extension):-
+obtener_propiedades_individuos_clase(Clase,PropiedadBuscar,PropiedadesHeredadas,[class(Clase,_,_,_,[[id=>Nombre,[],_]|[]])|_],Extension,PreferenciasHerencia):-
 	buscar_propiedad(PropiedadBuscar,PropiedadesHeredadas,ValorPorDefecto),
 	append([Nombre],[ValorPorDefecto],Extension).
 
-obtener_propiedades_individuos_clase(Clase,PropiedadBuscar,PropiedadesHeredadas,[_|T],Extension):-
-	obtener_propiedades_individuos_clase(Clase,PropiedadBuscar,PropiedadesHeredadas,T,Extension).
+obtener_propiedades_individuos_clase(Clase,PropiedadBuscar,PropiedadesHeredadas,[_|T],Extension,PreferenciasHerencia):-
+	obtener_propiedades_individuos_clase(Clase,PropiedadBuscar,PropiedadesHeredadas,T,Extension,PreferenciasHerencia).
 
-obtener_propiedades_individuos_clase(_,_,_,[],[]).
+obtener_propiedades_individuos_clase(_,_,_,[],[],PreferenciasHerencia).
 
 extraer_propiedades_individuos(PropiedadBuscar,PropiedadesHeredadas,[[id=>Nombre,[A|B],_]|Resto],Extension):-
 	append([A|B],PropiedadesHeredadas,PropiedadesMescladaz),
@@ -199,7 +205,7 @@ extraer_propiedades_individuos(PropiedadBuscar,PropiedadesHeredadas,[_|Resto],Ex
 extraer_propiedades_individuos(_,_,[],[]).
 
 %si no se encuentra la propiedad se dice que no
-buscar_propiedad(_,[],no).
+buscar_propiedad(_,[],desconocido).
 
 %propiedades que son positivas
 buscar_propiedad(Propiedad, [Propiedad=>(Valor,_)|_],Valor).
@@ -216,6 +222,14 @@ obtener_propiedades_clase(Clase,[class(Clase,_,[[A|B]],_,_)|_], [A|B]).
 obtener_propiedades_clase(Clase,[_|T],Propiedades):-
 	obtener_propiedades_clase(Clase,T,Propiedades).
 
+obtener_preferencias_clase(_,[],[]).
+obtener_preferencias_clase(Clase,[class(Clase,_,[_|[A|B]],_,_)|_],[A|B]).
+obtener_preferencias_clase(Clase,[class(Clase,_,[[A|B]],_,_)|_], [A|B]).
+
+obtener_preferencias_clase(Clase,[_|T], Preferencias):-
+	obtener_preferencias_clase(Clase,T,Preferencias).
+
+
 obtener_hijos(Padre,[class(Hija,Padre,_,_,_)|Resto],Hijos):-
 	obtener_hijos(Padre,Resto,Hermanos),
 	append([Hija],Hermanos,Hijos).
@@ -225,88 +239,91 @@ obtener_hijos(Padre,[_|B],Hijo):-
 
 obtener_hijos(_,[],[]).
 
-bajar_por_hijos_propiedad(Padre,[],PropiedadBuscar,PropiedadesHerencia,KB,Extension):-
-	obtener_propiedades_individuos_clase(Padre,PropiedadBuscar,PropiedadesHerencia,KB,Extension).
+bajar_por_hijos_propiedad(Padre,[],PropiedadBuscar,PropiedadesHerencia,KB,Extension,PreferenciasHerencia):-
+	obtener_propiedades_individuos_clase(Padre,PropiedadBuscar,PropiedadesHerencia,KB,Extension,PreferenciasHerencia).
 
-bajar_por_hijos_propiedad(_,Hijos,PropiedadBuscar,PropiedadesHerencia,KB,Extension):-
-	recorre_hijos_propiedad(Hijos,PropiedadBuscar,PropiedadesHerencia,KB,Extension).
+bajar_por_hijos_propiedad(_,Hijos,PropiedadBuscar,PropiedadesHerencia,KB,Extension,PreferenciasHerencia):-
+	recorre_hijos_propiedad(Hijos,PropiedadBuscar,PropiedadesHerencia,KB,Extension,PreferenciasHerencia).
 
-recorre_hijos_propiedad([P|H],PropiedadBuscar,KB,Propiedades,Extension):-
-	obtener_extension_propiedad(P,PropiedadBuscar,KB,Propiedades,ExtensionNueva),
-	recorre_hijos_propiedad(H,PropiedadBuscar,KB,Propiedades,ExtensionNueva2),
+recorre_hijos_propiedad([P|H],PropiedadBuscar,KB,Propiedades,Extension,PreferenciasHerencia):-
+	obtener_extension_propiedad(P,PropiedadBuscar,KB,Propiedades,ExtensionNueva,PreferenciasHerencia),
+	recorre_hijos_propiedad(H,PropiedadBuscar,KB,Propiedades,ExtensionNueva2,PreferenciasHerencia),
 	append(ExtensionNueva2,ExtensionNueva,Extension).
 
-recorre_hijos_propiedad([],_,_,_,[]).
-recorre_hijos_propiedad(_,_,[],_,[]).
+recorre_hijos_propiedad([],_,_,_,[],_).
+recorre_hijos_propiedad(_,_,[],_,[],_).
 
 %--------------------------------------------------------------------------------------------------------
 
 %Extensión de una relación-------------------------------------------------------------------------------
 
 extension_relacion(Relacion,KB,Extension):-
-	obtener_extension_relacion(top,Relacion,[],KB,Extension).
+	obtener_extension_relacion(top,Relacion,[],KB,Extension,KB).
 
 %predicado que permite obtener la extensión completa de una relacion en todo el árbol
 %se obtienen los hijos de la clase
 %se obtiene la lista de relaciones de la clase padre
 %se concantenan las relaciones padre con las relaciones heredadas
 %se elije el primer hijo y se busca si tiene la relacion dada
-obtener_extension_relacion(Padre,RelacionBuscar,RelacionesHeredadas,KB,Extension):-
+obtener_extension_relacion(Padre,RelacionBuscar,RelacionesHeredadas,KB,Extension,RespaldoKB):-
 	obtener_hijos(Padre,KB,Hijos),											
 	obtener_relaciones_clase(Padre,KB,RelacionesPadre),						
 	append(RelacionesPadre,RelacionesHeredadas,RelacionesHerencia),			
-	bajar_por_hijos_relacion(Padre,Hijos,RelacionBuscar,RelacionesHerencia,KB,Extension). 
+	bajar_por_hijos_relacion(Padre,Hijos,RelacionBuscar,RelacionesHerencia,KB,Extension,RespaldoKB). 
 
-obtener_extension_relacion([],_,_,_,[]).
+obtener_extension_relacion([],_,_,_,[],_).
 
-obtener_relaciones_individuos_clase(Clase,RelacionBuscar,RelacionesHeredadas,[class(Clase,_,_,_,[[id=>Nombre,_,[A|B]]|Otros])|_],Extension):-
+obtener_relaciones_individuos_clase(Clase,RelacionBuscar,RelacionesHeredadas,[class(Clase,_,_,_,[[id=>Nombre,_,[A|B]]|Otros])|_],Extension,RespaldoKB):-
 	append([A|B],RelacionesHeredadas,RelacionesCompletas),
-	buscar_relacion(RelacionBuscar,RelacionesCompletas,ValorPorDefecto),
+	buscar_relacion(RelacionBuscar,RelacionesCompletas,ValorPorDefecto,RespaldoKB),
 	append([Nombre],[ValorPorDefecto],Val1),
-	extraer_relaciones_individuos(RelacionBuscar,RelacionesHeredadas,Otros,DemasValores),
+	extraer_relaciones_individuos(RelacionBuscar,RelacionesHeredadas,Otros,DemasValores,RespaldoKB),
 	append([Val1],DemasValores,Extension).
 
-obtener_relaciones_individuos_clase(Clase,RelacionBuscar,RelacionesHeredadas,[class(Clase,_,_,_,[[id=>Nombre,_,[]]|Otros])|_],Extension):-
-	buscar_relacion(RelacionBuscar,RelacionesHeredadas,ValorPorDefecto),
+obtener_relaciones_individuos_clase(Clase,RelacionBuscar,RelacionesHeredadas,[class(Clase,_,_,_,[[id=>Nombre,_,[]]|Otros])|_],Extension,RespaldoKB):-
+	buscar_relacion(RelacionBuscar,RelacionesHeredadas,ValorPorDefecto,RespaldoKB),
 	append([Nombre],[ValorPorDefecto],Val1),
-	extraer_relaciones_individuos(RelacionBuscar,RelacionesHeredadas,Otros,DemasValores),
+	extraer_relaciones_individuos(RelacionBuscar,RelacionesHeredadas,Otros,DemasValores,RespaldoKB),
 	append([Val1],DemasValores,Extension).
 
-obtener_relaciones_individuos_clase(Clase,RelacionBuscar,RelacionesHeredadas,[class(Clase,_,_,_,[[id=>Nombre,_,[]]|[]])|_],Extension):-
-	buscar_relacion(RelacionBuscar,RelacionesHeredadas,ValorPorDefecto),
+obtener_relaciones_individuos_clase(Clase,RelacionBuscar,RelacionesHeredadas,[class(Clase,_,_,_,[[id=>Nombre,_,[]]|[]])|_],Extension,RespaldoKB):-
+	buscar_relacion(RelacionBuscar,RelacionesHeredadas,ValorPorDefecto,RespaldoKB),
 	append([Nombre],[ValorPorDefecto],Extension).
 
-obtener_relaciones_individuos_clase(Clase,RelacionBuscar,RelacionesHeredadas,[_|T],Extension):-
-	obtener_relaciones_individuos_clase(Clase,RelacionBuscar,RelacionesHeredadas,T,Extension).
+obtener_relaciones_individuos_clase(Clase,RelacionBuscar,RelacionesHeredadas,[_|T],Extension,RespaldoKB):-
+	obtener_relaciones_individuos_clase(Clase,RelacionBuscar,RelacionesHeredadas,T,Extension,RespaldoKB).
 
-obtener_relaciones_individuos_clase(_,_,_,[],[]).
+obtener_relaciones_individuos_clase(_,_,_,[],[],_).
 
-extraer_relaciones_individuos(RelacionBuscar,RelacionesHeredadas,[[id=>Nombre,_,[A|B]]|Resto],Extension):-
+extraer_relaciones_individuos(RelacionBuscar,RelacionesHeredadas,[[id=>Nombre,_,[A|B]]|Resto],Extension,RespaldoKB):-
 	append([A|B],RelacionesHeredadas,RelacionesCompletas),
-	buscar_relacion(RelacionBuscar,RelacionesCompletas,ValorPorDefecto),
-	extraer_relaciones_individuos(RelacionBuscar,RelacionesHeredadas,Resto,RestoIndividuos),
+	buscar_relacion(RelacionBuscar,RelacionesCompletas,ValorPorDefecto,RespaldoKB),
+	extraer_relaciones_individuos(RelacionBuscar,RelacionesHeredadas,Resto,RestoIndividuos,RespaldoKB),
 	append([Nombre],[ValorPorDefecto],Ind1),
 	append([Ind1],RestoIndividuos,Extension).
 
-extraer_relaciones_individuos(RelacionBuscar,RelacionesHeredadas,[[id=>Nombre,_,[]]|Resto],Extension):-
-	buscar_relacion(RelacionBuscar,RelacionesHeredadas,ValorPorDefecto),
-	extraer_relaciones_individuos(RelacionBuscar,RelacionesHeredadas,Resto,RestoIndividuos),
+extraer_relaciones_individuos(RelacionBuscar,RelacionesHeredadas,[[id=>Nombre,_,[]]|Resto],Extension,RespaldoKB):-
+	buscar_relacion(RelacionBuscar,RelacionesHeredadas,ValorPorDefecto,RespaldoKB),
+	extraer_relaciones_individuos(RelacionBuscar,RelacionesHeredadas,Resto,RestoIndividuos,RespaldoKB),
 	append([Nombre],[ValorPorDefecto],Ind1),
 	append(Ind1,RestoIndividuos,Extension).
 
-extraer_relaciones_individuos(RelacionBuscar,RelacionesHeredadas,[_|Resto],Extension):-
-	extraer_relaciones_individuos(RelacionBuscar,RelacionesHeredadas,Resto,Extension).
+extraer_relaciones_individuos(RelacionBuscar,RelacionesHeredadas,[_|Resto],Extension,RespaldoKB):-
+	extraer_relaciones_individuos(RelacionBuscar,RelacionesHeredadas,Resto,Extension,RespaldoKB).
 
-extraer_relaciones_individuos(_,_,[],[]).
+extraer_relaciones_individuos(_,_,[],[],_).
 
 %si no se encuentra la propiedad se dice que no
-buscar_relacion(_,[],no).
+buscar_relacion(_,[],no,_).
 
 %propiedades que son positivas
-buscar_relacion(Relacion, [Relacion=>(Valor,_)|_],Valor).	
+buscar_relacion(Relacion, [Relacion=>(Individuo,_)|_],Valor,RespaldoKB):-
+	individuos_especificos_de_clase(Individuo,RespaldoKB,Valor).
 
-buscar_relacion(Relacion,[_|T],Valor):-
-	buscar_relacion(Relacion,T,Valor).
+
+%si no unifica en la relación entonces se siguen buscando en la relaciones
+buscar_relacion(Relacion,[_|T],Valor,KB):-
+	buscar_relacion(Relacion,T,Valor,KB).
 
 obtener_relaciones_clase(_,[],[]).
 obtener_relaciones_clase(Clase,[class(Clase,_,_,[[A|B]|_],_)|_], [A|B]).
@@ -316,19 +333,19 @@ obtener_relaciones_clase(Clase,[class(Clase,_,_,[[A|B]],_)|_], [A|B]).
 obtener_relaciones_clase(Clase,[_|T],Relaciones):-
 	obtener_relaciones_clase(Clase,T,Relaciones).
 
-bajar_por_hijos_relacion(Padre,[],RelacionBuscar,RelacionesHerencia,KB,Extension):-
-	obtener_relaciones_individuos_clase(Padre,RelacionBuscar,RelacionesHerencia,KB,Extension).
+bajar_por_hijos_relacion(Padre,[],RelacionBuscar,RelacionesHerencia,KB,Extension,RespaldoKB):-
+	obtener_relaciones_individuos_clase(Padre,RelacionBuscar,RelacionesHerencia,KB,Extension,RespaldoKB).
 
-bajar_por_hijos_relacion(_,Hijos,RelacionBuscar,RelacionesHerencia,KB,Extension):-
-	recorre_hijos_relacion(Hijos,RelacionBuscar,RelacionesHerencia,KB,Extension).
+bajar_por_hijos_relacion(_,Hijos,RelacionBuscar,RelacionesHerencia,KB,Extension,RespaldoKB):-
+	recorre_hijos_relacion(Hijos,RelacionBuscar,RelacionesHerencia,KB,Extension,RespaldoKB).
 
-recorre_hijos_relacion([P|H],RelacionBuscar,KB,Relaciones,Extension):-
-	obtener_extension_relacion(P,RelacionBuscar,KB,Relaciones,ExtensionNueva),
-	recorre_hijos_relacion(H,RelacionBuscar,KB,Relaciones,ExtensionNueva2),
+recorre_hijos_relacion([P|H],RelacionBuscar,KB,Relaciones,Extension,RespaldoKB):-
+	obtener_extension_relacion(P,RelacionBuscar,KB,Relaciones,ExtensionNueva,RespaldoKB),
+	recorre_hijos_relacion(H,RelacionBuscar,KB,Relaciones,ExtensionNueva2,RespaldoKB),
 	append(ExtensionNueva2,ExtensionNueva,Extension).
 
-recorre_hijos_relacion([],_,_,_,[]).
-recorre_hijos_relacion(_,_,[],_,[]).
+recorre_hijos_relacion([],_,_,_,[],_).
+recorre_hijos_relacion(_,_,[],_,[],_).
 
 %--------------------------------------------------------------------------------------------------------
 
@@ -361,7 +378,7 @@ bajar_por_hijos_clase_pertenecen(_,_,[],[],_,_).
 
 %una vez que encuentra la clase revisa si tiene individios y busca el deseado
 obtener_clases_pertenecientes_individuo_nivel(Clase,IndividuoBuscar,[class(Clase,_,_,_,[A|B])],Pertenece,Pila):-
-buscar_individuo(IndividuoBuscar,[A|B],Pertenece,Pila).
+	buscar_individuo(IndividuoBuscar,[A|B],Pertenece,Pila).
 
 obtener_clases_pertenecientes_individuo_nivel(Clase,IndividuoBuscar,[class(Clase,_,_,_,[A|B])|_],Pertenece,Pila):-
 	buscar_individuo(IndividuoBuscar,[A|B],Pertenece,Pila).
