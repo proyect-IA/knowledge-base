@@ -173,21 +173,21 @@ obtener_extension_propiedad([],_,_,_,[]).
 obtener_propiedades_individuos_clase(Clase,PropiedadBuscar,PropiedadesHeredadas,[class(Clase,_,_,_,[[id=>Nombre,[A|B],_]|Otros])|_],Extension,PreferenciasHerencia):-
 	append([A|B],PropiedadesHeredadas,PropiedadesMescladaz),
 	buscar_propiedad(PropiedadBuscar,PropiedadesMescladaz,Peso,ValorPorDefecto), % aqui ya se puede tener un valor, no o desconocido
-	inferir_propiedad(PreferenciasHerencia,PropiedadBuscar,PropiedadesMescladaz,ValorInferido,ValorPorDefecto),
+	prepar_proceso_inferencia(PreferenciasHerencia,PropiedadBuscar,PropiedadesMescladaz,ValorInferido,ValorPorDefecto),
 	append([Nombre],[ValorInferido],Val1),
 	extraer_propiedades_individuos(PropiedadBuscar,PropiedadesHeredadas,Otros,DemasValores,PreferenciasHerencia),
 	append([Val1],DemasValores,Extension).
 
 obtener_propiedades_individuos_clase(Clase,PropiedadBuscar,PropiedadesHeredadas,[class(Clase,_,_,_,[[id=>Nombre,[],_]|Otros])|_],Extension,PreferenciasHerencia):-
 	buscar_propiedad(PropiedadBuscar,PropiedadesHeredadas,Peso,ValorPorDefecto),
-	inferir_propiedad(PreferenciasHerencia,PropiedadBuscar,PropiedadesHeredadas,ValorInferido,ValorPorDefecto),
+	prepar_proceso_inferencia(PreferenciasHerencia,PropiedadBuscar,PropiedadesHeredadas,ValorInferido,ValorPorDefecto),
 	append([Nombre],[ValorInferido],Val1),
 	extraer_propiedades_individuos(PropiedadBuscar,PropiedadesHeredadas,Otros,DemasValores,PreferenciasHerencia),
 	append([Val1],DemasValores,Extension).
 
 obtener_propiedades_individuos_clase(Clase,PropiedadBuscar,PropiedadesHeredadas,[class(Clase,_,_,_,[[id=>Nombre,[],_]|[]])|_],Extension,PreferenciasHerencia):-
 	buscar_propiedad(PropiedadBuscar,PropiedadesHeredadas,Peso,ValorPorDefecto),
-	inferir_propiedad(PreferenciasHerencia,PropiedadBuscar,PropiedadesHeredadas,ValorInferido,ValorPorDefecto),
+	prepar_proceso_inferencia(PreferenciasHerencia,PropiedadBuscar,PropiedadesHeredadas,ValorInferido,ValorPorDefecto),
 	append([Nombre],[ValorInferido],Extension).
 
 obtener_propiedades_individuos_clase(Clase,PropiedadBuscar,PropiedadesHeredadas,[_|T],Extension,PreferenciasHerencia):-
@@ -198,14 +198,14 @@ obtener_propiedades_individuos_clase(_,_,_,[],[],_).
 extraer_propiedades_individuos(PropiedadBuscar,PropiedadesHeredadas,[[id=>Nombre,[A|B],_]|Resto],Extension,PreferenciasHerencia):-
 	append([A|B],PropiedadesHeredadas,PropiedadesMescladaz),
 	buscar_propiedad(PropiedadBuscar,PropiedadesMescladaz,Peso,ValorPorDefecto),
-	inferir_propiedad(PreferenciasHerencia,PropiedadBuscar,PropiedadesMescladaz,ValorInferido,ValorPorDefecto),
+	prepar_proceso_inferencia(PreferenciasHerencia,PropiedadBuscar,PropiedadesMescladaz,ValorInferido,ValorPorDefecto),
 	extraer_propiedades_individuos(PropiedadBuscar,PropiedadesHeredadas,Resto,RestoIndividuos,PreferenciasHerencia),
 	append([Nombre],[ValorInferido],Ind1),
 	append([Ind1],RestoIndividuos,Extension).
 
 extraer_propiedades_individuos(PropiedadBuscar,PropiedadesHeredadas,[[id=>Nombre,[],_]|Resto],Extension,PreferenciasHerencia):-
 	buscar_propiedad(PropiedadBuscar,PropiedadesHeredadas,Peso,ValorPorDefecto),
-	inferir_propiedad(PreferenciasHerencia,PropiedadBuscar,PropiedadesHeredadas,ValorInferido,ValorPorDefecto),
+	prepar_proceso_inferencia(PreferenciasHerencia,PropiedadBuscar,PropiedadesHeredadas,ValorInferido,ValorPorDefecto),	
 	extraer_propiedades_individuos(PropiedadBuscar,PropiedadesHeredadas,Resto,RestoIndividuos,PreferenciasHerencia),
 	append([Nombre],[ValorInferido],Ind1),
 	append([Ind1],RestoIndividuos,Extension).
@@ -217,10 +217,7 @@ extraer_propiedades_individuos(_,_,[],[],_).
 
 inferir_propiedad([],_,_,A,A).
 
-%inferir_propiedad([[A]|B],Buscar,Propiedades,Resultado,Inferido):-
-%	inferir_propiedad(B,Buscar,Propiedades,Resultado,Inferido).
-
-inferir_propiedad([[[Antecedentes=>>Buscar=>(Valor,Peso)]]|_],Buscar,Propiedades,Resultado,Inferido):-
+inferir_propiedad([Antecedentes=>>Buscar=>(Valor,Peso)|_],Buscar,Propiedades,Resultado,Inferido):-
 	compara_preferencias(Antecedentes,Propiedades,Desicion),
 	inferencia_nueva_propiedad(Desicion,Valor,Resultado,Inferido).
 
@@ -230,7 +227,47 @@ inferir_propiedad([_|B],Buscar,Propiedades,Resultado,Inferido):-
 inferencia_nueva_propiedad(si,Valor,Valor,_).
 inferencia_nueva_propiedad(no,_,Valor,Valor).
 
+prepar_proceso_inferencia([],_,_,Inferido,Inferido).
+
+prepar_proceso_inferencia(Preferencias,Buscar,Propiedades,Resultado,Inferido):-
+	extraer_preferencias_por_propiedad(Preferencias,Buscar,PreferenciasFiltradas),
+	ordenar_preferencias(PreferenciasFiltradas,PreferenciasOrdenadas),
+	inferir_propiedad(PreferenciasOrdenadas,Buscar,Propiedades,Resultado,Inferido).
+
+ordenar_preferencias(Preferencias,Ordenadas):-
+	orden_bur(Preferencias,EnOrden),
+	reversa(EnOrden,Ordenadas).
+
+concatener(A,B,X):-
+	append(A,B,X).
+
+reversa([],[]).
+
+reversa([X|L1],M):-
+	reversa(L1,Demas),
+	concatener(Demas,[X],M).
+
+orden_bur([Ant=>>Prop=>(Val,X)],[Ant=>>Prop=>(Val,X)]).
+
+orden_bur(L,Lord):-  
+    burbuja(L,L1),
+    orden_bur(L1,Lord).
+
+orden_bur(X,X).
+
+burbuja([],[]). 
+burbuja([Ant=>>Prop=>(Val,C)],[Ant=>>Prop=>(Val,C)]).
+
+burbuja([Ant2=>>Prop2=>(Val2,X),Ant3=>>Prop3=>(Val3,Y)|L],Lburb):-  
+   X<Y,  
+   burbuja([Ant2=>>Prop2=>(Val2,X)|L],L1),  
+   Lburb = [Ant3=>>Prop3=>(Val3,Y)|L1]. 
+
 compara_preferencias([],_,_).
+
+compara_preferencias([A|[]],Prop,Desicion):-
+	comparar_propiedad_preferencia(A,Prop,Desicion2),
+	decidir(Desicion2,si,Desicion).
 
 compara_preferencias([A|B],Prop,Desicion):-
 	comparar_propiedad_preferencia(A,Prop,Desicion2),
@@ -241,11 +278,21 @@ decidir(si,si,si).
 decidir(_,_,no).
 
 comparar_propiedad_preferencia(_,[],no).
-comparar_propiedad_preferencia(Propiedad=>(Valor,_),[Propiedad=>(Valor,_)|_],si).
-comparar_propiedad_preferencia([Propiedad=>(Valor,_)],[Propiedad=>(Valor,_)|_],si).
+comparar_propiedad_preferencia(Propiedad=>(Valor),[Propiedad=>(Valor,_)|_],si).
+comparar_propiedad_preferencia([Propiedad=>(Valor)],[Propiedad=>(Valor,_)|_],si).
 
 comparar_propiedad_preferencia(Buscar,[_|T],R):-
 	comparar_propiedad_preferencia(Buscar,T,R).
+
+extraer_preferencias_por_propiedad([],_,[]).
+
+extraer_preferencias_por_propiedad([Ant=>>Buscar=>(Val,C)|Resto],Buscar,L):-
+	extraer_preferencias_por_propiedad(Resto,Buscar,L1),
+	append([Ant=>>Buscar=>(Val,C)],L1,L).
+
+extraer_preferencias_por_propiedad([_|B],Buscar,L):-
+	extraer_preferencias_por_propiedad(B,Buscar,L).
+
 
 %si no se encuentra la propiedad se dice que no
 buscar_propiedad(_,[],1000,desconocido).
