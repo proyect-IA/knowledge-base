@@ -229,10 +229,14 @@ inferencia_nueva_propiedad(no,_,Valor,Valor).
 
 prepar_proceso_inferencia([],_,_,Inferido,Inferido).
 
-prepar_proceso_inferencia(Preferencias,Buscar,Propiedades,Resultado,Inferido):-
+prepar_proceso_inferencia(Preferencias,Buscar,Propiedades,Resultado,desconocido):-
 	extraer_preferencias_por_propiedad(Preferencias,Buscar,PreferenciasFiltradas),
 	ordenar_preferencias(PreferenciasFiltradas,PreferenciasOrdenadas),
 	inferir_propiedad(PreferenciasOrdenadas,Buscar,Propiedades,Resultado,Inferido).
+
+prepar_proceso_inferencia(_,_,_,Inferido,Inferido).
+
+ordenar_preferencias([],[]).
 
 ordenar_preferencias(Preferencias,Ordenadas):-
 	orden_bur(Preferencias,EnOrden),
@@ -278,8 +282,12 @@ decidir(si,si,si).
 decidir(_,_,no).
 
 comparar_propiedad_preferencia(_,[],no).
+
 comparar_propiedad_preferencia(Propiedad=>(Valor),[Propiedad=>(Valor,_)|_],si).
+comparar_propiedad_preferencia(Propiedad=>(Valor),[Propiedad=>(Valor2,_)|_],no).
+
 comparar_propiedad_preferencia([Propiedad=>(Valor)],[Propiedad=>(Valor,_)|_],si).
+comparar_propiedad_preferencia([Propiedad=>(Valor)],[Propiedad=>(Valor2,_)|_],no).
 
 comparar_propiedad_preferencia(Buscar,[_|T],R):-
 	comparar_propiedad_preferencia(Buscar,T,R).
@@ -488,6 +496,44 @@ buscar_individuo(_,[],_,_).
 
 %predicado base que detiene la recursividad
 obtener_clases_pertenecientes_individuo_nivel(_,_,[],_,_).
+
+%--------------------------------------------------------------------------------------------------------
+
+% predicados para obtener todas las propiedades de un objeto --------------------------------------------
+
+% obtener_propiedades_completas_objetos():-
+
+%obtener_propiedades_clase(Padre,KB,PropiedadesClase),
+%--------------------------------------------------------------------------------------------------------
+
+% predicados para obtener todas las propiedades de una clase --------------------------------------------
+
+obtener_propiedades_completas_clase(ClaseBuscar,KB,Propiedades):-
+	buscar_propiedades_clase(top,ClaseBuscar,KB,[],Propiedades).
+
+buscar_propiedades_clase(ClaseBuscar,ClaseBuscar,KB,PropiedadesHeredadas,Propiedades):-
+	obtener_propiedades_clase(ClaseBuscar,KB,PropiedadesClase),
+	append(PropiedadesClase,PropiedadesHeredadas,Propiedades).
+
+buscar_propiedades_clase(ClaseActual,ClaseBuscar,KB,PropiedadesHeredadas,Propiedades):-
+	obtener_hijos(ClaseActual,KB,Hijos),
+	obtener_propiedades_clase(ClaseActual,KB,PropiedadesClase),
+	append(PropiedadesClase,PropiedadesHeredadas,PropiedadesHerencia),
+	bajar_por_hijos_propiedades_clase(Hijos,ClaseBuscar,KB,PropiedadesHerencia,Propiedades).
+
+%si ya no tiene hijos se detiene
+bajar_por_hijos_propiedades_clase([],ClaseBuscar,KB,PropiedadesHerencia,Propiedades).
+
+bajar_por_hijos_propiedades_clase(Hijos,ClaseBuscar,KB,PropiedadesHerencia,Propiedades):-
+	recorre_hijos_propiedad_clase(Hijos,ClaseBuscar,KB,PropiedadesHerencia,Propiedades).
+
+recorre_hijos_propiedad_clase([P|H],ClaseBuscar,KB,PropiedadesHeredadas,Propiedades):-
+	buscar_propiedades_clase(P,ClaseBuscar,KB,PropiedadesHeredadas,Propiedades2),
+	recorre_hijos_propiedad_clase(H,ClaseBuscar,KB,PropiedadesHeredadas,Propiedades3),
+	append(Propiedades2,Propiedades3,Propiedades).
+
+recorre_hijos_propiedad_clase([],_,_,_,[]).
+recorre_hijos_propiedad_clase(_,_,[],_,[]).
 
 %--------------------------------------------------------------------------------------------------------
 
