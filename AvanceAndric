@@ -1,3 +1,11 @@
+%%*** PENDIENTES
+%% Preferencias de propiedades/relaciones para objetos
+
+%%*** DUDAS
+%% Uso de variables en KB (ej vive=>(X)), ¿que pasa con ellas cuando se modifican en el save de otra accion?
+%% Guardar resultados o copiarlos de as consultas hechas (para el examen)
+%% Los individuos tambien tienen preferencias en propiedades y relaciones ???
+
 %--------------------------------------------------
 % Load and Save from files
 %--------------------------------------------------
