@@ -1,0 +1,186 @@
+% Open a file: consult('/home/raul/Escritorio/IA/lightkb/KnowledgeBase/change_KB.pl').
+
+%--------------------------------------------------
+% Load and Save from files
+%--------------------------------------------------
+
+
+%KB open and save
+
+open_kb(Route,KB):-
+	open(Route,read,Stream),
+	readclauses(Stream,X),
+	close(Stream),
+	atom_to_term(X,KB).
+
+save_kb(Route,KB):-
+	open(Route,write,Stream),
+	writeq(Stream,KB),
+	close(Stream).
+
+readclauses(InStream,W) :-
+    get0(InStream,Char),
+    checkCharAndReadRest(Char,Chars,InStream),
+	atom_chars(W,Chars).
+
+checkCharAndReadRest(-1,[],_) :- !.  % End of Stream	
+checkCharAndReadRest(end_of_file,[],_) :- !.
+
+checkCharAndReadRest(Char,[Char|Chars],InStream) :-
+    get0(InStream,NextChar),
+    checkCharAndReadRest(NextChar,Chars,InStream).
+
+%compile an atom string of characters as a prolog term
+atom_to_term(ATOM, TERM) :-
+	atom(ATOM),
+	atom_to_chars(ATOM,STR),
+	atom_to_chars('.',PTO),
+	append(STR,PTO,STR_PTO),
+	read_from_chars(STR_PTO,TERM).
+
+%definicion de los operadores 
+:- op(500,xfy, =>).  %operador de asignacion
+:- op(501,xfy, =>>). %operador de implicación
+
+
+%------------------------------
+% Ejemplo:  
+%------------------------------
+
+%Cargar la base en una lista, imprimir la lista en consola y guardar todo en un nuevo archivo.
+%No olvides poner las rutas correctas para localizar el archivo kb.txt en tu computadora!!!
+
+abrir(KB):-
+	open_kb('/Users/EIVP1650/Desktop/Maestria/Inteligencia Artificial/Proyecto1/Knowledge-base/KB3.txt',KB).
+	%% write('\nReading actual data...'),
+	%% write('\nKB: '),
+	%% write(KB).
+
+guardar(KB):-
+	write('\nSaving new data...'),
+	save_kb('/Users/EIVP1650/Desktop/Maestria/Inteligencia Artificial/Proyecto1/Knowledge-base/KB3.txt',KB).
+
+
+checkCharAndReadRest(-1,[],_) :- !.  % End of Stream	
+checkCharAndReadRest(end_of_file,[],_) :- !.
+
+checkCharAndReadRest(Char,[Char|Chars],InStream) :-
+    get0(InStream,NextChar),
+    checkCharAndReadRest(NextChar,Chars,InStream).
+
+atom_to_term_conversion(ATOM, TERM) :-
+	atom(ATOM),
+	atom_to_chars(ATOM,STR),
+	atom_to_chars('.',PTO),
+	append(STR,PTO,STR_PTO),
+	read_from_chars(STR_PTO,TERM).
+
+
+%----------------------------------------
+% Admin de listas
+%----------------------------------------
+
+%Cambiar todas las ocurrencias de un elemento X en una lista por el valor de Y
+%cambiaElemento(X,Y,InputList,OutputList).
+%Example (p,b,[p,a,p,a,y,a],[b,a,b,a,y,a])
+
+cambiaElemento(_,_,[],[]).
+
+cambiaElemento(X,Y,[X|T],[Y|N]):-
+	cambiaElemento(X,Y,T,N).
+
+cambiaElemento(X,Y,[H|T],[H|N]):-
+	cambiaElemento(X,Y,T,N).
+
+%Verifica si el elemento X está en la lista
+%esElemento(X,List)
+%Example (n,[b,a,n,a,n,a])
+
+esElemento(X,[X|_]).
+esElemento(X,[_|T]):-
+	esElemento(X,T).
+
+
+%--------------------------------------------------------------------------------------------------
+%Ejercicio 2 -> Agregar clases, objetos, propiedades, relaciones y preferencias
+%--------------------------------------------------------------------------------------------------
+
+%%************** Agregar Clase
+
+agregar_clase(NewClass,Mother,OriginalKB,NewKB) :-
+	append(OriginalKB,[class(NewClass,Mother,[],[],[])],NewKB).
+
+%%************** Agregar nueva propiedad de clase
+
+agregar_propiedad_clase(Class,NuevaProp,Valor,Negacion,OriginalKB,NuevaKB) :-
+	cambiaElemento(class(Class,Mother,PropPref,Rels,Objects),class(Class, Mother, ListaNuevasPropPref, Rels, Objects),OriginalKB,NuevaKB),
+	agregar_propiedad(PropPref,NuevaProp,Valor,Negacion,ListaNuevasPropPref).
+
+agregar_propiedad([],NuevaProp,Valor,si,ListaNuevasPropPref):-
+	append([],[[no(NuevaProp=>Valor)], []],ListaNuevasPropPref).
+
+agregar_propiedad([Props|Pref],NuevaProp,Valor,si,ListaNuevasPropPref):-
+	append(Props,[no(NuevaProp=>Valor)],ListaActualProp),
+	append([ListaActualProp],Pref,ListaNuevasPropPref).
+
+agregar_propiedad([],NuevaProp,Valor,no,ListaNuevasPropPref):-
+	append([],[[NuevaProp=>Valor], []],ListaNuevasPropPref).
+
+agregar_propiedad([Props|Pref],NuevaProp,Valor,no,ListaNuevasPropPref):-
+	append(Props,[NuevaProp=>Valor],ListaActualProp),
+	append([ListaActualProp],Pref,ListaNuevasPropPref).
+
+%%************** Agregar nueva preferencia a clase
+
+agregar_preferencia_clase(Class, Antecedente, Consecuente, Valor, Negacion, OriginalKB, NuevaKB) :-
+	cambiaElemento(class(Class, Mother, PropPref, Rels, Objects),class(Class, Mother, ListaNuevasPropPref, Rels, Objects), OriginalKB, NuevaKB),
+	agregar_preferencia(PropPref, Antecedente, Consecuente, Valor, Negacion, ListaNuevasPropPref).
+
+agregar_preferencia([], Antecedente, Consecuente, Valor, si, ListaNuevasPropPref):-
+	append([], [[], [Antecedente=>>no(Consecuente=>Valor)]], ListaNuevasPropPref).
+
+agregar_preferencia([Props|[Pref|_]], Antecedente, Consecuente, Valor, si, ListaNuevasPropPref):-
+	append(Pref, [Antecedente=>>no(Consecuente=>Valor)], ListaActualPref),
+	append([Props], [ListaActualPref], ListaNuevasPropPref).
+
+agregar_preferencia([Props|[[]]], Antecedente, Consecuente, Valor, si, ListaNuevasPropPref):-
+	append([], [Antecedente=>>no(Consecuente=>Valor)], ListaActualPref),
+	append([Props], [ListaActualPref], ListaNuevasPropPref).
+
+agregar_preferencia([], Antecedente, Consecuente, Valor, no, ListaNuevasPropPref):-
+	append([], [[], [Antecedente=>>Consecuente=>Valor]], ListaNuevasPropPref).
+
+agregar_preferencia([Props|[[]]], Antecedente, Consecuente, Valor, no, ListaNuevasPropPref):-
+	append([], [Antecedente=>>Consecuente=>Valor], ListaActualPref),
+	append([Props], [ListaActualPref], ListaNuevasPropPref).
+
+agregar_preferencia([Props|[Pref|_]], Antecedente, Consecuente, Valor, no, ListaNuevasPropPref):-
+	append(Pref, [Antecedente=>>Consecuente=>Valor], ListaActualPref),
+	append([Props], [ListaActualPref], ListaNuevasPropPref).
+
+ %% [[[color=>verde]=>>imaginario(si, 1)]|[trabaja=>_1616]=>>vive=>(_1616, 1)]
+
+%Add new object
+
+add_object(NewObject,Class,OriginalKB,NewKB) :-
+	cambiaElemento(class(Class,Mother,Props,Rels,Objects),class(Class,Mother,Props,Rels,NewObjects),OriginalKB,NewKB),
+	append(Objects,[[id=>NewObject,[],[]]],NewObjects).
+
+
+%Add new object property
+
+add_object_property(Object,NewProperty,Value,OriginalKB,NewKB) :-
+	cambiaElemento(class(Class,Mother,Props,Rels,Objects),class(Class,Mother,Props,Rels,NewObjects),OriginalKB,NewKB),
+	esElemento([id=>Object,Properties,Relations],Objects),
+	cambiaElemento([id=>Object,Properties,Relations],[id=>Object,NewProperties,Relations],Objects,NewObjects),
+	append_property(Properties,NewProperty,Value,NewProperties).
+
+
+%Add new object relation
+
+add_object_relation(Object,NewRelation,OtherObject,OriginalKB,NewKB) :-
+	cambiaElemento(class(Class,Mother,Props,Rels,Objects),class(Class,Mother,Props,Rels,NewObjects),OriginalKB,NewKB),
+	esElemento([id=>Object,Properties,Relations],Objects),
+	cambiaElemento([id=>Object,Properties,Relations],[id=>Object,Properties,NewRelations],Objects,NewObjects),
+	append_relation(Relations,NewRelation,OtherObject,NewRelations).
+
