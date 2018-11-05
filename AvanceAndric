@@ -1,10 +1,6 @@
-% Open a file: consult('/home/raul/Escritorio/IA/lightkb/KnowledgeBase/change_KB.pl').
-
 %--------------------------------------------------
 % Load and Save from files
 %--------------------------------------------------
-
-
 %KB open and save
 
 open_kb(Route,KB):-
@@ -92,15 +88,6 @@ cambiaElemento(X,Y,[X|T],[Y|N]):-
 cambiaElemento(X,Y,[H|T],[H|N]):-
 	cambiaElemento(X,Y,T,N).
 
-%Verifica si el elemento X está en la lista
-%esElemento(X,List)
-%Example (n,[b,a,n,a,n,a])
-
-esElemento(X,[X|_]).
-esElemento(X,[_|T]):-
-	esElemento(X,T).
-
-
 %--------------------------------------------------------------------------------------------------
 %Ejercicio 2 -> Agregar clases, objetos, propiedades, relaciones y preferencias
 %--------------------------------------------------------------------------------------------------
@@ -110,12 +97,25 @@ esElemento(X,[_|T]):-
 agregar_clase(NewClass,Padre,KB,NuevaKB) :-
 	append(KB,[class(NewClass,Padre,[],[],[])],NuevaKB).
 
+%%************** Agregar Individuo/Objeto
+
+agregar_individuo(NuevoIndiv,Class,KB,NuevaKB) :-
+	cambiaElemento(class(Class,Padre,PropPref,RelPref,Indiv),class(Class,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),
+	append(Indiv,[[id=>NuevoIndiv,[],[]]],ListaNuevosIndiv).
+
 %%************** Agregar nueva propiedad de clase
 
 agregar_propiedad_clase(Class,NuevaProp,Valor,Negacion,KB,NuevaKB) :-
-	cambiaElemento(class(Class,Mother,PropPref,PropRel,Indiv),class(Class, Mother, ListaNuevasPropPref, PropRel, Indiv),KB,NuevaKB),
+	cambiaElemento(class(Class,Padre,PropPref,PropRel,Indiv),class(Class, Padre, ListaNuevasPropPref, PropRel, Indiv),KB,NuevaKB),
 	agregar_propiedad_relacion(PropPref,NuevaProp,Valor,Negacion,ListaNuevasPropPref).
 
+%%************** Agregar nueva propiedad de Individuo/Objeto
+
+agregar_propiedad_individuo(Clase,Indiv,NuevaProp,Valor,Negacion,KB,NuevaKB) :-
+	cambiaElemento(class(Clase,Padre,PropPref,RelPref,Indivs),class(Clase,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),
+	member([id=>Indiv,PropPrefIndiv,RelPrefIndiv],Indivs),
+	cambiaElemento([id=>Indiv,PropPrefIndiv,RelPrefIndiv],[id=>Indiv,ListaNuevasPropPref,RelPrefIndiv],Indivs,ListaNuevosIndiv),
+	agregar_propiedad_relacion(PropPrefIndiv,NuevaProp,Valor,Negacion,ListaNuevasPropPref).
 
 %%************** Agregar nueva preferencia de propiedades de clase
 
@@ -123,13 +123,19 @@ agregar_preferencia_propiedad_clase(Class, Antecedente, Consecuente, Valor, Nega
 	cambiaElemento(class(Class, Padre, PropPref, PropRel, Indiv),class(Class, Padre, ListaNuevasPropPref, PropRel, Indiv), KB, NuevaKB),
 	agregar_preferencia(PropPref, Antecedente, Consecuente, Valor, Negacion, ListaNuevasPropPref).
 
-
 %%************** Agregar nueva relacion de clase
 
 agregar_relacion_clase(Class,NuevaRel,Valor,Negacion,KB,NuevaKB) :-
 	cambiaElemento(class(Class,Padre,PropPref,RelPref,Indiv),class(Class,Padre,PropPref,ListaNuevaRelPref,Indiv),KB,NuevaKB),
 	agregar_propiedad_relacion(RelPref,NuevaRel,Valor,Negacion,ListaNuevaRelPref).
 
+%%************** Agregar nueva relacion de Individuo/Objeto
+
+agregar_relacion_individuo(Clase,Indiv,NuevaRel,Valor,Negacion,KB,NuevaKB) :-
+	cambiaElemento(class(Clase,Padre,PropPref,RelPref,Indivs),class(Clase,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),
+	member([id=>Indiv,PropPrefIndiv,RelPrefIndiv],Indivs),
+	cambiaElemento([id=>Indiv,PropPrefIndiv,RelPrefIndiv],[id=>Indiv,PropPrefIndiv,ListaNuevaRelPref],Indivs,ListaNuevosIndiv),
+	agregar_propiedad_relacion(RelPrefIndiv,NuevaRel,Valor,Negacion,ListaNuevaRelPref).
 
 %%************** Agregar nueva preferencia de relacion de clase
 
@@ -138,7 +144,7 @@ agregar_preferencia_relacion_clase(Class, Antecedente, Consecuente, Valor, Negac
 	agregar_preferencia(RelPref,NuevaRel,Valor,Negacion,ListaNuevaRelPref).
 
 
-%% Predicados para agregar nueva propiedad o relacion de clase
+%% Predicados para agregar una nueva propiedad o relacion de clase
 
 agregar_propiedad_relacion([],NuevaPropRel,Valor,si,ListaNuevasPropRelPref):-
 	append([],[[no(NuevaPropRel=>Valor)], []],ListaNuevasPropRelPref).
@@ -177,4 +183,3 @@ agregar_preferencia([Props|[[]]], Antecedente, Consecuente, Valor, no, ListaNuev
 agregar_preferencia([Props|[Pref|_]], Antecedente, Consecuente, Valor, no, ListaNuevasPropPref):-
 	append(Pref, [Antecedente=>>Consecuente=>Valor], ListaActualPref),
 	append([Props], [ListaActualPref], ListaNuevasPropPref).
-
