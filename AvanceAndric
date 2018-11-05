@@ -107,34 +107,54 @@ esElemento(X,[_|T]):-
 
 %%************** Agregar Clase
 
-agregar_clase(NewClass,Mother,OriginalKB,NewKB) :-
-	append(OriginalKB,[class(NewClass,Mother,[],[],[])],NewKB).
+agregar_clase(NewClass,Padre,KB,NuevaKB) :-
+	append(KB,[class(NewClass,Padre,[],[],[])],NuevaKB).
 
 %%************** Agregar nueva propiedad de clase
 
-agregar_propiedad_clase(Class,NuevaProp,Valor,Negacion,OriginalKB,NuevaKB) :-
-	cambiaElemento(class(Class,Mother,PropPref,Rels,Objects),class(Class, Mother, ListaNuevasPropPref, Rels, Objects),OriginalKB,NuevaKB),
-	agregar_propiedad(PropPref,NuevaProp,Valor,Negacion,ListaNuevasPropPref).
+agregar_propiedad_clase(Class,NuevaProp,Valor,Negacion,KB,NuevaKB) :-
+	cambiaElemento(class(Class,Mother,PropPref,PropRel,Indiv),class(Class, Mother, ListaNuevasPropPref, PropRel, Indiv),KB,NuevaKB),
+	agregar_propiedad_relacion(PropPref,NuevaProp,Valor,Negacion,ListaNuevasPropPref).
 
-agregar_propiedad([],NuevaProp,Valor,si,ListaNuevasPropPref):-
-	append([],[[no(NuevaProp=>Valor)], []],ListaNuevasPropPref).
 
-agregar_propiedad([Props|Pref],NuevaProp,Valor,si,ListaNuevasPropPref):-
-	append(Props,[no(NuevaProp=>Valor)],ListaActualProp),
-	append([ListaActualProp],Pref,ListaNuevasPropPref).
+%%************** Agregar nueva preferencia de propiedades de clase
 
-agregar_propiedad([],NuevaProp,Valor,no,ListaNuevasPropPref):-
-	append([],[[NuevaProp=>Valor], []],ListaNuevasPropPref).
-
-agregar_propiedad([Props|Pref],NuevaProp,Valor,no,ListaNuevasPropPref):-
-	append(Props,[NuevaProp=>Valor],ListaActualProp),
-	append([ListaActualProp],Pref,ListaNuevasPropPref).
-
-%%************** Agregar nueva preferencia a clase
-
-agregar_preferencia_clase(Class, Antecedente, Consecuente, Valor, Negacion, OriginalKB, NuevaKB) :-
-	cambiaElemento(class(Class, Mother, PropPref, Rels, Objects),class(Class, Mother, ListaNuevasPropPref, Rels, Objects), OriginalKB, NuevaKB),
+agregar_preferencia_propiedad_clase(Class, Antecedente, Consecuente, Valor, Negacion, KB, NuevaKB) :-
+	cambiaElemento(class(Class, Padre, PropPref, PropRel, Indiv),class(Class, Padre, ListaNuevasPropPref, PropRel, Indiv), KB, NuevaKB),
 	agregar_preferencia(PropPref, Antecedente, Consecuente, Valor, Negacion, ListaNuevasPropPref).
+
+
+%%************** Agregar nueva relacion de clase
+
+agregar_relacion_clase(Class,NuevaRel,Valor,Negacion,KB,NuevaKB) :-
+	cambiaElemento(class(Class,Padre,PropPref,RelPref,Indiv),class(Class,Padre,PropPref,ListaNuevaRelPref,Indiv),KB,NuevaKB),
+	agregar_propiedad_relacion(RelPref,NuevaRel,Valor,Negacion,ListaNuevaRelPref).
+
+
+%%************** Agregar nueva preferencia de relacion de clase
+
+agregar_preferencia_relacion_clase(Class, Antecedente, Consecuente, Valor, Negacion, KB, NuevaKB) :-
+	cambiaElemento(class(Class,Padre,PropPref,RelPref,Indiv),class(Class,Padre,PropPref,ListaNuevaRelPref,Indiv),KB,NuevaKB),
+	agregar_preferencia(RelPref,NuevaRel,Valor,Negacion,ListaNuevaRelPref).
+
+
+%% Predicados para agregar nueva propiedad o relacion de clase
+
+agregar_propiedad_relacion([],NuevaPropRel,Valor,si,ListaNuevasPropRelPref):-
+	append([],[[no(NuevaPropRel=>Valor)], []],ListaNuevasPropRelPref).
+
+agregar_propiedad_relacion([Props|Pref],NuevaPropRel,Valor,si,ListaNuevasPropRelPref):-
+	append(Props,[no(NuevaPropRel=>Valor)],ListaActualPropRel),
+	append([ListaActualPropRel],Pref,ListaNuevasPropRelPref).
+
+agregar_propiedad_relacion([],NuevaPropRel,Valor,no,ListaNuevasPropRelPref):-
+	append([],[[NuevaPropRel=>Valor], []],ListaNuevasPropRelPref).
+
+agregar_propiedad_relacion([Props|Pref],NuevaPropRel,Valor,no,ListaNuevasPropRelPref):-
+	append(Props,[NuevaPropRel=>Valor],ListaActualPropRel),
+	append([ListaActualPropRel],Pref,ListaNuevasPropRelPref).
+
+%% Predicados para agregar nueva preferencia de propiedad o relacion de clase
 
 agregar_preferencia([], Antecedente, Consecuente, Valor, si, ListaNuevasPropPref):-
 	append([], [[], [Antecedente=>>no(Consecuente=>Valor)]], ListaNuevasPropPref).
@@ -157,30 +177,4 @@ agregar_preferencia([Props|[[]]], Antecedente, Consecuente, Valor, no, ListaNuev
 agregar_preferencia([Props|[Pref|_]], Antecedente, Consecuente, Valor, no, ListaNuevasPropPref):-
 	append(Pref, [Antecedente=>>Consecuente=>Valor], ListaActualPref),
 	append([Props], [ListaActualPref], ListaNuevasPropPref).
-
- %% [[[color=>verde]=>>imaginario(si, 1)]|[trabaja=>_1616]=>>vive=>(_1616, 1)]
-
-%Add new object
-
-add_object(NewObject,Class,OriginalKB,NewKB) :-
-	cambiaElemento(class(Class,Mother,Props,Rels,Objects),class(Class,Mother,Props,Rels,NewObjects),OriginalKB,NewKB),
-	append(Objects,[[id=>NewObject,[],[]]],NewObjects).
-
-
-%Add new object property
-
-add_object_property(Object,NewProperty,Value,OriginalKB,NewKB) :-
-	cambiaElemento(class(Class,Mother,Props,Rels,Objects),class(Class,Mother,Props,Rels,NewObjects),OriginalKB,NewKB),
-	esElemento([id=>Object,Properties,Relations],Objects),
-	cambiaElemento([id=>Object,Properties,Relations],[id=>Object,NewProperties,Relations],Objects,NewObjects),
-	append_property(Properties,NewProperty,Value,NewProperties).
-
-
-%Add new object relation
-
-add_object_relation(Object,NewRelation,OtherObject,OriginalKB,NewKB) :-
-	cambiaElemento(class(Class,Mother,Props,Rels,Objects),class(Class,Mother,Props,Rels,NewObjects),OriginalKB,NewKB),
-	esElemento([id=>Object,Properties,Relations],Objects),
-	cambiaElemento([id=>Object,Properties,Relations],[id=>Object,Properties,NewRelations],Objects,NewObjects),
-	append_relation(Relations,NewRelation,OtherObject,NewRelations).
 
