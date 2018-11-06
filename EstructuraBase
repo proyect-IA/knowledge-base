@@ -1,6 +1,6 @@
 [
 class(top,none,[],[],[]),
-class(animales,top,[[],[trabaja=>(X)]=>>vive=>(X,2), [nace=>(X)]=>>vive=>(X,5), [color=>(azul)]=>>vuela=>(si,1) ],[],[]),
+class(animales,top,[[],[[trabaja=>(X)]=>>vive=>(X,2), [nace=>(X)]=>>vive=>(X,5), [color=>(azul)]=>>vuela=>(si,1)] ],[],[]),
 class(mamiferos,animales,[[ponen_huevos=>(si,0),color=>(azul,0),carnivoro=>(no,0)],[]],[],[]),
 class(raton,mamiferos,[],[],[[id=>mickey,[trabaja=>(mexico,0),nace=>(michoacan,0)],[]],[id=>timothy,[],[]]]),
 class(ballena,mamiferos,[[ponen_huevos=>(no,0)],[]],[],[[id=>monstruo,[],[odia=>(humano,-1)]]]),
