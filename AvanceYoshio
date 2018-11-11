@@ -213,14 +213,14 @@ verificar_existencia_propiedad(PropiedadBuscar,[_|B],R,Nombres):-
 
 extraer_propiedades_individuos(PropiedadBuscar,PropiedadesHeredadas,[[id=>[Nombre|RestoNombres],[A|B],_]|Resto],Extension,PreferenciasHerencia):-
 	append([A|B],PropiedadesHeredadas,PropiedadesMescladaz),
-	buscar_propiedad(PropiedadBuscar,PropiedadesMescladaz,Peso,ValorPorDefecto),
+	buscar_propiedad(PropiedadBuscar,PropiedadesMescladaz,_,ValorPorDefecto),
 	prepar_proceso_inferencia(PreferenciasHerencia,PropiedadBuscar,PropiedadesMescladaz,ValorInferido,ValorPorDefecto),
 	extraer_propiedades_individuos(PropiedadBuscar,PropiedadesHeredadas,Resto,RestoIndividuos,PreferenciasHerencia),
 	append([Nombre|RestoNombres],[ValorInferido],Ind1),
 	append([Ind1],RestoIndividuos,Extension).
 
 extraer_propiedades_individuos(PropiedadBuscar,PropiedadesHeredadas,[[id=>[Nombre|RestoNombres],[],_]|Resto],Extension,PreferenciasHerencia):-
-	buscar_propiedad(PropiedadBuscar,PropiedadesHeredadas,Peso,ValorPorDefecto),
+	buscar_propiedad(PropiedadBuscar,PropiedadesHeredadas,_,ValorPorDefecto),
 	prepar_proceso_inferencia(PreferenciasHerencia,PropiedadBuscar,PropiedadesHeredadas,ValorInferido,ValorPorDefecto),	
 	extraer_propiedades_individuos(PropiedadBuscar,PropiedadesHeredadas,Resto,RestoIndividuos,PreferenciasHerencia),
 	append([Nombre|RestoNombres],[ValorInferido],Ind1),
@@ -233,12 +233,12 @@ extraer_propiedades_individuos(_,_,[],[],_).
 
 inferir_propiedad([],_,_,A,A).
 
-inferir_propiedad([Antecedentes=>>Buscar=>(variable,Peso)|_],Buscar,Propiedades,Resultado,Inferido):-
+inferir_propiedad([Antecedentes=>>Buscar=>(variable,_)|_],Buscar,Propiedades,Resultado,Inferido):-
 	compara_preferencias(Antecedentes,Propiedades,Desicion,Valor),
 	inferencia_nueva_propiedad(Desicion,Valor,Resultado,Inferido).
 
-inferir_propiedad([Antecedentes=>>Buscar=>(Valor,Peso)|_],Buscar,Propiedades,Resultado,Inferido):-
-	compara_preferencias(Antecedentes,Propiedades,Desicion,V),
+inferir_propiedad([Antecedentes=>>Buscar=>(Valor,_)|_],Buscar,Propiedades,Resultado,Inferido):-
+	compara_preferencias(Antecedentes,Propiedades,Desicion,_),
 	inferencia_nueva_propiedad(Desicion,Valor,Resultado,Inferido).
 
 inferir_propiedad([_|B],Buscar,Propiedades,Resultado,Inferido):-
@@ -305,10 +305,10 @@ comparar_propiedad_preferencia(_,[],[],no).
 
 comparar_propiedad_preferencia(Propiedad=>(variable,_),[Propiedad=>(Valor,_)|_],Valor,si).
 comparar_propiedad_preferencia(Propiedad=>(Valor,_),[Propiedad=>(Valor,_)|_],Valor,si).
-comparar_propiedad_preferencia(Propiedad=>(Valor,_),[Propiedad=>(Valor2,_)|_],Valor2,no).
+comparar_propiedad_preferencia(Propiedad=>(_,_),[Propiedad=>(Valor2,_)|_],Valor2,no).
 
 comparar_propiedad_preferencia([Propiedad=>(Valor,_)],[Propiedad=>(Valor,_)|_],Valor,si).
-comparar_propiedad_preferencia([Propiedad=>(Valor,_)],[Propiedad=>(Valor2,_)|_],Valor2,no).
+comparar_propiedad_preferencia([Propiedad=>(_,_)],[Propiedad=>(Valor2,_)|_],Valor2,no).
 
 comparar_propiedad_preferencia(Buscar,[_|T],Valor,R):-
 	comparar_propiedad_preferencia(Buscar,T,Valor,R).
@@ -376,7 +376,8 @@ recorre_hijos_propiedad(_,_,[],_,[],_).
 %Extensión de una relación-------------------------------------------------------------------------------
 
 extension_relacion(Relacion,KB,Extension):-
-	obtener_extension_relacion(top,Relacion,[],[],KB,Extension,KB), imprime_lista_resultados(Extension).
+	obtener_extension_relacion(top,Relacion,[],[],KB,Extension,KB),
+	imprime_lista_resultados(Extension).
 
 %predicado que permite obtener la extensión completa de una relacion en todo el árbol
 %se obtienen los hijos de la clase
@@ -429,8 +430,8 @@ prepar_proceso_inferencia_relacion(_,_,_,Inferido,Inferido).
 
 inferir_relacion([],_,_,A,A).
 
-inferir_relacion([Antecedentes=>>Buscar=>(Valor,Peso)|_],Buscar,Relaciones,Resultado,Inferido):-
-	compara_preferencias(Antecedentes,Relaciones,Desicion,V),
+inferir_relacion([Antecedentes=>>Buscar=>(Valor,_)|_],Buscar,Relaciones,Resultado,Inferido):-
+	compara_preferencias(Antecedentes,Relaciones,Desicion,_),
 	inferencia_nueva_propiedad(Desicion,Valor,Resultado,Inferido).
 
 inferir_relacion([_|B],Buscar,Relaciones,Resultado,Inferido):-
@@ -510,7 +511,8 @@ recorre_hijos_relacion(_,_,[],_,_,[],_).
 %predicados para  obtener las clases a las que pertenece un individuo -----------------------------------
 
 clases_pertenecientes_individuo(Individuo,KB,Pertenece):-
-	obtener_clases_pertenecientes_individuo(top,Individuo,KB,Pertenece,[]).
+	obtener_clases_pertenecientes_individuo(top,Individuo,KB,Pertenece,[]),
+	imprime_lista_resultados(Pertenece).
 
 obtener_clases_pertenecientes_individuo(Padre,IndividuoBuscar,KB,Pertenece,Pila):-
 	obtener_hijos(Padre,KB,Hijos),
@@ -535,6 +537,10 @@ obtener_clases_pertenecientes_individuo_nivel(Clase,IndividuoBuscar,[class(Clase
 obtener_clases_pertenecientes_individuo_nivel(Clase,IndividuoBuscar,[_|T],Pertenece,Pila):-
 	obtener_clases_pertenecientes_individuo_nivel(Clase,IndividuoBuscar,T,Pertenece,Pila).
 
+%predicado base que detiene la recursividad
+obtener_clases_pertenecientes_individuo_nivel(_,_,[],[],_).
+obtener_clases_pertenecientes_individuo_nivel(_,_,[],_,_).
+
 %cuando se encuentra el individuo, se unifica la pila con el arreglo respuesta
 buscar_individuo(IndividuoBuscar,[[id=>IndividuoBuscar,_,_]|_],Pertenece,Pertenece):-!.
 
@@ -547,17 +553,14 @@ buscar_individuo(_,[],[],_).
 
 buscar_individuo(_,[],_,_).
 
-%predicado base que detiene la recursividad
-obtener_clases_pertenecientes_individuo_nivel(_,_,[],[],_).
-obtener_clases_pertenecientes_individuo_nivel(_,_,[],_,_).
-
 %--------------------------------------------------------------------------------------------------------
 
 % predicados para obtener todas las propiedades de un objeto --------------------------------------------
 
 %predicado que se encarga de obtener todas las propiedades de un objeto especifico
 obtener_propiedades_completas_objeto(Individuo,KB,Resultado):-
-	obtener_propiedades_completas_por_objeto(top,KB,Individuo,[],[],Resultado). %llama al predicado principal que recorre el arbol recursivamente
+	obtener_propiedades_completas_por_objeto(top,KB,Individuo,[],[],Resultado), %llama al predicado principal que recorre el arbol recursivamente
+	imprime_lista_resultados(Resultado).
 
 %predicado para obtener 
 obtener_propiedades_completas_por_objeto(ClaseActual,KB,IndividuoBuscar,PropiedadesHeredadas,PreferenciasHeredadas,Resultado):-
@@ -585,7 +588,7 @@ encontrar_objeto_especifico_por_clase(ClaseActual,[_|B],IndividuoBuscar,Propieda
 	encontrar_objeto_especifico_por_clase(ClaseActual,B,IndividuoBuscar,PropiedadesHerencia,PreferenciasHerencia,Resultado).
 
 % predicado base que detiene la recursividad, ya no sigue buscando mas adentro arbol
-encontrar_objeto_especifico_por_clase(ClaseActual,[],_,_,_,[]).
+encontrar_objeto_especifico_por_clase(_,[],_,_,_,[]).
 
 iterar_por_lista_propiedades_de_individuos([],_,_,_,[]).
 
@@ -593,11 +596,11 @@ iterar_por_lista_propiedades_de_individuos([[id=>ListaIndividuoBuscar,PropInd,_]
 	buscar_propiedad_individuo_lista(ListaIndividuoBuscar,PropInd,IndividuoBuscar,PropHerencia,PrefHerencia,R),
 	iterar_por_lista_propiedades_de_individuos(Demas,IndividuoBuscar,PropHerencia ,PrefHerencia,R).	
 
-iterar_por_lista_propiedades_de_individuos(_,_,_,_,R).
+iterar_por_lista_propiedades_de_individuos(_,_,_,_,_).
 
 buscar_propiedad_individuo_lista([],_,_,_,_,_).
 
-buscar_propiedad_individuo_lista([IndividuoBuscar|Resto],PropIndi,IndividuoBuscar,PropHerencia ,PrefHerencia,R):-
+buscar_propiedad_individuo_lista([IndividuoBuscar|_],PropIndi,IndividuoBuscar,PropHerencia ,PrefHerencia,R):-
 	extraer_todas_propiedades_individuo(PropIndi,PropHerencia ,PrefHerencia,R).
 
 buscar_propiedad_individuo_lista([_|Resto],PropIndi,IndividuoBuscar,PropHerencia ,PrefHerencia,R):-
@@ -650,15 +653,15 @@ ordenar_preferencias_por_implicacion([],_,[]).
 
 ordenar_preferencias_por_implicacion(P,_,P).
 
-ordenar_preferencias_por_implicacion([Antecedentes=>>Consecuente=>(Valor,Peso)|D],Pref,R):-
+ordenar_preferencias_por_implicacion([Antecedentes=>>_=>(_,_)|D],Pref,R):-
 	iterar_implicaciones_propiedades(Antecedentes,Pref,R2),
 	ordenar_preferencias_por_implicacion(D,Pref,R3),
 	append(R2,R3,R).
 
 eliminar_repetidos([],_,[]).
 
-elimiar_repetidos([Antecedentes=>>Consecuente=>(V,P)|D],PropIndi,R):-
-	elimiar_repetidos(D,PropIndi,R2),
+eliminar_repetidos([Antecedentes=>>Consecuente=>(V,P)|D],PropIndi,R):-
+	eliminar_repetidos(D,PropIndi,R2),
 	buscar_propiedad(Consecuente,PropIndi,_,X),
 	verificar_resultado_repetido(X,Antecedentes=>>Consecuente=>(V,P),R2,R).
 
@@ -666,7 +669,7 @@ eliminar_repetidos(A,A,[]).
 
 iterar_implicaciones_propiedades([],_,[]).
 
-iterar_implicaciones_propiedades([Prop=>(Valor,Peso)|D],Pref,R):-
+iterar_implicaciones_propiedades([Prop=>(_,_)|D],Pref,R):-
 	buscar_propiedad_consecuente(Prop,Pref,R2),
 	iterar_implicaciones_propiedades(D,Pref,R3),
 	append(R2,R3,R).
@@ -680,14 +683,12 @@ buscar_propiedad_consecuente(Consecuente,[_|B],R):-
 %caso base que detiene la recursividad
 buscar_propiedad_consecuente(_,[],[]).
 
-obtener_propiedades_mas_especificas(PropiedadesPropias,PropiedadesHeredadas,Filtradas).
-
 %caso base que detiene la recursividad
 recorrer_propiedades_heredadas([],_,[]).
 
 %predicado que permite obtener las propiedades heredades que no se repiten en las propiedades propias
 recorrer_propiedades_heredadas([Propiedad=>(Valor,Pes)|B],PropIndI,Resultado):-	
-	recorrer_propiedades_heredadas(B,PropIndI,Resultado2),
+	recorrer_propiedades_heredadas(B,PropIndI,_),
 	buscar_propiedad(Propiedad,PropIndI,_,X),
 	verificar_resultado_repetido(X,Propiedad=>(Valor,Pes),PropIndI,Resultado).
 
@@ -703,7 +704,7 @@ iniciar_inferencias_multiples([],A,A,[]).
 %caso base que detiene la recursividad
 iniciar_inferencias_multiples([],_,[],_).
 
-iniciar_inferencias_multiples([Antecedentes=>>Propiedad=>(Valor,Peso)|Resto],Propiedades,PropiedadesInferidas,Preferencias):-
+iniciar_inferencias_multiples([_=>>Propiedad=>(_,Peso)|Resto],Propiedades,PropiedadesInferidas,Preferencias):-
 	iniciar_inferencias_multiples(Resto,Propiedades,PropiedadesInferidas2,Preferencias), % se llama recursivamente hasta encontrar el caso base
 	buscar_propiedad(Propiedad,PropiedadesInferidas2,_,X), %primero verificamos que no exista ya la propiedad inferida en las propiedades inferidas
 	append(Propiedades,PropiedadesInferidas2,Completas),
@@ -713,7 +714,7 @@ iniciar_inferencias_multiples([Antecedentes=>>Propiedad=>(Valor,Peso)|Resto],Pro
 	
 verificar_inferencia(desconocido,_,_,[]).
 verificar_inferencia([],_,_,[]).
-verificar_inferencia(Valor,Propiedad,Peso,Resultado):-
+verificar_inferencia(Valor,Propiedad,_,Resultado):-
 	Resultado = [Propiedad=>(Valor,0)].
 
 validar_no_existencia(desconocido,Propiedad,Preferencias,PropiedadesCompletas,Inferido):-
@@ -738,7 +739,8 @@ recorrer_arbol_propiedades_completos_objetos([],_,_,_,_,[]).
 % predicados para obtener todas las propiedades de una clase --------------------------------------------
 
 obtener_propiedades_completas_clase(ClaseBuscar,KB,Propiedades):-
-	buscar_propiedades_clase(top,ClaseBuscar,KB,[],Propiedades).
+	buscar_propiedades_clase(top,ClaseBuscar,KB,[],Propiedades),
+	imprime_lista_resultados(Propiedades).
 
 buscar_propiedades_clase(ClaseBuscar,ClaseBuscar,KB,PropiedadesHeredadas,Propiedades):-
 	obtener_propiedades_clase(ClaseBuscar,KB,PropiedadesClase),
@@ -751,7 +753,7 @@ buscar_propiedades_clase(ClaseActual,ClaseBuscar,KB,PropiedadesHeredadas,Propied
 	bajar_por_hijos_propiedades_clase(Hijos,ClaseBuscar,KB,PropiedadesHerencia,Propiedades).
 
 %si ya no tiene hijos se detiene
-bajar_por_hijos_propiedades_clase([],ClaseBuscar,KB,PropiedadesHerencia,Propiedades).
+bajar_por_hijos_propiedades_clase([],_,_,_,_).
 
 bajar_por_hijos_propiedades_clase(Hijos,ClaseBuscar,KB,PropiedadesHerencia,Propiedades):-
 	recorre_hijos_propiedad_clase(Hijos,ClaseBuscar,KB,PropiedadesHerencia,Propiedades).
@@ -769,7 +771,8 @@ recorre_hijos_propiedad_clase(_,_,[],_,[]).
 % predicados para obtener todas las relaciones de una clase ---------------------------------------------
 
 obtener_relaciones_completas_clase(ClaseBuscar,KB,Relaciones):-
-	buscar_relaciones_clase(top,ClaseBuscar,KB,[],Relaciones).
+	buscar_relaciones_clase(top,ClaseBuscar,KB,[],Relaciones),
+	imprime_lista_resultados(Relaciones).
 
 buscar_relaciones_clase(ClaseBuscar,ClaseBuscar,KB,RelacionesHeredadas,Relaciones):-
 	obtener_relaciones_clase(ClaseBuscar,KB,RelacionesClase),
@@ -782,7 +785,7 @@ buscar_relaciones_clase(ClaseActual,ClaseBuscar,KB,RelacionesHeredadas,Relacione
 	bajar_por_hijos_relaciones_clase(Hijos,ClaseBuscar,KB,RelacionesHerencia,Relaciones).
 
 %si ya no tiene hijos se detiene
-bajar_por_hijos_relaciones_clase([],ClaseBuscar,KB,RelacionesHerencia,Relaciones).
+bajar_por_hijos_relaciones_clase([],_,_,_,_).
 
 bajar_por_hijos_relaciones_clase(Hijos,ClaseBuscar,KB,RelacionesHerencia,Relaciones):-
 	recorre_hijos_relacion_clase(Hijos,ClaseBuscar,KB,RelacionesHerencia,Relaciones).
@@ -801,7 +804,8 @@ recorre_hijos_relacion_clase(_,_,[],_,[]).
 % predicados para obtener todas las relaciones de un objeto ---------------------------------------------
 
 obtener_relaciones_completas_objeto(Individuo,KB,Resultado):-
-	obtener_relaciones_completas_por_objeto(top,KB,Individuo,[],[],Resultado,KB).
+	obtener_relaciones_completas_por_objeto(top,KB,Individuo,[],[],Resultado,KB),
+	imprime_lista_resultados(Resultado).
 
 %predicado para obtener 
 obtener_relaciones_completas_por_objeto(ClaseActual,KB,IndividuoBuscar,RelacionesHeredadas,PreferenciasHeredadas,Resultado,KB):-
@@ -835,7 +839,7 @@ encontrar_objeto_especifico_por_clase_relacion(ClaseActual,[_|B],IndividuoBuscar
 	encontrar_objeto_especifico_por_clase_relacion(ClaseActual,B,IndividuoBuscar,RelacionesHerencia,PreferenciasHerencia,Resultado,KB).
 
 % predicado base que detiene la recursividad, ya no sigue buscando mas adentro arbol
-encontrar_objeto_especifico_por_clase_relacion(ClaseActual,[],_,_,_,[],_).
+encontrar_objeto_especifico_por_clase_relacion(_,[],_,_,_,[],_).
 
 iterar_por_lista_relaciones_de_indidividuos([],_,_,_,[],_).
 
@@ -843,11 +847,11 @@ iterar_por_lista_relaciones_de_indidividuos([[id=>ListaIndividuoBuscar,_,RelInd]
 	buscar_relacion_individuo_lista(ListaIndividuoBuscar,RelInd,IndividuoBuscar,RelHerencia,PrefHerencia,R,KB),
 	iterar_por_lista_relaciones_de_indidividuos(Demas,IndividuoBuscar,RelHerencia,PrefHerencia,R,KB).
 
-iterar_por_lista_relaciones_de_indidividuos(_,_,_,_,R,_).
+iterar_por_lista_relaciones_de_indidividuos(_,_,_,_,_,_).
 
 buscar_relacion_individuo_lista([],_,_,_,_,_,_).
 
-buscar_relacion_individuo_lista([IndividuoBuscar|Resto],RelIndi, IndividuoBuscar,RelacionesHerencia,PreferenciasHerencia,Resultado,KB):-
+buscar_relacion_individuo_lista([IndividuoBuscar|_],RelIndi, IndividuoBuscar,RelacionesHerencia,PreferenciasHerencia,Resultado,KB):-
 	extraer_todas_relaciones_individuo(RelIndi,RelacionesHerencia,PreferenciasHerencia,Resultado,KB).
 
 buscar_relacion_individuo_lista([_|Resto],RelIndi, IndividuoBuscar,RelacionesHerencia,PreferenciasHerencia,Resultado,KB):-
@@ -888,10 +892,10 @@ obtener_nombres_extension_relacion([Relacion=>(Valor,Pes)|Resto],Relaciones,KB):
 	extension_de_clase(Valor,KB,ExtensionClase),
 	verificar_relacion_desconocida(ExtensionClase,Relacion=>(ExtensionClase,Pes),Relacion=>(Valor,Pes),Relaciones2,Relaciones).
 
-verificar_relacion_desconocida(desconocido,Relacion,Valor,R1,R):-
+verificar_relacion_desconocida(desconocido,_,Valor,R1,R):-
 	append([Valor],R1,R).
 
-verificar_relacion_desconocida(_,Relacion,Valor,R1,R):-
+verificar_relacion_desconocida(_,Relacion,_,R1,R):-
 	append([Relacion],R1,R).
 
 recorrer_relaciones_heredadas([],_,[],_).
@@ -910,7 +914,7 @@ iniciar_inferencias_multiples_relacion([],A,A,[],_).
 
 iniciar_inferencias_multiples_relacion([],_,[],_,_).
 
-iniciar_inferencias_multiples_relacion([Antecedentes=>>Relacion=>(Valor,Peso)|Resto],Relaciones,RelacionesInferidas,Preferencias,KB):-
+iniciar_inferencias_multiples_relacion([_=>>Relacion=>(_,Peso)|Resto],Relaciones,RelacionesInferidas,Preferencias,KB):-
 	iniciar_inferencias_multiples_relacion(Resto,Relaciones,RelacionesInferidas2,Preferencias,KB),	
 	buscar_relacion(Relacion,RelacionesInferidas2,X,KB), 
 	append(Relaciones,RelacionesInferidas2,Completas),
@@ -941,22 +945,19 @@ recorrer_arbol_relaciones_completos_objetos([A|B],KB,IndividuoBuscar,RelacionesH
 recorrer_arbol_relaciones_completos_objetos([],_,_,_,_,[],_).
 %--------------------------------------------------------------------------------------------------------
 
-
-%predicados para agregar una nueva clase ----------------------------------------------------------------
-
-agregar_clase(Nueva,Padre,KB,NuevaKB) :-
-	append(KB,[class(Nueva,Padre,[],[],[])],NuevaKB).
-
-%--------------------------------------------------------------------------------------------------------
-
-
 %predicados para agregar una nueva propiedad -----------------------------------------------------------
 
 %% Agregar nueva propiedad de clase
 %% [[ponen_huevos=>(si,0),vuelan=>(no,0),color=>(azul,0)],[]]
-agregar_propiedad_clase(Class, NuevaProp, Valor, Negacion, OriginalKB, NuevaKB) :-
+agregar_propiedad_clase(Class, NuevaProp, Valor, Negacion, OriginalKB, NuevaKB):-
 	cambiaElemento(class(Class, Mother, PropPref, Rels, Objects),class(Class, Mother, ListaNuevasProp, Rels, Objects), OriginalKB, NuevaKB),
 	agregar_propiedad(PropPref, NuevaProp, Valor, Negacion, ListaNuevasProp).
+
+%%************** Agregar nueva propiedad de clase
+
+agregar_propiedad_clase(Class,NuevaProp,Valor,Negacion,KB,NuevaKB) :-
+	cambiaElemento(class(Class,Padre,PropPref,PropRel,Indiv),class(Class, Padre, ListaNuevasPropPref, PropRel, Indiv),KB,NuevaKB),
+	agregar_propiedad_relacion(PropPref,NuevaProp,Valor,Negacion,ListaNuevasPropPref).
 
 agregar_propiedad([Props|_], NuevaProp, Valor, si, ListaNuevasProp):-
 	append(Props, [no(NuevaProp=>Valor)], ListaNuevasProp).
@@ -1010,8 +1011,15 @@ cambiaElemento(X,Y,[H|T],[H|N]):-
 
 %%************** Agregar Clase
 
-agregar_clase(NewClass,Padre,KB,NuevaKB) :-
+agregar_clase(NewClass,Padre,KB,NuevaKB):-
 	append(KB,[class(NewClass,Padre,[],[],[])],NuevaKB).
+
+%predicados para agregar una nueva clase ----------------------------------------------------------------
+
+agregar_clase(Nueva,Padre,KB,NuevaKB) :-
+	append(KB,[class(Nueva,Padre,[],[],[])],NuevaKB).
+
+%--------------------------------------------------------------------------------------------------------
 
 %%************** Agregar Individuo/Objeto
 
@@ -1019,11 +1027,6 @@ agregar_individuo(NuevoIndiv,Class,KB,NuevaKB) :-
 	cambiaElemento(class(Class,Padre,PropPref,RelPref,Indiv),class(Class,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),
 	append(Indiv,[[id=>NuevoIndiv,[],[]]],ListaNuevosIndiv).
 
-%%************** Agregar nueva propiedad de clase
-
-agregar_propiedad_clase(Class,NuevaProp,Valor,Negacion,KB,NuevaKB) :-
-	cambiaElemento(class(Class,Padre,PropPref,PropRel,Indiv),class(Class, Padre, ListaNuevasPropPref, PropRel, Indiv),KB,NuevaKB),
-	agregar_propiedad_relacion(PropPref,NuevaProp,Valor,Negacion,ListaNuevasPropPref).
 
 %%************** Agregar nueva propiedad de Individuo/Objeto
 
@@ -1119,7 +1122,7 @@ buscar_preferencia_propiedad([],_,_,_).
 
 buscar_preferencia_propiedad(ClaseActual,PropiedadBuscar,KB,PesoNuevo,PesoViejo):-
 	obtener_preferencias_clase(ClaseActual,KB,Preferencias), %obtenemos las preferencias de la clase
-	buscar_preferencia_propiedad_existente(Preferencias,PropiedadBuscar,PesoViejo,PesoNuevo,R,KBG),
+	buscar_preferencia_propiedad_existente(Preferencias,PropiedadBuscar,PesoViejo,PesoNuevo,_,_),
 
 buscar_preferencia_propiedad_existente([],_,_,_,_,noencontrado,_).
 
