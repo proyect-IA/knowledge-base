@@ -1,0 +1,193 @@
+%%*** PENDIENTES
+%% Preferencias de propiedades/relaciones para objetos
+
+%%*** DUDAS
+%% Uso de variables en KB (ej vive=>(X)), ¿que pasa con ellas cuando se modifican en el save de otra accion?
+%% Guardar resultados o copiarlos de as consultas hechas (para el examen)
+%% Los individuos tambien tienen preferencias en propiedades y relaciones ???
+
+%--------------------------------------------------
+% Load and Save from files
+%--------------------------------------------------
+%KB open and save
+
+open_kb(Route,KB):-
+	open(Route,read,Stream),
+	readclauses(Stream,X),
+	close(Stream),
+	atom_to_term(X,KB).
+
+save_kb(Route,KB):-
+	open(Route,write,Stream),
+	writeq(Stream,KB),
+	close(Stream).
+
+readclauses(InStream,W) :-
+    get0(InStream,Char),
+    checkCharAndReadRest(Char,Chars,InStream),
+	atom_chars(W,Chars).
+
+checkCharAndReadRest(-1,[],_) :- !.  % End of Stream	
+checkCharAndReadRest(end_of_file,[],_) :- !.
+
+checkCharAndReadRest(Char,[Char|Chars],InStream) :-
+    get0(InStream,NextChar),
+    checkCharAndReadRest(NextChar,Chars,InStream).
+
+%compile an atom string of characters as a prolog term
+atom_to_term(ATOM, TERM) :-
+	atom(ATOM),
+	atom_to_chars(ATOM,STR),
+	atom_to_chars('.',PTO),
+	append(STR,PTO,STR_PTO),
+	read_from_chars(STR_PTO,TERM).
+
+%definicion de los operadores 
+:- op(500,xfy, =>).  %operador de asignacion
+:- op(501,xfy, =>>). %operador de implicación
+
+
+%------------------------------
+% Ejemplo:  
+%------------------------------
+
+%Cargar la base en una lista, imprimir la lista en consola y guardar todo en un nuevo archivo.
+%No olvides poner las rutas correctas para localizar el archivo kb.txt en tu computadora!!!
+
+abrir(KB):-
+	open_kb('/Users/EIVP1650/Desktop/Maestria/Inteligencia Artificial/Proyecto1/Knowledge-base/KB3.txt',KB).
+	%% write('\nReading actual data...'),
+	%% write('\nKB: '),
+	%% write(KB).
+
+guardar(KB):-
+	write('\nSaving new data...'),
+	save_kb('/Users/EIVP1650/Desktop/Maestria/Inteligencia Artificial/Proyecto1/Knowledge-base/KB3.txt',KB).
+
+
+checkCharAndReadRest(-1,[],_) :- !.  % End of Stream	
+checkCharAndReadRest(end_of_file,[],_) :- !.
+
+checkCharAndReadRest(Char,[Char|Chars],InStream) :-
+    get0(InStream,NextChar),
+    checkCharAndReadRest(NextChar,Chars,InStream).
+
+atom_to_term_conversion(ATOM, TERM) :-
+	atom(ATOM),
+	atom_to_chars(ATOM,STR),
+	atom_to_chars('.',PTO),
+	append(STR,PTO,STR_PTO),
+	read_from_chars(STR_PTO,TERM).
+
+
+%----------------------------------------
+% Admin de listas
+%----------------------------------------
+
+%Cambiar todas las ocurrencias de un elemento X en una lista por el valor de Y
+%cambiaElemento(X,Y,InputList,OutputList).
+%Example (p,b,[p,a,p,a,y,a],[b,a,b,a,y,a])
+
+cambiaElemento(_,_,[],[]).
+
+cambiaElemento(X,Y,[X|T],[Y|N]):-
+	cambiaElemento(X,Y,T,N).
+
+cambiaElemento(X,Y,[H|T],[H|N]):-
+	cambiaElemento(X,Y,T,N).
+
+%--------------------------------------------------------------------------------------------------
+%Ejercicio 2 -> Agregar clases, objetos, propiedades, relaciones y preferencias
+%--------------------------------------------------------------------------------------------------
+
+%%************** Agregar Clase
+
+agregar_clase(NewClass,Padre,KB,NuevaKB) :-
+	append(KB,[class(NewClass,Padre,[],[],[])],NuevaKB).
+
+%%************** Agregar Individuo/Objeto
+
+agregar_individuo(NuevoIndiv,Class,KB,NuevaKB) :-
+	cambiaElemento(class(Class,Padre,PropPref,RelPref,Indiv),class(Class,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),
+	append(Indiv,[[id=>NuevoIndiv,[],[]]],ListaNuevosIndiv).
+
+%%************** Agregar nueva propiedad de clase
+
+agregar_propiedad_clase(Class,NuevaProp,Valor,Negacion,KB,NuevaKB) :-
+	cambiaElemento(class(Class,Padre,PropPref,PropRel,Indiv),class(Class, Padre, ListaNuevasPropPref, PropRel, Indiv),KB,NuevaKB),
+	agregar_propiedad_relacion(PropPref,NuevaProp,Valor,Negacion,ListaNuevasPropPref).
+
+%%************** Agregar nueva propiedad de Individuo/Objeto
+
+agregar_propiedad_individuo(Clase,Indiv,NuevaProp,Valor,Negacion,KB,NuevaKB) :-
+	cambiaElemento(class(Clase,Padre,PropPref,RelPref,Indivs),class(Clase,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),
+	member([id=>Indiv,PropPrefIndiv,RelPrefIndiv],Indivs),
+	cambiaElemento([id=>Indiv,PropPrefIndiv,RelPrefIndiv],[id=>Indiv,ListaNuevasPropPref,RelPrefIndiv],Indivs,ListaNuevosIndiv),
+	agregar_propiedad_relacion(PropPrefIndiv,NuevaProp,Valor,Negacion,ListaNuevasPropPref).
+
+%%************** Agregar nueva preferencia de propiedades de clase
+
+agregar_preferencia_propiedad_clase(Class, Antecedente, Consecuente, Valor, Negacion, KB, NuevaKB) :-
+	cambiaElemento(class(Class, Padre, PropPref, PropRel, Indiv),class(Class, Padre, ListaNuevasPropPref, PropRel, Indiv), KB, NuevaKB),
+	agregar_preferencia(PropPref, Antecedente, Consecuente, Valor, Negacion, ListaNuevasPropPref).
+
+%%************** Agregar nueva relacion de clase
+
+agregar_relacion_clase(Class,NuevaRel,Valor,Negacion,KB,NuevaKB) :-
+	cambiaElemento(class(Class,Padre,PropPref,RelPref,Indiv),class(Class,Padre,PropPref,ListaNuevaRelPref,Indiv),KB,NuevaKB),
+	agregar_propiedad_relacion(RelPref,NuevaRel,Valor,Negacion,ListaNuevaRelPref).
+
+%%************** Agregar nueva relacion de Individuo/Objeto
+
+agregar_relacion_individuo(Clase,Indiv,NuevaRel,Valor,Negacion,KB,NuevaKB) :-
+	cambiaElemento(class(Clase,Padre,PropPref,RelPref,Indivs),class(Clase,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),
+	member([id=>Indiv,PropPrefIndiv,RelPrefIndiv],Indivs),
+	cambiaElemento([id=>Indiv,PropPrefIndiv,RelPrefIndiv],[id=>Indiv,PropPrefIndiv,ListaNuevaRelPref],Indivs,ListaNuevosIndiv),
+	agregar_propiedad_relacion(RelPrefIndiv,NuevaRel,Valor,Negacion,ListaNuevaRelPref).
+
+%%************** Agregar nueva preferencia de relacion de clase
+
+agregar_preferencia_relacion_clase(Class, Antecedente, Consecuente, Valor, Negacion, KB, NuevaKB) :-
+	cambiaElemento(class(Class,Padre,PropPref,RelPref,Indiv),class(Class,Padre,PropPref,ListaNuevaRelPref,Indiv),KB,NuevaKB),
+	agregar_preferencia(RelPref,NuevaRel,Valor,Negacion,ListaNuevaRelPref).
+
+
+%% Predicados para agregar una nueva propiedad o relacion de clase
+
+agregar_propiedad_relacion([],NuevaPropRel,Valor,si,ListaNuevasPropRelPref):-
+	append([],[[no(NuevaPropRel=>Valor)], []],ListaNuevasPropRelPref).
+
+agregar_propiedad_relacion([Props|Pref],NuevaPropRel,Valor,si,ListaNuevasPropRelPref):-
+	append(Props,[no(NuevaPropRel=>Valor)],ListaActualPropRel),
+	append([ListaActualPropRel],Pref,ListaNuevasPropRelPref).
+
+agregar_propiedad_relacion([],NuevaPropRel,Valor,no,ListaNuevasPropRelPref):-
+	append([],[[NuevaPropRel=>Valor], []],ListaNuevasPropRelPref).
+
+agregar_propiedad_relacion([Props|Pref],NuevaPropRel,Valor,no,ListaNuevasPropRelPref):-
+	append(Props,[NuevaPropRel=>Valor],ListaActualPropRel),
+	append([ListaActualPropRel],Pref,ListaNuevasPropRelPref).
+
+%% Predicados para agregar nueva preferencia de propiedad o relacion de clase
+
+agregar_preferencia([], Antecedente, Consecuente, Valor, si, ListaNuevasPropPref):-
+	append([], [[], [Antecedente=>>no(Consecuente=>Valor)]], ListaNuevasPropPref).
+
+agregar_preferencia([Props|[Pref|_]], Antecedente, Consecuente, Valor, si, ListaNuevasPropPref):-
+	append(Pref, [Antecedente=>>no(Consecuente=>Valor)], ListaActualPref),
+	append([Props], [ListaActualPref], ListaNuevasPropPref).
+
+agregar_preferencia([Props|[[]]], Antecedente, Consecuente, Valor, si, ListaNuevasPropPref):-
+	append([], [Antecedente=>>no(Consecuente=>Valor)], ListaActualPref),
+	append([Props], [ListaActualPref], ListaNuevasPropPref).
+
+agregar_preferencia([], Antecedente, Consecuente, Valor, no, ListaNuevasPropPref):-
+	append([], [[], [Antecedente=>>Consecuente=>Valor]], ListaNuevasPropPref).
+
+agregar_preferencia([Props|[[]]], Antecedente, Consecuente, Valor, no, ListaNuevasPropPref):-
+	append([], [Antecedente=>>Consecuente=>Valor], ListaActualPref),
+	append([Props], [ListaActualPref], ListaNuevasPropPref).
+
+agregar_preferencia([Props|[Pref|_]], Antecedente, Consecuente, Valor, no, ListaNuevasPropPref):-
+	append(Pref, [Antecedente=>>Consecuente=>Valor], ListaActualPref),
+	append([Props], [ListaActualPref], ListaNuevasPropPref).

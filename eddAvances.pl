@@ -77,6 +77,7 @@ cambiar_relacion(A=>(Name, Val),A=>(NewName, Val),[H|T],[H|N]):-
     cambiar_relacion(NextAcc=>(Name, NextVal), NextAcc=>(NewName, NextVal),T,N).
 
 
+
 % -------------------------------------------
 % Buscar un elemento en una lista
 % --------------------------------------------
@@ -109,7 +110,7 @@ change_relations(Object,NewName,[[id=>N,P,R]|T],[[id=>N,P,NewR]|NewT]):-
 
 change_relation(_,_,[],[]).
 
-change_relation(OldName,NewName,[R=>OldName|T],[R=>NewName|NewT]):-
+change_relation(OldName,NewName,[R=>(OldName, Val)|T],[R=>(NewName, Val)|NewT]):-
 	change_relation(OldName,NewName,T,NewT).
 
 change_relation(OldName,NewName,[not(R=>OldName)|T],[not(R=>NewName)|NewT]):-
@@ -136,6 +137,7 @@ buscar_objeto_en_relacion([Prop=>(Id, Val)|_], Id, NewId, R):-
 buscar_objeto_en_relacion([_|B], Id, NewId, R):-
 	buscar_objeto_en_relacion(B, Id, NewId, R).
 
+
 % ------------------------------------------------------------------
 % -- Predicado para cambiar nombre a un elemento en una relacion ---
 % **** Existe solo cambia la primer relacion con el primer individuo
@@ -147,11 +149,8 @@ cambiar_objeto_en_relacion(Objeto,NombreNuevo,[Acc=>(Objeto, Val)|_],Result):-
 
 % -------------------------------------------------
 % ---  Cambiar el nombre de un objeto particular --
-cambiar_nombre_de_objeto(Objeto,NewName,OriginalKB,NewKB) :-
-	cambiar_elemento( class(Clase,Padre,Props,Rels,Objects),
-                      class(Clase,Padre,Props,RelsNew,NewObjects),
-                      OriginalKB,TemporalKB),
-    cambiar_objeto_en_relacion(Objeto,NewName,Rels,RelsNew),
+cambiar_nombre_de_objeto(Objeto,NewName,OriginalKB,NewKB):-
+	cambiar_elemento(class(Clase,Padre,Props,Rels,Objects),class(Clase,Padre,Props,Rels,NewObjects),OriginalKB,TemporalKB),
 	es_elemento([id=>Objeto|Properties],Objects),
 	cambiar_elemento([id=>Objeto|Properties],[id=>NewName|Properties],Objects,NewObjects),
 	cambiar_relacion_objeto(Objeto,NewName,TemporalKB,NewKB).
@@ -164,3 +163,12 @@ cambiar_nombre_de_clase(Clase,NombreNuevo,KB,NewKB):-
     cambiar_padre(Clase,NombreNuevo,AUX,AUX2),
     cambiar_relacion_objeto(Clase,NombreNuevo,AUX2,NewKB).
 
+
+% ------------------------------------------------
+% -- Predicado para cambiar nombre a un elemento en una relacion ---
+cambiar_objeto_en_relacion(Objeto,NombreNuevo,KB,NewKB):-
+    cambiar_elemento(class(Clase,Padre,Propiedades,Relaciones,Objetos), class(Clase,Padre,Propiedades,Relaciones2,Objetos),KB,AUX),
+    es_elemento([Id=>(Objeto,Val)|Properties],Relaciones),
+    buscar_objeto_en_relacion([Prop=>(Objeto, Val)|_], Objeto, NombreNuevo, R),
+    %cambiar_elemento([Id=>(Objeto,Val)|Properties],[Id=>(NombreNuevo,Val)|Properties],Relaciones,RelNueva),
+    cambiar_relacion_objeto(Objeto,NombreNuevo,AUX,NewKB).
