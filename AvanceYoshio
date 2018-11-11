@@ -881,7 +881,7 @@ obtener_nuevas_relaciones_inidividuo(RelInd,PrefIndI,RelHerencia,PrefHerencia,Re
 	append(RelInd,Filtradas,RelacionesCompletas),
 	reversa(OrdenadasPorPreferencia,OrdenadasPorPreferenciaInvertidas),
 	iniciar_inferencias_multiples_relacion(OrdenadasPorPreferenciaInvertidas,RelacionesCompletas,Inferido,OrdenadasPorPreferenciaInvertidas,KB),
-	append(RelInd,Inferido,PropiedadesNuevas),
+	append(RelacionesCompletas,Inferido,PropiedadesNuevas),
 	obtener_nombres_extension_relacion(PropiedadesNuevas,Resultado,KB).
 
 
@@ -900,10 +900,20 @@ verificar_relacion_desconocida(_,Relacion,_,R1,R):-
 
 recorrer_relaciones_heredadas([],_,[],_).
 
-recorrer_relaciones_heredadas([Relacion=>(Valor,Pes)|B], RelacionesPropias,Resultado,KB):-
-	buscar_relacion(Relacion,RelacionesPropias,X,KB),
-	recorrer_relaciones_heredadas(B,RelacionesPropias,Resultado2,KB),
-	verificar_resultado_repetido_relacion(X,Relacion=>(Valor,Pes),Resultado2,Resultado).
+recorrer_relaciones_heredadas([Relacion=>(Valor,Pes)|B], RelacionesPropias,Resultado,KB):-	
+	recorrer_relaciones_heredadas(B,RelacionesPropias,Resultado2,KB),	
+	buscar_relacion_sin_nombres(Relacion,RelacionesPropias,X,KB),
+	verificar_resultado_repetido_relacion(X,Relacion=>(X,Pes),Resultado2,Resultado).
+
+	%si no se encuentra la propiedad se dice que no
+buscar_relacion_sin_nombres(_,[],desconocido,_).
+
+%propiedades que son positivas
+buscar_relacion_sin_nombres(Relacion, [Relacion=>(Individuo,_)|_],Individuo,RespaldoKB).
+
+%si no unifica en la relación entonces se siguen buscando en la relaciones
+buscar_relacion_sin_nombres(Relacion,[_|T],Individuo,KB):-
+	buscar_relacion_sin_nombres(Relacion,T,Individuo,KB).
 
 verificar_resultado_repetido_relacion(desconocido,Relacion=>(Valor,Pes),Resultado2,Resultado):-
 	append([Relacion=>(Valor,Pes)],Resultado2,Resultado).
@@ -916,8 +926,8 @@ iniciar_inferencias_multiples_relacion([],_,[],_,_).
 
 iniciar_inferencias_multiples_relacion([_=>>Relacion=>(_,Peso)|Resto],Relaciones,RelacionesInferidas,Preferencias,KB):-
 	iniciar_inferencias_multiples_relacion(Resto,Relaciones,RelacionesInferidas2,Preferencias,KB),	
-	buscar_relacion(Relacion,RelacionesInferidas2,X,KB), 
 	append(Relaciones,RelacionesInferidas2,Completas),
+	buscar_relacion(Relacion,Completas,X,KB), 	
 	validar_no_existencia_relacion(X,Relacion,Preferencias,Completas,Inferir),
 	verificar_inferencia_relacion(Inferir,Relacion,Peso,ResultadoInferido),
 	append(ResultadoInferido,RelacionesInferidas2,RelacionesInferidas).
