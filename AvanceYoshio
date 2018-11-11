@@ -73,8 +73,8 @@ hijos_de_clase(Class,[_|T],Sons):-
 
 es_clase(_,[],desconocido).
 
-es_clase(Clase,[class(not(Clase),_,_,_,_)|_],no).
 es_clase(Clase,[class(Clase,_,_,_,_)|_],si).
+
 es_clase(Clase,[_|T],Resultado):-
 	es_clase(Clase,T,Resultado).
 
@@ -91,7 +91,12 @@ extension_de_clase(Clase,KB,Individuos):-
 %recive el la clase en la que se buscar, la base, y regresa una lista de Individuos
 %primero tenemos que validar que en verdad es una clase
 individuos_de_una_clase(Clase,KB,Individuos):-
-	es_clase(Clase,KB,_), 				         
+	es_clase(Clase,KB,R),
+	validar_clase_verdadera(R,KB,Clase,Individuos).
+
+validar_clase_verdadera(desconocido,_,_,desconocido).
+
+validar_clase_verdadera(_,KB,Clase,Individuos):-
 	individuos_especificos_de_clase(Clase,KB,IndividuosLocales),
 	obtener_individuos_hijos(Clase,KB,IndivudosHijo,KB),
 	append(IndividuosLocales,IndivudosHijo,Individuos).
@@ -228,8 +233,12 @@ extraer_propiedades_individuos(_,_,[],[],_).
 
 inferir_propiedad([],_,_,A,A).
 
+inferir_propiedad([Antecedentes=>>Buscar=>(variable,Peso)|_],Buscar,Propiedades,Resultado,Inferido):-
+	compara_preferencias(Antecedentes,Propiedades,Desicion,Valor),
+	inferencia_nueva_propiedad(Desicion,Valor,Resultado,Inferido).
+
 inferir_propiedad([Antecedentes=>>Buscar=>(Valor,Peso)|_],Buscar,Propiedades,Resultado,Inferido):-
-	compara_preferencias(Antecedentes,Propiedades,Desicion),
+	compara_preferencias(Antecedentes,Propiedades,Desicion,V),
 	inferencia_nueva_propiedad(Desicion,Valor,Resultado,Inferido).
 
 inferir_propiedad([_|B],Buscar,Propiedades,Resultado,Inferido):-
@@ -278,30 +287,31 @@ burbuja([Ant2=>>Prop2=>(Val2,X),Ant3=>>Prop3=>(Val3,Y)|L],Lburb):-
    burbuja([Ant2=>>Prop2=>(Val2,X)|L],L1),  
    Lburb = [Ant3=>>Prop3=>(Val3,Y)|L1]. 
 
-compara_preferencias([],_,_).
+compara_preferencias([],_,_,[]).
 
-compara_preferencias([A|[]],Prop,Desicion):-
-	comparar_propiedad_preferencia(A,Prop,Desicion2),
+compara_preferencias([A|[]],Prop,Desicion,Valor):-
+	comparar_propiedad_preferencia(A,Prop,Valor,Desicion2),
 	decidir(Desicion2,si,Desicion).
 
-compara_preferencias([A|B],Prop,Desicion):-
-	comparar_propiedad_preferencia(A,Prop,Desicion2),
-	comparar_propiedad_preferencia(B,Prop,Desicion3),
+compara_preferencias([A|B],Prop,Desicion,Valor):-
+	comparar_propiedad_preferencia(A,Prop,Valor,Desicion2),
+	comparar_propiedad_preferencia(B,Prop,Valor,Desicion3),
 	decidir(Desicion2,Desicion3,Desicion).
 
 decidir(si,si,si).
 decidir(_,_,no).
 
-comparar_propiedad_preferencia(_,[],no).
+comparar_propiedad_preferencia(_,[],[],no).
 
-comparar_propiedad_preferencia(Propiedad=>(Valor,_),[Propiedad=>(Valor,_)|_],si).
-comparar_propiedad_preferencia(Propiedad=>(Valor,_),[Propiedad=>(Valor2,_)|_],no).
+comparar_propiedad_preferencia(Propiedad=>(variable,_),[Propiedad=>(Valor,_)|_],Valor,si).
+comparar_propiedad_preferencia(Propiedad=>(Valor,_),[Propiedad=>(Valor,_)|_],Valor,si).
+comparar_propiedad_preferencia(Propiedad=>(Valor,_),[Propiedad=>(Valor2,_)|_],Valor2,no).
 
-comparar_propiedad_preferencia([Propiedad=>(Valor,_)],[Propiedad=>(Valor,_)|_],si).
-comparar_propiedad_preferencia([Propiedad=>(Valor,_)],[Propiedad=>(Valor2,_)|_],no).
+comparar_propiedad_preferencia([Propiedad=>(Valor,_)],[Propiedad=>(Valor,_)|_],Valor,si).
+comparar_propiedad_preferencia([Propiedad=>(Valor,_)],[Propiedad=>(Valor2,_)|_],Valor2,no).
 
-comparar_propiedad_preferencia(Buscar,[_|T],R):-
-	comparar_propiedad_preferencia(Buscar,T,R).
+comparar_propiedad_preferencia(Buscar,[_|T],Valor,R):-
+	comparar_propiedad_preferencia(Buscar,T,Valor,R).
 
 extraer_preferencias_por_propiedad([],_,[]).
 
@@ -420,7 +430,7 @@ prepar_proceso_inferencia_relacion(_,_,_,Inferido,Inferido).
 inferir_relacion([],_,_,A,A).
 
 inferir_relacion([Antecedentes=>>Buscar=>(Valor,Peso)|_],Buscar,Relaciones,Resultado,Inferido):-
-	compara_preferencias(Antecedentes,Relaciones,Desicion),
+	compara_preferencias(Antecedentes,Relaciones,Desicion,V),
 	inferencia_nueva_propiedad(Desicion,Valor,Resultado,Inferido).
 
 inferir_relacion([_|B],Buscar,Relaciones,Resultado,Inferido):-
@@ -466,7 +476,7 @@ buscar_relacion(_,[],desconocido,_).
 
 %propiedades que son positivas
 buscar_relacion(Relacion, [Relacion=>(Individuo,_)|_],Valor,RespaldoKB):-
-	individuos_especificos_de_clase(Individuo,RespaldoKB,Valor).
+	individuos_de_una_clase(Individuo,RespaldoKB,Valor).
 
 
 %si no unifica en la relación entonces se siguen buscando en la relaciones
@@ -616,8 +626,10 @@ obtener_nuevas_propiedades_individuo(PropIndI,PrefIndI,PropHerencia,PrefHerencia
 	%en esta parte se acomodan las preferencias en orden de implicación
 	ordenar_preferencias_por_implicacion(PrefIndiHeren,PrefIndiHeren,PreferenciasOrdendas),
 
+	eliminar_repetidos(PreferenciasOrdendas,PrefIndiHeren,Propiedades),
+	
 	% en esta parte se concatenan las preferencias en orden con las heredadas
-	append(PreferenciasOrdendas,PrefIndiHeren,OrdenadasPorPreferencia), 
+	append(Propiedades,PrefIndiHeren,OrdenadasPorPreferencia), 
 
 	%aqui se encarga de eliminar las propiedades repetidas, se da prioridad a las del individuo	
 	recorrer_propiedades_heredadas(PropHerencia,PropIndI,Filtradas),	
@@ -642,6 +654,15 @@ ordenar_preferencias_por_implicacion([Antecedentes=>>Consecuente=>(Valor,Peso)|D
 	iterar_implicaciones_propiedades(Antecedentes,Pref,R2),
 	ordenar_preferencias_por_implicacion(D,Pref,R3),
 	append(R2,R3,R).
+
+eliminar_repetidos([],_,[]).
+
+elimiar_repetidos([Antecedentes=>>Consecuente=>(V,P)|D],PropIndi,R):-
+	elimiar_repetidos(D,PropIndi,R2),
+	buscar_propiedad(Consecuente,PropIndi,_,X),
+	verificar_resultado_repetido(X,Antecedentes=>>Consecuente=>(V,P),R2,R).
+
+eliminar_repetidos(A,A,[]).
 
 iterar_implicaciones_propiedades([],_,[]).
 
@@ -671,8 +692,8 @@ recorrer_propiedades_heredadas([Propiedad=>(Valor,Pes)|B],PropIndI,Resultado):-
 	verificar_resultado_repetido(X,Propiedad=>(Valor,Pes),PropIndI,Resultado).
 
 %predicado que permite verificar que efectivamente no este la propiedad repetida
-verificar_resultado_repetido(desconocido,Propiedad=>(Valor,Pes),Resultado2,Resultado):-
-	append([Propiedad=>(Valor,Pes)],Resultado2,Resultado).
+verificar_resultado_repetido(desconocido,PropPref,Resultado2,Resultado):-
+	append([PropPref],Resultado2,Resultado).
 
 %este predicado se ejecuta si ya existe la propiedad
 verificar_resultado_repetido(_,_,Resultado2,Resultado2).
@@ -850,12 +871,28 @@ extraer_todas_relaciones_individuo([],RelHerencia,PrefHerencia,Resultado,KB):-
 obtener_nuevas_relaciones_inidividuo(RelInd,PrefIndI,RelHerencia,PrefHerencia,Resultado,KB):-
 	decide_heredar_preferencias(PrefIndI,PrefHerencia,PrefIndiHeren),
 	ordenar_preferencias_por_implicacion(PrefIndiHeren,PrefIndiHeren,PreferenciasOrdendas),
-	append(PreferenciasOrdendas,PrefIndiHeren,OrdenadasPorPreferencia),
+	eliminar_repetidos(PreferenciasOrdendas,PrefIndiHeren,Propiedades),	
+	append(Propiedades,PrefIndiHeren,OrdenadasPorPreferencia),
 	recorrer_relaciones_heredadas(RelHerencia,RelInd,Filtradas,KB),
 	append(RelInd,Filtradas,RelacionesCompletas),
 	reversa(OrdenadasPorPreferencia,OrdenadasPorPreferenciaInvertidas),
 	iniciar_inferencias_multiples_relacion(OrdenadasPorPreferenciaInvertidas,RelacionesCompletas,Inferido,OrdenadasPorPreferenciaInvertidas,KB),
-	append(RelInd,Inferido,Resultado).
+	append(RelInd,Inferido,PropiedadesNuevas),
+	obtener_nombres_extension_relacion(PropiedadesNuevas,Resultado,KB).
+
+
+obtener_nombres_extension_relacion([],[],_).
+
+obtener_nombres_extension_relacion([Relacion=>(Valor,Pes)|Resto],Relaciones,KB):-
+	obtener_nombres_extension_relacion(Resto,Relaciones2,KB),
+	extension_de_clase(Valor,KB,ExtensionClase),
+	verificar_relacion_desconocida(ExtensionClase,Relacion=>(ExtensionClase,Pes),Relacion=>(Valor,Pes),Relaciones2,Relaciones).
+
+verificar_relacion_desconocida(desconocido,Relacion,Valor,R1,R):-
+	append([Valor],R1,R).
+
+verificar_relacion_desconocida(_,Relacion,Valor,R1,R):-
+	append([Relacion],R1,R).
 
 recorrer_relaciones_heredadas([],_,[],_).
 
@@ -878,12 +915,12 @@ iniciar_inferencias_multiples_relacion([Antecedentes=>>Relacion=>(Valor,Peso)|Re
 	buscar_relacion(Relacion,RelacionesInferidas2,X,KB), 
 	append(Relaciones,RelacionesInferidas2,Completas),
 	validar_no_existencia_relacion(X,Relacion,Preferencias,Completas,Inferir),
-	verificar_inferencia(Inferir,Relacion,Peso,ResultadoInferido),
+	verificar_inferencia_relacion(Inferir,Relacion,Peso,ResultadoInferido),
 	append(ResultadoInferido,RelacionesInferidas2,RelacionesInferidas).
 	
-verificar_inferencia(desconocido,_,_,[]).
-verificar_inferencia([],_,_,[]).
-verificar_inferencia(Valor,Relacion,Peso,Resultado):-
+verificar_inferencia_relacion(desconocido,_,_,[]).
+verificar_inferencia_relacion([],_,_,[]).
+verificar_inferencia_relacion(Valor,Relacion,Peso,Resultado):-
 	Resultado = [Relacion=>(Valor,Peso)].
 
 validar_no_existencia_relacion(desconocido,Relacion,Preferencias,PropiedadesCompletas,Inferido):-
