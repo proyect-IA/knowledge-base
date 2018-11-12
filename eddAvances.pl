@@ -1,7 +1,7 @@
 % --- predicado para abrir un archivo ---------------------------------
 abrir(KB):-
     % open('/home/edgar/Documents/Maestría_IIMASS/1erSemestre/inteligencia/knowledge-base/EstructuraBase.txt',read,Stream),
-    open('d:/maestria/inteligenciaArtif/knowledge-base/EstructuraBase.txt',read,Stream),
+    open('d:/maestria/inteligenciaArtif/knowledge-base/EstructuraBase',read,Stream),
     readclauses(Stream,X),
     close(Stream),
     atom_to_term_conversion(X,KB).
@@ -54,27 +54,28 @@ cambiar_elemento(A,B,[A|T],[B|N]):-
 cambiar_elemento(A,B,[H|T],[H|N]):-
     cambiar_elemento(A,B,T,N).
 
+
 % ------------------------------------------------------------
 % Cambiar el nombre de un elemento en una lista de relaciones
 % ------------------------------------------------------------
-cambiar_relacion(_,_,[],[]).
+buscar_cambiar_objeto_en_relacion(_,_,[],[]).
 
-cambiar_relacion(Acc=>(Name, Val), Acc=>(NewName, Val),[Acc=>(Name, Val)|T],[Acc=>(NewName, Val)|N]):-
-    cambiar_relacion(NextAcc=>(Name, NextVal),NextAcc=>(NewName, NextVal),T,N).
+buscar_cambiar_objeto_en_relacion(Acc=>(Name, Val), Acc=>(NewName, Val),[Acc=>(Name, Val)|T],[Acc=>(NewName, Val)|N]):-
+    buscar_cambiar_objeto_en_relacion(NextAcc=>(Name, NextVal),NextAcc=>(NewName, NextVal),T,N).
 
-cambiar_relacion(A=>(Name, Val),A=>(NewName, Val),[H|T],[H|N]):-
-    cambiar_relacion(NextAcc=>(Name, NextVal), NextAcc=>(NewName, NextVal),T,N).
+buscar_cambiar_objeto_en_relacion(A=>(Name, Val),A=>(NewName, Val),[H|T],[H|N]):-
+    buscar_cambiar_objeto_en_relacion(NextAcc=>(Name, NextVal), NextAcc=>(NewName, NextVal),T,N).
 
 % ------------------------------------------------------------
-% Cambiar el valor de una preferencia en la lista de relaciones
+% Cambiar el valor de una propiedad clase
 % ------------------------------------------------------------
-cambiar_relacion(_,_,[],[]).
+cambiar_prop_clase(_,_,[],[]).
 
-cambiar_relacion(Acc=>(Name, Val), Acc=>(NewName, Val),[Acc=>(Name, Val)|T],[Acc=>(NewName, Val)|N]):-
-    cambiar_relacion(NextAcc=>(Name, NextVal),NextAcc=>(NewName, NextVal),T,N).
+cambiar_prop_clase(Acc=>(Name, Val), Acc=>(NewName, Val),[Acc=>(Name, Val)|T],[Acc=>(NewName, Val)|N]):-
+    cambiar_prop_clase(NextAcc=>(Name, NextVal),NextAcc=>(NewName, NextVal),T,N).
 
-cambiar_relacion(A=>(Name, Val),A=>(NewName, Val),[H|T],[H|N]):-
-    cambiar_relacion(NextAcc=>(Name, NextVal), NextAcc=>(NewName, NextVal),T,N).
+cambiar_prop_clase(A=>(Name, Val),A=>(NewName, Val),[H|T],[H|N]):-
+    cambiar_prop_clase(NextAcc=>(Name, NextVal), NextAcc=>(NewName, NextVal),T,N).
 
 
 
@@ -140,17 +141,28 @@ buscar_objeto_en_relacion([_|B], Id, NewId, R):-
 
 % ------------------------------------------------------------------
 % -- Predicado para cambiar nombre a un elemento en una relacion ---
-% **** Existe solo cambia la primer relacion con el primer individuo
-cambiar_objeto_en_relacion(Objeto,NombreNuevo,[Acc=>(Objeto, Val)|_],Result):-
-    cambiar_elemento(Acc=>(Objeto, Val), Acc=>(NombreNuevo, Val), Rel, Aux1),
-    cambiar_elemento(Acc1=>(Objeto, Val1), Acc1=>(NombreNuevo, Val1), Aux1, Aux2),
-    cambiar_elemento(Acc2=>(Objeto, Val2), Acc2=>(NombreNuevo, Val2), Aux2, Aux3),
-    cambiar_elemento(Acc3=>(Objeto, Val3), Acc3=>(NombreNuevo, Val3), Aux3, Result).
+cambiar_objeto_en_relacion(Objeto,NombreNuevo,Rels,Result):-
+    buscar_cambiar_objeto_en_relacion(_=>(Objeto,_), _=>(NombreNuevo, _), Rels, Result).
+
+% ------------------------------------------------
+% -- Predicado para cambiar nombre a un elemento en una relacion ---
+cambiar_objeto_en_relaciones(Objeto,NombreNuevo,KB,NewKB):-
+    cambiar_elemento(class(Clase,Padre,Propiedades,Relaciones,Objetos),
+                    class(Clase,Padre,Propiedades,Relaciones2,Objetos),KB,AUX),
+    cambiar_objeto_en_relacion(Objeto,NombreNuevo,Relaciones,Relaciones2),
+    cambiar_elemento(class(Clase,Padre,Propiedades,Relaciones,Objetos),
+                    class(Clase,Padre,Propiedades,Relaciones2,Objetos),AUX,TemporalKB),
+    cambiar_relacion_objeto(Objeto,NewName,TemporalKB,NewKB).
+
+
+
+
 
 % -------------------------------------------------
 % ---  Cambiar el nombre de un objeto particular --
 cambiar_nombre_de_objeto(Objeto,NewName,OriginalKB,NewKB):-
-	cambiar_elemento(class(Clase,Padre,Props,Rels,Objects),class(Clase,Padre,Props,Rels,NewObjects),OriginalKB,TemporalKB),
+	cambiar_elemento(class(Clase,Padre,Props,Rels,Objects),
+                class(Clase,Padre,Props,Rels,NewObjects),OriginalKB,TemporalKB),
 	es_elemento([id=>Objeto|Properties],Objects),
 	cambiar_elemento([id=>Objeto|Properties],[id=>NewName|Properties],Objects,NewObjects),
 	cambiar_relacion_objeto(Objeto,NewName,TemporalKB,NewKB).
@@ -159,16 +171,7 @@ cambiar_nombre_de_objeto(Objeto,NewName,OriginalKB,NewKB):-
 % ------------------------------------------------
 % -- Predicado para cambiar nombre a una clase ---
 cambiar_nombre_de_clase(Clase,NombreNuevo,KB,NewKB):-
-    cambiar_elemento(class(Clase,Padre,Propiedades,Relaciones,Objetos),class(NombreNuevo,Padre,Propiedades,Relaciones,Objectos),KB,AUX),
+    cambiar_elemento(class(Clase,Padre,Propiedades,Relaciones,Objetos),
+                    class(NombreNuevo,Padre,Propiedades,Relaciones,Objetos),KB,AUX),
     cambiar_padre(Clase,NombreNuevo,AUX,AUX2),
     cambiar_relacion_objeto(Clase,NombreNuevo,AUX2,NewKB).
-
-
-% ------------------------------------------------
-% -- Predicado para cambiar nombre a un elemento en una relacion ---
-cambiar_objeto_en_relacion(Objeto,NombreNuevo,KB,NewKB):-
-    cambiar_elemento(class(Clase,Padre,Propiedades,Relaciones,Objetos), class(Clase,Padre,Propiedades,Relaciones2,Objetos),KB,AUX),
-    es_elemento([Id=>(Objeto,Val)|Properties],Relaciones),
-    buscar_objeto_en_relacion([Prop=>(Objeto, Val)|_], Objeto, NombreNuevo, R),
-    %cambiar_elemento([Id=>(Objeto,Val)|Properties],[Id=>(NombreNuevo,Val)|Properties],Relaciones,RelNueva),
-    cambiar_relacion_objeto(Objeto,NombreNuevo,AUX,NewKB).
