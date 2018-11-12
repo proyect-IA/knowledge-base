@@ -97,6 +97,32 @@ cambiar_padre(OldFather,NewFather,[H|T],[H|N]):-
     cambiar_padre(OldFather,NewFather,T,N).
 
 
+% -- Predicado para cambiar nombre a un elemento en una relacion ---
+% -- NOTE:   Andrick  ----- 
+cambiar_relaciones(_,_,[],[]).
+
+cambiar_relaciones(Nombre,NombreNuevo,
+            [class(C,Padre,P,[Rels,PrefRel],O)|T],[class(C,Padre,P,[RelsNew,PrefRel],O)|N]):-
+    cambiar_objeto_en_relacion(Nombre,NombreNuevo,Rels,RelsNew),    
+    cambiar_relaciones(Nombre,NombreNuevo,T,N).
+
+cambiar_relaciones(Nombre,NombreNuevo,[H|T],[H|N]):-
+    cambiar_relaciones(Nombre,NombreNuevo,T,N).
+
+cambiar_objeto_en_relacion(Objeto,NombreNuevo,Rels,Result):-
+    buscar_cambiar_objeto_en_relacion(_=>(Objeto,_), _=>(NombreNuevo, _), Rels, Result).
+
+
+
+
+
+
+
+
+
+
+
+
 % --------------------------------------------------------------------
 % Predicados para realizar modificaciones a Knowledge Base
 % --------------------------------------------------------------------
@@ -139,11 +165,6 @@ buscar_objeto_en_relacion([_|B], Id, NewId, R):-
 	buscar_objeto_en_relacion(B, Id, NewId, R).
 
 
-% ------------------------------------------------------------------
-% -- Predicado para cambiar nombre a un elemento en una relacion ---
-cambiar_objeto_en_relacion(Objeto,NombreNuevo,Rels,Result):-
-    buscar_cambiar_objeto_en_relacion(_=>(Objeto,_), _=>(NombreNuevo, _), Rels, Result).
-
 % ------------------------------------------------
 % -- Predicado para cambiar nombre a un elemento en una relacion ---
 cambiar_objeto_en_relaciones(Objeto,NombreNuevo,KB,NewKB):-
@@ -172,6 +193,9 @@ cambiar_nombre_de_objeto(Objeto,NewName,OriginalKB,NewKB):-
 % -- Predicado para cambiar nombre a una clase ---
 cambiar_nombre_de_clase(Clase,NombreNuevo,KB,NewKB):-
     cambiar_elemento(class(Clase,Padre,Propiedades,Relaciones,Objetos),
-                    class(NombreNuevo,Padre,Propiedades,Relaciones,Objetos),KB,AUX),
-    cambiar_padre(Clase,NombreNuevo,AUX,AUX2),
-    cambiar_relacion_objeto(Clase,NombreNuevo,AUX2,NewKB).
+                    class(NombreNuevo,Padre,Propiedades,Relaciones,Objetos),KB,KBnameUpdate),
+    cambiar_padre(Clase,NombreNuevo,KBnameUpdate,KBfatherUpdate),
+    cambiar_relaciones(Clase,NombreNuevo,KBfatherUpdate,NewKB).
+    %cambiar_relaciones(Clase,NombreNuevo,KBaux3,NewKB).
+
+
