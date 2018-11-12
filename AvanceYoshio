@@ -676,8 +676,11 @@ obtener_nuevas_propiedades_individuo(PropIndI,PrefIndI,PropHerencia,PrefHerencia
 	% en esta parte se concatenan las preferencias en orden con las heredadas
 	append(Propiedades,PrefIndiHeren,OrdenadasPorPreferencia), 
 
+	%reversea la lista para poder realizar correctamente las inferencias
+	reversa(PropHerencia,PropHerenciaInvertidas),
+
 	%aqui se encarga de eliminar las propiedades repetidas, se da prioridad a las del individuo	
-	recorrer_propiedades_heredadas(PropHerencia,PropIndI,Filtradas),	
+	recorrer_propiedades_heredadas(PropHerenciaInvertidas,PropIndI,Filtradas),	
 
 	%aqui se concantenan las propiedades propias del individuo con las propiedades heredadas
 	append(PropIndI,Filtradas,PropiedadesCompletas),
@@ -689,7 +692,7 @@ obtener_nuevas_propiedades_individuo(PropIndI,PrefIndI,PropHerencia,PrefHerencia
 	iniciar_inferencias_multiples(OrdenadasPorPreferenciaInvertidas,PropiedadesCompletas,Inferido,OrdenadasPorPreferenciaInvertidas),
 
 	%concatena la lista de propiedades del individuo con las inferidas
-	append(PropIndI,Inferido,Resultado).
+	append(PropiedadesCompletas,Inferido,Resultado).
 
 ordenar_preferencias_por_implicacion([],_,[]).
 
@@ -750,14 +753,16 @@ recorrer_propiedades_heredadas(A,[],A).
 
 %predicado que permite obtener las propiedades heredades que no se repiten en las propiedades propias
 recorrer_propiedades_heredadas([Propiedad=>(Valor,Pes)|B],PropIndI,Resultado):-	
-	recorrer_propiedades_heredadas(B,PropIndI,_),
-	buscar_propiedad(Propiedad,PropIndI,_,X),
-	verificar_resultado_repetido(X,Propiedad=>(Valor,Pes),PropIndI,Resultado).
+	recorrer_propiedades_heredadas(B,PropIndI,Resultado2),
+	append(Resultado2,PropIndI,Completas),
+	buscar_propiedad(Propiedad,Completas,_,X),
+	verificar_resultado_repetido(X,Propiedad=>(Valor,Pes),Resultado2,Resultado).
 
 recorrer_propiedades_heredadas([no(Propiedad=>(Valor,Pes))|B],PropIndI,Resultado):-	
-	recorrer_propiedades_heredadas(B,PropIndI,_),
-	buscar_propiedad(Propiedad,PropIndI,_,X),
-	verificar_resultado_repetido(X,no(Propiedad=>(Valor,Pes)),PropIndI,Resultado).
+	recorrer_propiedades_heredadas(B,PropIndI,Resultado2),
+	append(Resultado2,PropIndI,Completas),
+	buscar_propiedad(Propiedad,Completas,_,X),
+	verificar_resultado_repetido(X,no(Propiedad=>(Valor,Pes)),Resultado2,Resultado).
 
 %predicado que permite verificar que efectivamente no este la propiedad repetida
 verificar_resultado_repetido(desconocido,PropPref,Resultado2,Resultado):-
@@ -766,7 +771,7 @@ verificar_resultado_repetido(desconocido,PropPref,Resultado2,Resultado):-
 %este predicado se ejecuta si ya existe la propiedad
 verificar_resultado_repetido(_,_,Resultado2,Resultado2).
 
-iniciar_inferencias_multiples([],A,A,[]).
+iniciar_inferencias_multiples([],_,[],[]).
 
 %caso base que detiene la recursividad
 iniciar_inferencias_multiples([],_,[],_).
@@ -960,17 +965,22 @@ obtener_nuevas_relaciones_inidividuo(RelInd,PrefIndI,RelHerencia,PrefHerencia,Re
 	obtener_nombres_extension_relacion(PropiedadesNuevas,Resultado,KB).
 
 
+validar_nombre_extension_vacia([],V,V).
+validar_nombre_extension_vacia(V,_,V).
+
 obtener_nombres_extension_relacion([],[],_).
 
 obtener_nombres_extension_relacion([Relacion=>(Valor,Pes)|Resto],Relaciones,KB):-
 	obtener_nombres_extension_relacion(Resto,Relaciones2,KB),
 	extension_de_clase(Valor,KB,ExtensionClase),
-	verificar_relacion_desconocida(ExtensionClase,Relacion=>(ExtensionClase,Pes),Relacion=>(Valor,Pes),Relaciones2,Relaciones).
+	validar_nombre_extension_vacia(ExtensionClase,Valor,Extension),
+	verificar_relacion_desconocida(ExtensionClase,Relacion=>(Extension,Pes),Relacion=>(Valor,Pes),Relaciones2,Relaciones).
 
 obtener_nombres_extension_relacion([no(Relacion=>(Valor,Pes))|Resto],Relaciones,KB):-
 	obtener_nombres_extension_relacion(Resto,Relaciones2,KB),
 	extension_de_clase(Valor,KB,ExtensionClase),
-	verificar_relacion_desconocida(ExtensionClase,no(Relacion=>(ExtensionClase,Pes)),no(Relacion=>(Valor,Pes)),Relaciones2,Relaciones).
+	validar_nombre_extension_vacia(ExtensionClase,Valor,Extension),
+	verificar_relacion_desconocida(ExtensionClase,no(Relacion=>(Extension,Pes)),no(Relacion=>(Valor,Pes)),Relaciones2,Relaciones).
 
 verificar_relacion_desconocida(desconocido,_,Valor,R1,R):-
 	append([Valor],R1,R).
@@ -983,12 +993,12 @@ recorrer_relaciones_heredadas([],_,[],_).
 recorrer_relaciones_heredadas([Relacion=>(Valor,Pes)|B], RelacionesPropias,Resultado,KB):-	
 	recorrer_relaciones_heredadas(B,RelacionesPropias,Resultado2,KB),	
 	buscar_relacion_sin_nombres(Relacion,RelacionesPropias,X,KB),
-	verificar_resultado_repetido_relacion(X,Relacion=>(X,Pes),Resultado2,Resultado).
+	verificar_resultado_repetido_relacion(X,Relacion=>(Valor,Pes),Resultado2,Resultado).
 
 recorrer_relaciones_heredadas([no(Relacion=>(Valor,Pes))|B], RelacionesPropias,Resultado,KB):-	
 	recorrer_relaciones_heredadas(B,RelacionesPropias,Resultado2,KB),	
 	buscar_relacion_sin_nombres(Relacion,RelacionesPropias,X,KB),
-	verificar_resultado_repetido_relacion(X,no(Relacion=>(X,Pes)),Resultado2,Resultado).
+	verificar_resultado_repetido_relacion(X,no(Relacion=>(Valor,Pes)),Resultado2,Resultado).
 
 	%si no se encuentra la propiedad se dice que no
 buscar_relacion_sin_nombres(_,[],desconocido,_).
@@ -1006,7 +1016,7 @@ verificar_resultado_repetido_relacion(desconocido,Relacion,Resultado2,Resultado)
 
 verificar_resultado_repetido_relacion(_,_,Resultado2,Resultado2).
 
-iniciar_inferencias_multiples_relacion([],A,A,[],_).
+iniciar_inferencias_multiples_relacion([],_,[],[],_).
 
 iniciar_inferencias_multiples_relacion([],_,[],_,_).
 
