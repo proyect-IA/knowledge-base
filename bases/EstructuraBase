@@ -1,0 +1,12 @@
+[
+class(top,none,[],[],[]),
+class(animales,top,[],[],[]),
+class(mamiferos,animales,[[no(color=>(azul,0))],[]],[[],[[odia=>(maquina,0)]=>>dentro=>(raton,0)]],[]),
+class(raton,mamiferos,[],[[],[[hermano=>(animales,0)]=>>primo=>(maquina,0)]],[[id=>[mickey,miky],[[color=>(verde,0)],[]],[[dentro=>(animales,0)],[]]],[id=>[timothy],[[color=>(gris,0)],[]],[]]]),
+class(ballena,mamiferos,[],[],[]),
+class(elefante, mamiferos,[],[[odia=>(raton,0)],[]],[[id=>[msJumbo],[],[]],[id=>[dumbo],[],[]]]),
+class(humano,mamiferos,[],[[odia=>(raton,0)],[]],[[id=>[maestro],[],[]],[id=>[gepeto],[],[[dentro=>(raton,0),amigo=>(maestro,0)]]]]),
+class(maquina,top,[],[],[]),
+class(juguete,maquina,[],[],[[id=>[pinocho,mono,otro],[],[]]])
+]
+
