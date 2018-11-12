@@ -1,6 +1,5 @@
 % --- predicado para abrir un archivo ---------------------------------
 abrir(KB):-
-    % open('/home/edgar/Documents/Maestría_IIMASS/1erSemestre/inteligencia/knowledge-base/EstructuraBase.txt',read,Stream),
     open('d:/maestria/inteligenciaArtif/knowledge-base/EstructuraBase',read,Stream),
     readclauses(Stream,X),
     close(Stream),
@@ -9,7 +8,6 @@ abrir(KB):-
 % ----------------------------------------------------------------------
 % --- predicado para guardar un archivo --------------------------------
 guardar(KB):-
-    % open('/home/edgar/Documents/Maestría_IIMASS/1erSemestre/inteligencia/knowledge-base/update_KB(edd).txt',write,Stream),
     open('d:/maestria/inteligenciaArtif/knowledge-base/update_KB(edd).txt',write,Stream),
     writeq(Stream,KB),
     close(Stream).
@@ -35,6 +33,10 @@ atom_to_term_conversion(ATOM, TERM) :-
     append(STR,PTO,STR_PTO),
     read_from_chars(STR_PTO,TERM).
 
+
+
+
+
 % ---------------------------------------------------------
 % ------------ definicion de los operadores ---------------
 :- op(500,xfy,'=>').  %operador de asignacion
@@ -55,9 +57,8 @@ cambiar_elemento(A,B,[H|T],[H|N]):-
     cambiar_elemento(A,B,T,N).
 
 
-% ------------------------------------------------------------
 % Cambiar el nombre de un elemento en una lista de relaciones
-% ------------------------------------------------------------
+% ---------------------------------------------------------------------
 buscar_cambiar_objeto_en_relacion(_,_,[],[]).
 
 buscar_cambiar_objeto_en_relacion(Acc=>(Name, Val), Acc=>(NewName, Val),[Acc=>(Name, Val)|T],[Acc=>(NewName, Val)|N]):-
@@ -66,16 +67,30 @@ buscar_cambiar_objeto_en_relacion(Acc=>(Name, Val), Acc=>(NewName, Val),[Acc=>(N
 buscar_cambiar_objeto_en_relacion(A=>(Name, Val),A=>(NewName, Val),[H|T],[H|N]):-
     buscar_cambiar_objeto_en_relacion(NextAcc=>(Name, NextVal), NextAcc=>(NewName, NextVal),T,N).
 
-% ------------------------------------------------------------
+
+% Cambiar antecendentes en lista de preferencias de relaciones
+% ---------------------------------------------------------------------
+buscar_cambiar_antecendes_en_prefrecias_relacion(_,__,_,[],[]).
+
+buscar_cambiar_antecendes_en_prefrecias_relacion(Name,NewName, Ant=>>Conse, NewAnt=>>Conse, [Ant=>>Conse|T], [NewAnt=>>Conse|N]):-
+    cambiar_objeto_en_relacion(Name,NewName,Ant,NewAnt),
+    buscar_cambiar_antecendes_en_prefrecias_relacion(Name,NewName, Ant=>>Conse, NewAnt=>>Conse, T, N).
+
+buscar_cambiar_antecendes_en_prefrecias_relacion(Name,NewName,Ant=>>Conse, NewAnt=>>Conse,[H|T],[H|N]):-
+    buscar_cambiar_antecendes_en_prefrecias_relacion(Name,NewName,Ant=>>NextAcc(NextName, NextVal), NewAnt=>>NextAcc(NextName, NextVal), T, N).
+
+
+
 % Cambiar el valor de una propiedad clase
-% ------------------------------------------------------------
-cambiar_prop_clase(_,_,[],[]).
+% *****  Pendiente
+% ---------------------------------------------------------------------
+buscar_cambiar_prop_clase(_,_,[],[]).
 
-cambiar_prop_clase(Acc=>(Name, Val), Acc=>(NewName, Val),[Acc=>(Name, Val)|T],[Acc=>(NewName, Val)|N]):-
-    cambiar_prop_clase(NextAcc=>(Name, NextVal),NextAcc=>(NewName, NextVal),T,N).
+buscar_cambiar_prop_clase(Acc=>(Name, Val), Acc=>(NewName, Val),[Acc=>(Name, Val)|T],[Acc=>(NewName, Val)|N]):-
+    buscar_cambiar_prop_clase(NextAcc=>(Name, NextVal),NextAcc=>(NewName, NextVal),T,N).
 
-cambiar_prop_clase(A=>(Name, Val),A=>(NewName, Val),[H|T],[H|N]):-
-    cambiar_prop_clase(NextAcc=>(Name, NextVal), NextAcc=>(NewName, NextVal),T,N).
+buscar_cambiar_prop_clase(A=>(Name, Val),A=>(NewName, Val),[H|T],[H|N]):-
+    buscar_cambiar_prop_clase(NextAcc=>(Name, NextVal), NextAcc=>(NewName, NextVal),T,N).
 
 
 
@@ -98,7 +113,6 @@ cambiar_padre(OldFather,NewFather,[H|T],[H|N]):-
 
 
 % -- Predicado para cambiar nombre a un elemento en una relacion ---
-% -- NOTE:   Andrick  ----- 
 cambiar_relaciones(_,_,[],[]).
 
 cambiar_relaciones(Nombre,NombreNuevo,
@@ -109,16 +123,32 @@ cambiar_relaciones(Nombre,NombreNuevo,
 cambiar_relaciones(Nombre,NombreNuevo,[H|T],[H|N]):-
     cambiar_relaciones(Nombre,NombreNuevo,T,N).
 
+
+cambiar_relaciones_antecedentes(_,_,[],[]).
+
+cambiar_relaciones_antecedentes(Nombre,NombreNuevo,
+            [class(C,Padre,P,[Rels,[AntPrefRel=>>ConsPrefRel|H]],O)|T],
+            [class(C,Padre,P,[Rels,[NewAntPrefRel=>>ConsPrefRel|H]],O)|N]):-
+    cambiar_objeto_en_relacion(Nombre,NombreNuevo,AntPrefRel,NewAntPrefRel),    
+    cambiar_relaciones_antecedentes(Nombre,NombreNuevo,T,N).
+
+cambiar_relaciones_antecedentes(Nombre,NombreNuevo,[H|T],[H|N]):-
+    cambiar_relaciones_antecedentes(Nombre,NombreNuevo,T,N).
+
+
+cambiar_relaciones_consecuentes(_,_,[],[]).
+
+cambiar_relaciones_consecuentes(Nombre,NombreNuevo,
+            [class(C,Padre,P,[Rels,[AntPrefRel=>>A=>(Nombre,Val)|H] ],O)|T],
+            [class(C,Padre,P,[Rels,[AntPrefRel=>>A=>(NombreNuevo,Val)|H] ],O)|N]):-    
+    cambiar_relaciones_consecuentes(Nombre,NombreNuevo,T,N).
+
+cambiar_relaciones_consecuentes(Nombre,NombreNuevo,[H|T],[H|N]):-
+    cambiar_relaciones_consecuentes(Nombre,NombreNuevo,T,N).
+
+
 cambiar_objeto_en_relacion(Objeto,NombreNuevo,Rels,Result):-
     buscar_cambiar_objeto_en_relacion(_=>(Objeto,_), _=>(NombreNuevo, _), Rels, Result).
-
-
-
-
-
-
-
-
 
 
 
@@ -126,58 +156,6 @@ cambiar_objeto_en_relacion(Objeto,NombreNuevo,Rels,Result):-
 % --------------------------------------------------------------------
 % Predicados para realizar modificaciones a Knowledge Base
 % --------------------------------------------------------------------
-
-change_relations(_,_,[],[]).
-
-change_relations(Object,NewName,[[id=>N,P,R]|T],[[id=>N,P,NewR]|NewT]):-
-	change_relation(Object,NewName,R,NewR),
-	change_relations(Object,NewName,T,NewT).
-
-
-
-change_relation(_,_,[],[]).
-
-change_relation(OldName,NewName,[R=>(OldName, Val)|T],[R=>(NewName, Val)|NewT]):-
-	change_relation(OldName,NewName,T,NewT).
-
-change_relation(OldName,NewName,[not(R=>OldName)|T],[not(R=>NewName)|NewT]):-
-	change_relation(OldName,NewName,T,NewT).
-
-change_relation(OldName,NewName,[H|T],[H|NewT]):-
-	change_relation(OldName,NewName,T,NewT).
-		
-
-
-
-cambiar_relacion_objeto(_,_,[],[]).
-
-cambiar_relacion_objeto(Object,NewName,[class(C,M,P,R,O)|T],[class(C,M,P,NewR,NewO)|NewT]):-
-	change_relations(Object,NewName,O,NewO),
-	change_relation(Object,NewName,R,NewR),
-	cambiar_relacion_objeto(Object,NewName,T,NewT).
-
-buscar_objeto_en_relacion([],_,_,[]).
-
-buscar_objeto_en_relacion([Prop=>(Id, Val)|_], Id, NewId, R):-
-	R=[Prop=>(NewId, Val)].
-
-buscar_objeto_en_relacion([_|B], Id, NewId, R):-
-	buscar_objeto_en_relacion(B, Id, NewId, R).
-
-
-% ------------------------------------------------
-% -- Predicado para cambiar nombre a un elemento en una relacion ---
-cambiar_objeto_en_relaciones(Objeto,NombreNuevo,KB,NewKB):-
-    cambiar_elemento(class(Clase,Padre,Propiedades,Relaciones,Objetos),
-                    class(Clase,Padre,Propiedades,Relaciones2,Objetos),KB,AUX),
-    cambiar_objeto_en_relacion(Objeto,NombreNuevo,Relaciones,Relaciones2),
-    cambiar_elemento(class(Clase,Padre,Propiedades,Relaciones,Objetos),
-                    class(Clase,Padre,Propiedades,Relaciones2,Objetos),AUX,TemporalKB),
-    cambiar_relacion_objeto(Objeto,NewName,TemporalKB,NewKB).
-
-
-
-
 
 % -------------------------------------------------
 % ---  Cambiar el nombre de un objeto particular --
@@ -188,14 +166,12 @@ cambiar_nombre_de_objeto(Objeto,NewName,OriginalKB,NewKB):-
 	cambiar_elemento([id=>Objeto|Properties],[id=>NewName|Properties],Objects,NewObjects),
 	cambiar_relacion_objeto(Objeto,NewName,TemporalKB,NewKB).
 
-
 % ------------------------------------------------
 % -- Predicado para cambiar nombre a una clase ---
 cambiar_nombre_de_clase(Clase,NombreNuevo,KB,NewKB):-
     cambiar_elemento(class(Clase,Padre,Propiedades,Relaciones,Objetos),
                     class(NombreNuevo,Padre,Propiedades,Relaciones,Objetos),KB,KBnameUpdate),
     cambiar_padre(Clase,NombreNuevo,KBnameUpdate,KBfatherUpdate),
-    cambiar_relaciones(Clase,NombreNuevo,KBfatherUpdate,NewKB).
-    %cambiar_relaciones(Clase,NombreNuevo,KBaux3,NewKB).
-
-
+    cambiar_relaciones(Clase,NombreNuevo,KBfatherUpdate,KBrelationUpdate),
+    cambiar_relaciones_antecedentes(Clase, NombreNuevo, KBrelationUpdate, KBantePrefUpdate),
+    cambiar_relaciones_consecuentes(Clase, NombreNuevo, KBantePrefUpdate, NewKB).
