@@ -273,6 +273,8 @@ reversa([X|L1],M):-
 	concatener(Demas,[X],M).
 
 orden_bur([Ant=>>Prop=>(Val,X)],[Ant=>>Prop=>(Val,X)]).
+orden_bur([Ant=>>Prop=>(Val,X)],[Ant=>>no(Prop=>(Val,X))]).
+orden_bur([Ant=>>no(Prop=>(Val,X))],[Ant=>>Prop=>(Val,X)]).
 orden_bur([Ant=>>no(Prop=>(Val,X))],[Ant=>>no(Prop=>(Val,X))]).
 
 orden_bur(L,Lord):-  
@@ -283,6 +285,8 @@ orden_bur(X,X).
 
 burbuja([],[]). 
 burbuja([Ant=>>Prop=>(Val,C)],[Ant=>>Prop=>(Val,C)]).
+burbuja([Ant=>>Prop=>(Val,C)],[Ant=>>no(Prop=>(Val,C))]).
+burbuja([Ant=>>no(Prop=>(Val,C))],[Ant=>>Prop=>(Val,C)]).
 burbuja([Ant=>>no(Prop=>(Val,C))],[Ant=>>no(Prop=>(Val,C))]).
 
 burbuja([Ant2=>>Prop2=>(Val2,X),Ant3=>>Prop3=>(Val3,Y)|L],Lburb):-  
@@ -722,6 +726,11 @@ iterar_implicaciones_propiedades([Prop=>(_,_)|D],Pref,R):-
 	iterar_implicaciones_propiedades(D,Pref,R3),
 	append(R2,R3,R).
 
+iterar_implicaciones_propiedades([no(Prop=>(_,_))|D],Pref,R):-
+	buscar_propiedad_consecuente(Prop,Pref,R2),
+	iterar_implicaciones_propiedades(D,Pref,R3),
+	append(R2,R3,R).
+
 buscar_propiedad_consecuente(Consecuente,[Antecedentes=>>Consecuente=>(Valor,Peso)|_],R):-
 	R = [Antecedentes=>>Consecuente=>(Valor,Peso)].
 
@@ -736,6 +745,8 @@ buscar_propiedad_consecuente(_,[],[]).
 
 %caso base que detiene la recursividad
 recorrer_propiedades_heredadas([],_,[]).
+
+recorrer_propiedades_heredadas(A,[],A).
 
 %predicado que permite obtener las propiedades heredades que no se repiten en las propiedades propias
 recorrer_propiedades_heredadas([Propiedad=>(Valor,Pes)|B],PropIndI,Resultado):-	
