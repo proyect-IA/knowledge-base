@@ -1,0 +1,10 @@
+[
+class(top,none,[],[],[]),
+class(animales,top,[],[],[]),
+class(pescado,animales,[],[],[]),
+class(avez,animales,[[vuelan=>(si,0)],[]],[],[]),
+class(aguilas,avez,[[carnivoros=>(si,0)],[]],[[comen=>(pescado,0)],[]],[ [id=>[pete],[[size=>(grande,0)],[]],[[no(amigo=>(arturo,0))],[]] ]]),
+class(pinguino,avez,[[vuelan=>(no,0),color=>(anonimo,0)]],[],[[id=>[arturo],[[habil=>(si,0)]],[[no(amigo=>(pete,0))],[]]]]),
+class(mamiferos,animales,[[ponen_huevos=>(no,0)],[]],[],[]),
+class(ornitorrincos,mamiferos,[[ponen_huevos=>(si,0)],[]],[])
+]
