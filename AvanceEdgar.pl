@@ -63,6 +63,7 @@ es_elemento(X,[_|T]):-
     es_elemento(X,T).
 
 
+
 % Cambiar el nombre de un elemento en una lista de relaciones
 % ---------------------------------------------------------------------
 buscar_cambiar_objeto_en_relacion(_,_,[],[]).
@@ -77,16 +78,25 @@ buscar_cambiar_objeto_en_relacion(A=>(Name, Val),A=>(NewName, Val),[H|T],[H|N]):
 cambiar_objeto_en_relacion(Objeto,NombreNuevo,Rels,Result):-
     buscar_cambiar_objeto_en_relacion(_=>(Objeto,_), _=>(NombreNuevo, _), Rels, Result).
 
+
+
 % Cambiar el valor de una propiedad clase
-% *****  Pendiente
 % ---------------------------------------------------------------------
-%buscar_cambiar_prop_clase(_,_,[],[]).
+buscar_cambiar_valor_prop(_,_,[],[]).
 
-%buscar_cambiar_prop_clase(Acc=>(Name, Val), Acc=>(NewName, Val),[Acc=>(Name, Val)|T],[Acc=>(NewName, Val)|N]):-
-%    buscar_cambiar_prop_clase(NextAcc=>(Name, NextVal),NextAcc=>(NewName, NextVal),T,N).
+buscar_cambiar_valor_prop(Prop=>(Val, Peso), Prop=>(NuevoVal, Peso),
+        [Prop=>(Val, Peso)|T],
+        [Prop=>(NuevoVal, Peso)|N]):-
+    buscar_cambiar_valor_prop(NextProp=>(Val, NextPeso),NextProp=>(NuevoVal, NextPeso),T,N).
 
-%buscar_cambiar_prop_clase(A=>(Name, Val),A=>(NewName, Val),[H|T],[H|N]):-
-%buscar_cambiar_prop_clase(NextAcc=>(Name, NextVal), NextAcc=>(NewName, NextVal),T,N).
+buscar_cambiar_valor_prop(Prop=>(Val, Peso), Prop=>(NuevoVal, Peso),[H|T],[H|N]):-
+    buscar_cambiar_valor_prop(NextProp=>(Val, NextPeso),NextProp=>(NuevoVal, NextPeso),T,N).
+
+cambiar_valor_prop(Prop,NuevoValor,PropList,Result):-
+    buscar_cambiar_objeto_en_relacion(Prop=>(_,_), Prop=>(NuevoValor, _), PropList, Result).
+
+
+
 iterar_individuos_nombre(_,_,[],[]).
 
 iterar_individuos_nombre(Name,NewName,
@@ -194,6 +204,18 @@ cambiar_relaciones_consecuentes_nivelClase(Nombre,NombreNuevo,[H|T],[H|N]):-
     cambiar_relaciones_consecuentes_nivelClase(Nombre,NombreNuevo,T,N).
 
 
+cambiar_propiedades_nivelClase(Clase, Prop, NewValue, KB,NewKB):-
+    cambiar_elemento(class(Clase,Padre,[PropList,PrefProps],Rels,Objects),
+                class(Clase,Padre,[NewProps,PrefProps],Rels,Objects),KB,NewKB),
+    cambiar_valor_prop(Prop,NewValue,PropList, NewProps).
+
+cambiar_relacion_nivelClase(Clase, Relacion, NuevoSujeto,KB,NewKB):-
+    cambiar_elemento(class(Clase,Padre,Props,[RelsList, PrefRels],Objects),
+                class(Clase,Padre,Props,[NewRels,PrefRels],Objects),KB,NewKB),
+    buscar_cambiar_objeto_en_relacion(Relacion=>(_, _), Relacion=>(NuevoSujeto,_),RelsList, NewRels).
+
+
+
 % -- Predicado para cambiar nombre a un elemento en una relacion ---
 % -----------     A nivel de INDIVIDUO  ----------------------------
 cambiar_relaciones_nivelIndividuo(_,_,[],[]).
@@ -207,7 +229,7 @@ cambiar_relaciones_nivelIndividuo(Nombre,NombreNuevo,
 cambiar_relaciones_nivelIndividuo(Nombre,NombreNuevo,[H|T],[H|N]):-
     cambiar_relaciones_nivelIndividuo(Nombre,NombreNuevo,T,N).
 
-%(class(Name, Father, Props, Rels, [[id=>Objs, PropObjs, [Rel, [Antec=>>Consecuente|R]]]|H])
+
 cambiar_relaciones_antecedentes_nivelIndividuo(_,_,[],[]).
 
 cambiar_relaciones_antecedentes_nivelIndividuo(Nombre,NombreNuevo,
@@ -232,17 +254,28 @@ cambiar_relaciones_consecuentes_nivelIndividuo(Nombre,NombreNuevo,[H|T],[H|N]):-
     cambiar_relaciones_consecuentes_nivelIndividuo(Nombre,NombreNuevo,T,N).
 
 
+cambiar_propiedades_nivelIndividuo(Objeto, Prop, NewValue, KB,NewKB):-
+    cambiar_elemento(class(Clase,Padre,Prop,Rels,[id>Objects,PropList,Rels] ),
+                    class(Clase,Padre,Prop,Rels,[id=>Objects,NewProps,Rels] ),KB,NewKB),
+    es_elemento(Objeto, Objects),
+    cambiar_valor_prop(Prop,NewValue,PropList, NewProps).
 
 
 
 
 
 
+
+
+
+% --------------------------------------------------------------------
+%    CONSULTAS PRINCIPALES PARA MODIFICAR KB
 % --------------------------------------------------------------------
 % Predicados para realizar modificaciones a Knowledge Base
 % --------------------------------------------------------------------
 
 % ---  Cambiar el nombre de un objeto particular --
+% 4  a)
 cambiar_nombre_de_individuo(Objeto,NombreNuevo,KB,NewKB):-
     cambiar_nombre(Objeto, NombreNuevo, KB, KBnameUpdate),
     cambiar_relaciones_nivelClase(Clase,NombreNuevo,KBnameUpdate,KBrelationUpdate),
@@ -252,9 +285,8 @@ cambiar_nombre_de_individuo(Objeto,NombreNuevo,KB,NewKB):-
     cambiar_relaciones_antecedentes_nivelIndividuo(Clase, NombreNuevo, KBrelation2Update, KBantePref2Update),
     cambiar_relaciones_consecuentes_nivelIndividuo(Clase, NombreNuevo, KBantePref2Update, NewKB).
 
-
-% ------------------------------------------------
 % -- Predicado para cambiar nombre a una clase ---
+% 4  a)
 cambiar_nombre_de_clase(Clase,NombreNuevo,KB,NewKB):-
     cambiar_elemento(class(Clase,Padre,Propiedades,Relaciones,Objetos),
                     class(NombreNuevo,Padre,Propiedades,Relaciones,Objetos),KB,KBnameUpdate),
@@ -266,3 +298,25 @@ cambiar_nombre_de_clase(Clase,NombreNuevo,KB,NewKB):-
     cambiar_relaciones_antecedentes_nivelIndividuo(Clase, NombreNuevo, KBrelation2Update, KBantePref2Update),
     cambiar_relaciones_consecuentes_nivelIndividuo(Clase, NombreNuevo, KBantePref2Update, NewKB).
 
+
+% -- Predicado para cambiar valor de una propiedad de clase ---
+% 4 b)
+cambiar_valor_propiedad_clase(Clase, Propiedad, NuevoValor, KB, NewKB):-
+    cambiar_propiedades_nivelClase(Clase, Propiedad, NuevoValor,KB,NewKB).
+
+% -- Predicado para cambiar valor de una propiedad de clase ---
+%4 b)
+%cambiar_valor_propiedad_objeto(Objeto, Propiedad, NuevoValor):-
+%.
+
+
+% -- Predicado para cambiar con quien tiene relacion una clase ---
+% 4 c)
+cambiar_valor_relacion_especifica_en_clase(Clase, Relacion, NuevoSujeto, KB, NewKB):-
+    cambiar_relacion_nivelClase(Clase, Relacion, NuevoSujeto,KB,NewKB).
+
+
+% -- Predicado para cambiar con quien tiene relacion una clase ---
+% 4 c)
+% cambiar_valor_relacion_especifica_en_clase(Clase, Propiedad, NuevoValor, KB, NewKB):-
+%    cambiar_propiedades_nivelClase(Clase, Propiedad, NuevoValor,KB,NewKB).
