@@ -679,8 +679,10 @@ obtener_nuevas_propiedades_individuo(PropIndI,PrefIndI,PropHerencia,PrefHerencia
 	%reversea la lista para poder realizar correctamente las inferencias
 	reversa(PropHerencia,PropHerenciaInvertidas),
 
+	eliminar_propiedades_por_especificidad(PropHerenciaInvertidas,PropiedadesEspecificidad),
+
 	%aqui se encarga de eliminar las propiedades repetidas, se da prioridad a las del individuo	
-	recorrer_propiedades_heredadas(PropHerenciaInvertidas,PropIndI,Filtradas),	
+	recorrer_propiedades_heredadas(PropiedadesEspecificidad,PropIndI,Filtradas),	
 
 	%aqui se concantenan las propiedades propias del individuo con las propiedades heredadas
 	append(PropIndI,Filtradas,PropiedadesCompletas),
@@ -693,6 +695,18 @@ obtener_nuevas_propiedades_individuo(PropIndI,PrefIndI,PropHerencia,PrefHerencia
 
 	%concatena la lista de propiedades del individuo con las inferidas
 	append(PropiedadesCompletas,Inferido,Resultado).
+
+eliminar_propiedades_por_especificidad([],[]).
+
+eliminar_propiedades_por_especificidad([Propiedad=>(Valor,Pes)|D],C):-
+ 	eliminar_propiedades_por_especificidad(D,C2),
+	buscar_propiedad(Propiedad,C2,_,X),
+	verificar_resultado_repetido(X,Propiedad=>(Valor,Pes),C2,C).
+
+eliminar_propiedades_por_especificidad([no(Propiedad=>(Valor,Pes))|D],C):-
+ 	eliminar_propiedades_por_especificidad(D,C2),
+	buscar_propiedad(Propiedad,C2,_,X),
+	verificar_resultado_repetido(X,no(Propiedad=>(Valor,Pes)),C2,C).
 
 ordenar_preferencias_por_implicacion([],_,[]).
 
@@ -794,7 +808,7 @@ iniciar_inferencias_multiples([_=>>no(Propiedad=>(_,Peso))|Resto],Propiedades,Pr
 
 verificar_inferencia(desconocido,_,_,[]).
 verificar_inferencia([],_,_,[]).
-verificar_inferencia(Valor,Propiedad,_,Resultado):-
+verificar_inferencia(_,Propiedad,_,Resultado):-
 	Resultado = Propiedad.
 
 validar_no_existencia(desconocido,Propiedad,Preferencias,PropiedadesCompletas,Inferido):-
@@ -957,7 +971,9 @@ obtener_nuevas_relaciones_inidividuo(RelInd,PrefIndI,RelHerencia,PrefHerencia,Re
 	ordenar_preferencias_por_implicacion(PrefIndiHeren,PrefIndiHeren,PreferenciasOrdendas),
 	eliminar_repetidos(PreferenciasOrdendas,PrefIndiHeren,Propiedades),	
 	append(Propiedades,PrefIndiHeren,OrdenadasPorPreferencia),
-	recorrer_relaciones_heredadas(RelHerencia,RelInd,Filtradas,KB),
+	reversa(RelHerencia,RelHerenciaInvertidas),
+	eliminar_propiedades_por_especificidad(RelHerenciaInvertidas,RelEspecificidad),
+	recorrer_relaciones_heredadas(RelEspecificidad,RelInd,Filtradas,KB),
 	append(RelInd,Filtradas,RelacionesCompletas),
 	reversa(OrdenadasPorPreferencia,OrdenadasPorPreferenciaInvertidas),
 	iniciar_inferencias_multiples_relacion(OrdenadasPorPreferenciaInvertidas,RelacionesCompletas,Inferido,OrdenadasPorPreferenciaInvertidas,KB),
@@ -1004,8 +1020,8 @@ recorrer_relaciones_heredadas([no(Relacion=>(Valor,Pes))|B], RelacionesPropias,R
 buscar_relacion_sin_nombres(_,[],desconocido,_).
 
 %propiedades que son positivas
-buscar_relacion_sin_nombres(Relacion, [Relacion=>(Individuo,_)|_],Individuo,RespaldoKB).
-buscar_relacion_sin_nombres(Relacion, [no(Relacion=>(Individuo,_))|_],Individuo,RespaldoKB).
+buscar_relacion_sin_nombres(Relacion, [Relacion=>(Individuo,_)|_],Individuo,_).
+buscar_relacion_sin_nombres(Relacion, [no(Relacion=>(Individuo,_))|_],Individuo,_).
 
 %si no unifica en la relación entonces se siguen buscando en la relaciones
 buscar_relacion_sin_nombres(Relacion,[_|T],Individuo,KB):-
@@ -1038,7 +1054,7 @@ iniciar_inferencias_multiples_relacion([_=>>no(Relacion=>(_,Peso))|Resto],Relaci
 	
 verificar_inferencia_relacion(desconocido,_,_,[]).
 verificar_inferencia_relacion([],_,_,[]).
-verificar_inferencia_relacion(Valor,Relacion,Peso,Resultado):-
+verificar_inferencia_relacion(_,Relacion,_,Resultado):-
 	Resultado = Relacion.
 
 validar_no_existencia_relacion(desconocido,Relacion,Preferencias,PropiedadesCompletas,Inferido):-
