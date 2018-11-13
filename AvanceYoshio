@@ -238,6 +238,10 @@ inferir_propiedad([Antecedentes=>>Buscar=>(variable,_)|_],Buscar,Propiedades,Res
 	compara_preferencias(Antecedentes,Propiedades,Desicion,ValorD),
 	inferencia_nueva_propiedad(Desicion,variable,ValorD,Resultado,Inferido).
 
+inferir_propiedad([Antecedentes=>>no(Buscar=>(variable,_))|_],Buscar,Propiedades,Resultado,Inferido):-
+	compara_preferencias(Antecedentes,Propiedades,Desicion,ValorD),
+	inferencia_nueva_propiedad(Desicion,variable,ValorD,Resultado,Inferido).
+
 inferir_propiedad([Antecedentes=>>Buscar=>(Valor,_)|_],Buscar,Propiedades,Resultado,Inferido):-
 	compara_preferencias(Antecedentes,Propiedades,Desicion,ValorD),
 	inferencia_nueva_propiedad(Desicion,Valor,ValorD,Resultado,Inferido).
@@ -319,6 +323,11 @@ burbuja([Ant2=>>no(Prop2=>(Val2,X)),Ant3=>>no(Prop3=>(Val3,Y))|L],Lburb):-
 compara_preferencias([],_,si,_).
 
 compara_preferencias([Propiedad=>(variable,_)|R],Prop,Desicion,Valor):-
+	compara_preferencias(R,Prop,Desicion2,Valor),	
+	comparar_propiedad_preferencia(Propiedad=>(variable,_),Prop,Valor,Desicion3),
+	decidir(Desicion2,Desicion3,Desicion).
+
+compara_preferencias([no(Propiedad=>(variable,_))|R],Prop,Desicion,Valor):-
 	compara_preferencias(R,Prop,Desicion2,Valor),	
 	comparar_propiedad_preferencia(Propiedad=>(variable,_),Prop,Valor,Desicion3),
 	decidir(Desicion2,Desicion3,Desicion).
@@ -488,13 +497,21 @@ prepar_proceso_inferencia_relacion(_,_,_,Inferido,Inferido).
 
 inferir_relacion([],_,_,A,A).
 
+inferir_relacion([Antecedentes=>>Buscar=>(variable,_)|_],Buscar,Relaciones,Resultado,Inferido):-
+	compara_preferencias(Antecedentes,Relaciones,Desicion,ValorD),
+	inferencia_nueva_propiedad(Desicion,variable,ValorD,Resultado,Inferido).
+
+inferir_relacion([Antecedentes=>>no(Buscar=>(variable,_))|_],Buscar,Relaciones,Resultado,Inferido):-
+	compara_preferencias(Antecedentes,Relaciones,Desicion,ValorD),
+	inferencia_nueva_propiedad(Desicion,variable,ValorD,Resultado,Inferido).
+
 inferir_relacion([Antecedentes=>>Buscar=>(Valor,_)|_],Buscar,Relaciones,Resultado,Inferido):-
 	compara_preferencias(Antecedentes,Relaciones,Desicion,_),
-	inferencia_nueva_propiedad(Desicion,Valor,Resultado,Inferido).
+	inferencia_nueva_propiedad(Desicion,Valor,ValorD,Resultado,Inferido).
 
 inferir_relacion([Antecedentes=>>no(Buscar=>(Valor,_))|_],Buscar,Relaciones,Resultado,Inferido):-
-	compara_preferencias(Antecedentes,Relaciones,Desicion,_),
-	inferencia_nueva_propiedad(Desicion,Valor,Resultado,Inferido).
+	compara_preferencias(Antecedentes,Relaciones,Desicion,ValorD),
+	inferencia_nueva_propiedad(Desicion,Valor,ValorD,Resultado,Inferido).
 
 inferir_relacion([_|B],Buscar,Relaciones,Resultado,Inferido):-
 	inferir_relacion(B,Buscar,Relaciones,Resultado,Inferido).
