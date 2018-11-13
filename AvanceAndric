@@ -176,7 +176,7 @@ cambia_peso_preferencia_relacion_clase(Clase,Preferencia,PesoNuevo,KB,NuevaKB):-
 	cambiaElemento(class(Clase,Padre,PropPref,RelPref,Indivs),class(Clase,Padre,PropPref,ListaNuevaRelPref,Indivs),KB,NuevaKB),
 	cambiaElemento([A=>>Preferencia=>(B,C)],[A=>>Preferencia=>(B,PesoNuevo)],RelPref,ListaNuevaRelPref).
 
-cambia_peso_preferencias_indivuduo(ObjectName,Preferencia,PesoNuevo,KB,NuevaKB):-
+cambia_peso_preferencias_individuo(ObjectName,Preferencia,PesoNuevo,KB,NuevaKB):-
 	cambia_peso_preferencia_propiedad_individuo(ObjectName,Preferencia,PesoNuevo,KB,AuxNuevaKB),
 	cambia_peso_preferencia_relacion_individuo(ObjectName,Preferencia,PesoNuevo,AuxNuevaKB,NuevaKB).
 
