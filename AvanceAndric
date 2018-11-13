@@ -141,7 +141,7 @@ agregar_preferencia_relacion_objeto(ObjectName,Antecedente,Consecuente,Valor,Neg
 
 
 %--------------------------------------------------------------------------------------------------
-%Ejercicio 1d) -> Agregar clases, objetos, propiedades, relaciones y preferencias
+%Ejercicio 1d) -> Todas las clases a las que pertenece un objeto
 %--------------------------------------------------------------------------------------------------
 obtener_clases_objeto(ObjectName, KB, Clases):-
 	obtener_data_objeto(ObjectName,KB,ObjClass,ObjNames),
