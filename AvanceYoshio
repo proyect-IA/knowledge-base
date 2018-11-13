@@ -235,18 +235,25 @@ extraer_propiedades_individuos(_,_,[],[],_).
 inferir_propiedad([],_,_,A,A).
 
 inferir_propiedad([Antecedentes=>>Buscar=>(variable,_)|_],Buscar,Propiedades,Resultado,Inferido):-
-	compara_preferencias(Antecedentes,Propiedades,Desicion,Valor),
-	inferencia_nueva_propiedad(Desicion,Valor,Resultado,Inferido).
+	compara_preferencias(Antecedentes,Propiedades,Desicion,ValorD),
+	inferencia_nueva_propiedad(Desicion,variable,ValorD,Resultado,Inferido).
+
+inferir_propiedad([Antecedentes=>>Buscar=>(Valor,_)|_],Buscar,Propiedades,Resultado,Inferido):-
+	compara_preferencias(Antecedentes,Propiedades,Desicion,ValorD),
+	inferencia_nueva_propiedad(Desicion,Valor,ValorD,Resultado,Inferido).
 
 inferir_propiedad([Antecedentes=>>no(Buscar=>(Valor,_))|_],Buscar,Propiedades,Resultado,Inferido):-
-	compara_preferencias(Antecedentes,Propiedades,Desicion,_),
-	inferencia_nueva_propiedad(Desicion,Valor,Resultado,Inferido).
+	compara_preferencias(Antecedentes,Propiedades,Desicion,ValorD),
+	inferencia_nueva_propiedad(Desicion,Valor,ValorD,Resultado,Inferido).
 
 inferir_propiedad([_|B],Buscar,Propiedades,Resultado,Inferido):-
 	inferir_propiedad(B,Buscar,Propiedades,Resultado,Inferido).
 
-inferencia_nueva_propiedad(si,Valor,Valor,_).
-inferencia_nueva_propiedad(no,_,Valor,Valor).
+inferencia_nueva_propiedad(si,variable,Valor,Valor,_).
+inferencia_nueva_propiedad(no,variable,_,Valor,Valor).
+
+inferencia_nueva_propiedad(si,Valor,_,Valor,_).
+inferencia_nueva_propiedad(no,_,_,Valor,Valor).
 
 prepar_proceso_inferencia([],_,_,Inferido,Inferido).
 
@@ -309,16 +316,33 @@ burbuja([Ant2=>>no(Prop2=>(Val2,X)),Ant3=>>no(Prop3=>(Val3,Y))|L],Lburb):-
    burbuja([Ant2=>>no(Prop2=>(Val2,X))|L],L1),  
    Lburb = [Ant3=>>no(Prop3=>(Val3,Y))|L1].   
 
-compara_preferencias([],_,_,[]).
+compara_preferencias([],_,si,_).
 
-compara_preferencias([A|[]],Prop,Desicion,Valor):-
-	comparar_propiedad_preferencia(A,Prop,Valor,Desicion2),
-	decidir(Desicion2,si,Desicion).
-
-compara_preferencias([A|B],Prop,Desicion,Valor):-
-	comparar_propiedad_preferencia(A,Prop,Valor,Desicion2),
-	comparar_propiedad_preferencia(B,Prop,Valor,Desicion3),
+compara_preferencias([Propiedad=>(variable,_)|R],Prop,Desicion,Valor):-
+	compara_preferencias(R,Prop,Desicion2,Valor),	
+	comparar_propiedad_preferencia(Propiedad=>(variable,_),Prop,Valor,Desicion3),
 	decidir(Desicion2,Desicion3,Desicion).
+
+compara_preferencias([Propiedad=>(V,_)|R],Prop,Desicion,Valor):-
+	compara_preferencias(R,Prop,Desicion2,Valor),	
+	comparar_propiedad_preferencia(Propiedad=>(V,_),Prop,Valor,Desicion3),
+	decidir(Desicion2,Desicion3,Desicion).
+
+%compara_preferencias([A|[]],Prop,Desicion,Valor):-
+	%comparar_propiedad_preferencia(A,Prop,Valor,Desicion2),
+	%decidir(Desicion2,si,Desicion).
+
+%compara_preferencias([Propiedad=>(variable,_)|B],Prop,Desicion,ValorVariable):-
+	%comparar_propiedad_preferencia(A,Prop,ValorVariable,Desicion2),
+	%comparar_propiedad_preferencia(B,Prop,ValorVariable,Desicion3),
+	%decidir(Desicion2,Desicion3,Desicion).
+
+%compara_preferencias([A|B],Prop,Desicion,Valor):-
+	%comparar_propiedad_preferencia(A,Prop,Valor,Desicion2),
+	%comparar_propiedad_preferencia(B,Prop,Valor2,Desicion3),
+	%decidir(Desicion2,Desicion3,Desicion).
+
+
 
 decidir(si,si,si).
 decidir(_,_,no).
@@ -326,16 +350,19 @@ decidir(_,_,no).
 comparar_propiedad_preferencia(_,[],[],no).
 
 comparar_propiedad_preferencia(Propiedad=>(variable,_),[Propiedad=>(Valor,_)|_],Valor,si).
-comparar_propiedad_preferencia(Propiedad=>(Valor,_),[Propiedad=>(Valor,_)|_],Valor,si).
-comparar_propiedad_preferencia(Propiedad=>(_,_),[Propiedad=>(Valor2,_)|_],Valor2,no).
-comparar_propiedad_preferencia([Propiedad=>(Valor,_)],[Propiedad=>(Valor,_)|_],Valor,si).
-comparar_propiedad_preferencia([Propiedad=>(_,_)],[Propiedad=>(Valor2,_)|_],Valor2,no).
+comparar_propiedad_preferencia([Propiedad=>(variable,_)],[Propiedad=>(Valor,_)|_],Valor,si).
+comparar_propiedad_preferencia(Propiedad=>(variable,_),[Propiedad=>(Valor,_)|_],Valor2,no).
+
+comparar_propiedad_preferencia(Propiedad=>(Valor,_),[Propiedad=>(Valor,_)|_],_,si).
+comparar_propiedad_preferencia(Propiedad=>(_,_),[Propiedad=>(Valor2,_)|_],_,no).
+comparar_propiedad_preferencia([Propiedad=>(Valor,_)],[Propiedad=>(Valor,_)|_],_,si).
+comparar_propiedad_preferencia([Propiedad=>(_,_)],[Propiedad=>(Valor2,_)|_],_,no).
 
 comparar_propiedad_preferencia(no(Propiedad=>(variable,_)),[Propiedad=>(Valor,_)|_],Valor,si).
-comparar_propiedad_preferencia(no(Propiedad=>(Valor,_)),[Propiedad=>(Valor,_)|_],Valor,si).
-comparar_propiedad_preferencia(no(Propiedad=>(_,_)),[Propiedad=>(Valor2,_)|_],Valor2,no).
-comparar_propiedad_preferencia([no(Propiedad=>(Valor,_))],[Propiedad=>(Valor,_)|_],Valor,si).
-comparar_propiedad_preferencia([no(Propiedad=>(_,_))],[Propiedad=>(Valor2,_)|_],Valor2,no).
+comparar_propiedad_preferencia(no(Propiedad=>(Valor,_)),[Propiedad=>(Valor,_)|_],_,si).
+comparar_propiedad_preferencia(no(Propiedad=>(_,_)),[Propiedad=>(Valor2,_)|_],_,no).
+comparar_propiedad_preferencia([no(Propiedad=>(Valor,_))],[Propiedad=>(Valor,_)|_],_,si).
+comparar_propiedad_preferencia([no(Propiedad=>(_,_))],[Propiedad=>(Valor2,_)|_],_,no).
 
 comparar_propiedad_preferencia(Buscar,[_|T],Valor,R):-
 	comparar_propiedad_preferencia(Buscar,T,Valor,R).
