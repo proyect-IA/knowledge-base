@@ -87,6 +87,17 @@ cambiar_objeto_en_relacion(Objeto,NombreNuevo,Rels,Result):-
 
 %buscar_cambiar_prop_clase(A=>(Name, Val),A=>(NewName, Val),[H|T],[H|N]):-
 %buscar_cambiar_prop_clase(NextAcc=>(Name, NextVal), NextAcc=>(NewName, NextVal),T,N).
+iterar_individuos_nombre(_,_,[],[]).
+
+iterar_individuos_nombre(Name,NewName,
+        [[id=>Ids,Prop,Rels]|T],[[id=>NewIds,Prop,Rels]|N]):-
+    cambiar_elemento(Name,NewName,Ids,NewIds),
+    iterar_individuos_nombre(Name,NewName,T,N).
+
+iterar_individuos_nombre(Name,NewName,[H|T],[H|N]):-
+    iterar_individuos_nombre(Name,NewName,T,N).
+
+
 
 iterar_preferencias_relaciones_antec(_,_,[],[]).
 
@@ -95,7 +106,7 @@ iterar_preferencias_relaciones_antec(Name,NewName,[AntPrefRel=>>ConsPrefRel|T],[
     iterar_preferencias_relaciones_antec(Name,NewName,T,N).
 
 iterar_preferencias_relaciones_antec(Name,NewName,[H|T],[H|N]):-
-    iterar_preferencias_relaciones_antec(Nem,NewName,T,N).
+    iterar_preferencias_relaciones_antec(Name,NewName,T,N).
 
 
 iterar_preferencias_relaciones_antec(_,_,[],[]).
@@ -105,7 +116,7 @@ iterar_preferencias_relaciones_antec(Name,NewName,[AntPrefRel=>>ConsPrefRel|T],[
     iterar_preferencias_relaciones_antec(Name,NewName,T,N).
 
 iterar_preferencias_relaciones_antec(Name,NewName,[H|T],[H|N]):-
-    iterar_preferencias_relaciones_antec(Nem,NewName,T,N).
+    iterar_preferencias_relaciones_antec(Name,NewName,T,N).
 
 
 cambia_consc(Name, NewName, A=>(Name, Val), A=>(NewName, Val)).
@@ -129,6 +140,21 @@ cambiar_padre(OldFather,NewFather,[class(C,OldFather,P,R,O)|T],[class(C,NewFathe
 
 cambiar_padre(OldFather,NewFather,[H|T],[H|N]):-
     cambiar_padre(OldFather,NewFather,T,N).
+
+
+
+cambiar_nombre(_,_,[],[]).
+
+cambiar_nombre(Nombre,NombreNuevo,
+        [class(C,F,P,R,Objectos)|T],
+        [class(C,F,P,R,ObjetosNuevos)|N]):-
+    iterar_individuos_nombre(Nombre, NombreNuevo, Objectos, ObjetosNuevos),
+    cambiar_nombre(Nombre,NombreNuevo,T,N).
+
+cambiar_nombre(Nombre,NombreNuevo,[H|T],[H|N]):-
+    cambiar_nombre(Nombre,NombreNuevo,T,N).
+
+
 
 
 % -- Predicado para cambiar nombre a un elemento en una relacion ---
@@ -217,12 +243,14 @@ cambiar_relaciones_consecuentes_nivelIndividuo(Nombre,NombreNuevo,[H|T],[H|N]):-
 % --------------------------------------------------------------------
 
 % ---  Cambiar el nombre de un objeto particular --
-cambiar_nombre_de_objeto(Objeto,NewName,OriginalKB,NewKB):-
-	cambiar_elemento(class(Clase,Padre,Props,Rels,Objects),
-                class(Clase,Padre,Props,Rels,NewObjects),OriginalKB,TemporalKB),
-	es_elemento([id=>Objeto|Properties],Objects),
-	cambiar_elemento([id=>Objeto|Properties],[id=>NewName|Properties],Objects,NewObjects),
-	cambiar_relacion_objeto(Objeto,NewName,TemporalKB,NewKB).
+cambiar_nombre_de_individuo(Objeto,NombreNuevo,KB,NewKB):-
+    cambiar_nombre(Objeto, NombreNuevo, KB, KBnameUpdate),
+    cambiar_relaciones_nivelClase(Clase,NombreNuevo,KBnameUpdate,KBrelationUpdate),
+    cambiar_relaciones_antecedentes_nivelClase(Clase, NombreNuevo, KBrelationUpdate, KBantePrefUpdate),
+    cambiar_relaciones_consecuentes_nivelClase(Clase, NombreNuevo, KBantePrefUpdate, KBconsecPrefUpdate),
+    cambiar_relaciones_nivelIndividuo(Clase,NombreNuevo,KBconsecPrefUpdate,KBrelation2Update),
+    cambiar_relaciones_antecedentes_nivelIndividuo(Clase, NombreNuevo, KBrelation2Update, KBantePref2Update),
+    cambiar_relaciones_consecuentes_nivelIndividuo(Clase, NombreNuevo, KBantePref2Update, NewKB).
 
 
 % ------------------------------------------------
