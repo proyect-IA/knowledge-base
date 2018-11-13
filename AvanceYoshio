@@ -235,18 +235,25 @@ extraer_propiedades_individuos(_,_,[],[],_).
 inferir_propiedad([],_,_,A,A).
 
 inferir_propiedad([Antecedentes=>>Buscar=>(variable,_)|_],Buscar,Propiedades,Resultado,Inferido):-
-	compara_preferencias(Antecedentes,Propiedades,Desicion,Valor),
-	inferencia_nueva_propiedad(Desicion,Valor,Resultado,Inferido).
+	compara_preferencias(Antecedentes,Propiedades,Desicion,ValorD),
+	inferencia_nueva_propiedad(Desicion,variable,ValorD,Resultado,Inferido).
+
+inferir_propiedad([Antecedentes=>>Buscar=>(Valor,_)|_],Buscar,Propiedades,Resultado,Inferido):-
+	compara_preferencias(Antecedentes,Propiedades,Desicion,ValorD),
+	inferencia_nueva_propiedad(Desicion,Valor,ValorD,Resultado,Inferido).
 
 inferir_propiedad([Antecedentes=>>no(Buscar=>(Valor,_))|_],Buscar,Propiedades,Resultado,Inferido):-
-	compara_preferencias(Antecedentes,Propiedades,Desicion,_),
-	inferencia_nueva_propiedad(Desicion,Valor,Resultado,Inferido).
+	compara_preferencias(Antecedentes,Propiedades,Desicion,ValorD),
+	inferencia_nueva_propiedad(Desicion,Valor,ValorD,Resultado,Inferido).
 
 inferir_propiedad([_|B],Buscar,Propiedades,Resultado,Inferido):-
 	inferir_propiedad(B,Buscar,Propiedades,Resultado,Inferido).
 
-inferencia_nueva_propiedad(si,Valor,Valor,_).
-inferencia_nueva_propiedad(no,_,Valor,Valor).
+inferencia_nueva_propiedad(si,variable,Valor,Valor,_).
+inferencia_nueva_propiedad(no,variable,_,Valor,Valor).
+
+inferencia_nueva_propiedad(si,Valor,_,Valor,_).
+inferencia_nueva_propiedad(no,_,_,Valor,Valor).
 
 prepar_proceso_inferencia([],_,_,Inferido,Inferido).
 
@@ -309,16 +316,33 @@ burbuja([Ant2=>>no(Prop2=>(Val2,X)),Ant3=>>no(Prop3=>(Val3,Y))|L],Lburb):-
    burbuja([Ant2=>>no(Prop2=>(Val2,X))|L],L1),  
    Lburb = [Ant3=>>no(Prop3=>(Val3,Y))|L1].   
 
-compara_preferencias([],_,_,[]).
+compara_preferencias([],_,si,_).
 
-compara_preferencias([A|[]],Prop,Desicion,Valor):-
-	comparar_propiedad_preferencia(A,Prop,Valor,Desicion2),
-	decidir(Desicion2,si,Desicion).
-
-compara_preferencias([A|B],Prop,Desicion,Valor):-
-	comparar_propiedad_preferencia(A,Prop,Valor,Desicion2),
-	comparar_propiedad_preferencia(B,Prop,Valor,Desicion3),
+compara_preferencias([Propiedad=>(variable,_)|R],Prop,Desicion,Valor):-
+	compara_preferencias(R,Prop,Desicion2,Valor),	
+	comparar_propiedad_preferencia(Propiedad=>(variable,_),Prop,Valor,Desicion3),
 	decidir(Desicion2,Desicion3,Desicion).
+
+compara_preferencias([Propiedad=>(V,_)|R],Prop,Desicion,Valor):-
+	compara_preferencias(R,Prop,Desicion2,Valor),	
+	comparar_propiedad_preferencia(Propiedad=>(V,_),Prop,Valor,Desicion3),
+	decidir(Desicion2,Desicion3,Desicion).
+
+%compara_preferencias([A|[]],Prop,Desicion,Valor):-
+	%comparar_propiedad_preferencia(A,Prop,Valor,Desicion2),
+	%decidir(Desicion2,si,Desicion).
+
+%compara_preferencias([Propiedad=>(variable,_)|B],Prop,Desicion,ValorVariable):-
+	%comparar_propiedad_preferencia(A,Prop,ValorVariable,Desicion2),
+	%comparar_propiedad_preferencia(B,Prop,ValorVariable,Desicion3),
+	%decidir(Desicion2,Desicion3,Desicion).
+
+%compara_preferencias([A|B],Prop,Desicion,Valor):-
+	%comparar_propiedad_preferencia(A,Prop,Valor,Desicion2),
+	%comparar_propiedad_preferencia(B,Prop,Valor2,Desicion3),
+	%decidir(Desicion2,Desicion3,Desicion).
+
+
 
 decidir(si,si,si).
 decidir(_,_,no).
@@ -326,16 +350,19 @@ decidir(_,_,no).
 comparar_propiedad_preferencia(_,[],[],no).
 
 comparar_propiedad_preferencia(Propiedad=>(variable,_),[Propiedad=>(Valor,_)|_],Valor,si).
-comparar_propiedad_preferencia(Propiedad=>(Valor,_),[Propiedad=>(Valor,_)|_],Valor,si).
-comparar_propiedad_preferencia(Propiedad=>(_,_),[Propiedad=>(Valor2,_)|_],Valor2,no).
-comparar_propiedad_preferencia([Propiedad=>(Valor,_)],[Propiedad=>(Valor,_)|_],Valor,si).
-comparar_propiedad_preferencia([Propiedad=>(_,_)],[Propiedad=>(Valor2,_)|_],Valor2,no).
+comparar_propiedad_preferencia([Propiedad=>(variable,_)],[Propiedad=>(Valor,_)|_],Valor,si).
+comparar_propiedad_preferencia(Propiedad=>(variable,_),[Propiedad=>(Valor,_)|_],Valor2,no).
+
+comparar_propiedad_preferencia(Propiedad=>(Valor,_),[Propiedad=>(Valor,_)|_],_,si).
+comparar_propiedad_preferencia(Propiedad=>(_,_),[Propiedad=>(Valor2,_)|_],_,no).
+comparar_propiedad_preferencia([Propiedad=>(Valor,_)],[Propiedad=>(Valor,_)|_],_,si).
+comparar_propiedad_preferencia([Propiedad=>(_,_)],[Propiedad=>(Valor2,_)|_],_,no).
 
 comparar_propiedad_preferencia(no(Propiedad=>(variable,_)),[Propiedad=>(Valor,_)|_],Valor,si).
-comparar_propiedad_preferencia(no(Propiedad=>(Valor,_)),[Propiedad=>(Valor,_)|_],Valor,si).
-comparar_propiedad_preferencia(no(Propiedad=>(_,_)),[Propiedad=>(Valor2,_)|_],Valor2,no).
-comparar_propiedad_preferencia([no(Propiedad=>(Valor,_))],[Propiedad=>(Valor,_)|_],Valor,si).
-comparar_propiedad_preferencia([no(Propiedad=>(_,_))],[Propiedad=>(Valor2,_)|_],Valor2,no).
+comparar_propiedad_preferencia(no(Propiedad=>(Valor,_)),[Propiedad=>(Valor,_)|_],_,si).
+comparar_propiedad_preferencia(no(Propiedad=>(_,_)),[Propiedad=>(Valor2,_)|_],_,no).
+comparar_propiedad_preferencia([no(Propiedad=>(Valor,_))],[Propiedad=>(Valor,_)|_],_,si).
+comparar_propiedad_preferencia([no(Propiedad=>(_,_))],[Propiedad=>(Valor2,_)|_],_,no).
 
 comparar_propiedad_preferencia(Buscar,[_|T],Valor,R):-
 	comparar_propiedad_preferencia(Buscar,T,Valor,R).
@@ -679,8 +706,10 @@ obtener_nuevas_propiedades_individuo(PropIndI,PrefIndI,PropHerencia,PrefHerencia
 	%reversea la lista para poder realizar correctamente las inferencias
 	reversa(PropHerencia,PropHerenciaInvertidas),
 
+	eliminar_propiedades_por_especificidad(PropHerenciaInvertidas,PropiedadesEspecificidad),
+
 	%aqui se encarga de eliminar las propiedades repetidas, se da prioridad a las del individuo	
-	recorrer_propiedades_heredadas(PropHerenciaInvertidas,PropIndI,Filtradas),	
+	recorrer_propiedades_heredadas(PropiedadesEspecificidad,PropIndI,Filtradas),	
 
 	%aqui se concantenan las propiedades propias del individuo con las propiedades heredadas
 	append(PropIndI,Filtradas,PropiedadesCompletas),
@@ -693,6 +722,18 @@ obtener_nuevas_propiedades_individuo(PropIndI,PrefIndI,PropHerencia,PrefHerencia
 
 	%concatena la lista de propiedades del individuo con las inferidas
 	append(PropiedadesCompletas,Inferido,Resultado).
+
+eliminar_propiedades_por_especificidad([],[]).
+
+eliminar_propiedades_por_especificidad([Propiedad=>(Valor,Pes)|D],C):-
+ 	eliminar_propiedades_por_especificidad(D,C2),
+	buscar_propiedad(Propiedad,C2,_,X),
+	verificar_resultado_repetido(X,Propiedad=>(Valor,Pes),C2,C).
+
+eliminar_propiedades_por_especificidad([no(Propiedad=>(Valor,Pes))|D],C):-
+ 	eliminar_propiedades_por_especificidad(D,C2),
+	buscar_propiedad(Propiedad,C2,_,X),
+	verificar_resultado_repetido(X,no(Propiedad=>(Valor,Pes)),C2,C).
 
 ordenar_preferencias_por_implicacion([],_,[]).
 
@@ -794,7 +835,7 @@ iniciar_inferencias_multiples([_=>>no(Propiedad=>(_,Peso))|Resto],Propiedades,Pr
 
 verificar_inferencia(desconocido,_,_,[]).
 verificar_inferencia([],_,_,[]).
-verificar_inferencia(Valor,Propiedad,_,Resultado):-
+verificar_inferencia(_,Propiedad,_,Resultado):-
 	Resultado = Propiedad.
 
 validar_no_existencia(desconocido,Propiedad,Preferencias,PropiedadesCompletas,Inferido):-
@@ -957,7 +998,9 @@ obtener_nuevas_relaciones_inidividuo(RelInd,PrefIndI,RelHerencia,PrefHerencia,Re
 	ordenar_preferencias_por_implicacion(PrefIndiHeren,PrefIndiHeren,PreferenciasOrdendas),
 	eliminar_repetidos(PreferenciasOrdendas,PrefIndiHeren,Propiedades),	
 	append(Propiedades,PrefIndiHeren,OrdenadasPorPreferencia),
-	recorrer_relaciones_heredadas(RelHerencia,RelInd,Filtradas,KB),
+	reversa(RelHerencia,RelHerenciaInvertidas),
+	eliminar_propiedades_por_especificidad(RelHerenciaInvertidas,RelEspecificidad),
+	recorrer_relaciones_heredadas(RelEspecificidad,RelInd,Filtradas,KB),
 	append(RelInd,Filtradas,RelacionesCompletas),
 	reversa(OrdenadasPorPreferencia,OrdenadasPorPreferenciaInvertidas),
 	iniciar_inferencias_multiples_relacion(OrdenadasPorPreferenciaInvertidas,RelacionesCompletas,Inferido,OrdenadasPorPreferenciaInvertidas,KB),
@@ -1004,8 +1047,8 @@ recorrer_relaciones_heredadas([no(Relacion=>(Valor,Pes))|B], RelacionesPropias,R
 buscar_relacion_sin_nombres(_,[],desconocido,_).
 
 %propiedades que son positivas
-buscar_relacion_sin_nombres(Relacion, [Relacion=>(Individuo,_)|_],Individuo,RespaldoKB).
-buscar_relacion_sin_nombres(Relacion, [no(Relacion=>(Individuo,_))|_],Individuo,RespaldoKB).
+buscar_relacion_sin_nombres(Relacion, [Relacion=>(Individuo,_)|_],Individuo,_).
+buscar_relacion_sin_nombres(Relacion, [no(Relacion=>(Individuo,_))|_],Individuo,_).
 
 %si no unifica en la relación entonces se siguen buscando en la relaciones
 buscar_relacion_sin_nombres(Relacion,[_|T],Individuo,KB):-
@@ -1038,7 +1081,7 @@ iniciar_inferencias_multiples_relacion([_=>>no(Relacion=>(_,Peso))|Resto],Relaci
 	
 verificar_inferencia_relacion(desconocido,_,_,[]).
 verificar_inferencia_relacion([],_,_,[]).
-verificar_inferencia_relacion(Valor,Relacion,Peso,Resultado):-
+verificar_inferencia_relacion(_,Relacion,_,Resultado):-
 	Resultado = Relacion.
 
 validar_no_existencia_relacion(desconocido,Relacion,Preferencias,PropiedadesCompletas,Inferido):-

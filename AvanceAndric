@@ -1,10 +1,9 @@
+
 %%*** PENDIENTES
-%% Preferencias de propiedades/relaciones para objetos
+%% Busqueda de TODOS los individuos con id anonimo y añadir elem ??
 
 %%*** DUDAS
-%% Uso de variables en KB (ej vive=>(X)), ¿que pasa con ellas cuando se modifican en el save de otra accion?
 %% Guardar resultados o copiarlos de as consultas hechas (para el examen)
-%% Los individuos tambien tienen preferencias en propiedades y relaciones ???
 
 %--------------------------------------------------
 % Load and Save from files
@@ -15,7 +14,7 @@ open_kb(Route,KB):-
 	open(Route,read,Stream),
 	readclauses(Stream,X),
 	close(Stream),
-	atom_to_term(X,KB).
+	atom_to_term(X,KB). 
 
 save_kb(Route,KB):-
 	open(Route,write,Stream),
@@ -55,14 +54,14 @@ atom_to_term(ATOM, TERM) :-
 %No olvides poner las rutas correctas para localizar el archivo kb.txt en tu computadora!!!
 
 abrir(KB):-
-	open_kb('/Users/EIVP1650/Desktop/Maestria/Inteligencia Artificial/Proyecto1/Knowledge-base/KB3.txt',KB).
+	open_kb('/Users/EIVP1650/Desktop/Maestria/Inteligencia Artificial/Proyecto1/knowledge-base/KB4.txt',KB).
 	%% write('\nReading actual data...'),
 	%% write('\nKB: '),
 	%% write(KB).
 
 guardar(KB):-
 	write('\nSaving new data...'),
-	save_kb('/Users/EIVP1650/Desktop/Maestria/Inteligencia Artificial/Proyecto1/Knowledge-base/KB3.txt',KB).
+	save_kb('/Users/EIVP1650/Desktop/Maestria/Inteligencia Artificial/Proyecto1/knowledge-base/KB4.txt',KB).
 
 
 checkCharAndReadRest(-1,[],_) :- !.  % End of Stream	
@@ -80,96 +79,175 @@ atom_to_term_conversion(ATOM, TERM) :-
 	read_from_chars(STR_PTO,TERM).
 
 
-%----------------------------------------
-% Admin de listas
-%----------------------------------------
-
-%Cambiar todas las ocurrencias de un elemento X en una lista por el valor de Y
-%cambiaElemento(X,Y,InputList,OutputList).
-%Example (p,b,[p,a,p,a,y,a],[b,a,b,a,y,a])
-
-cambiaElemento(_,_,[],[]).
-
-cambiaElemento(X,Y,[X|T],[Y|N]):-
-	cambiaElemento(X,Y,T,N).
-
-cambiaElemento(X,Y,[H|T],[H|N]):-
-	cambiaElemento(X,Y,T,N).
-
 %--------------------------------------------------------------------------------------------------
 %Ejercicio 2 -> Agregar clases, objetos, propiedades, relaciones y preferencias
 %--------------------------------------------------------------------------------------------------
-
-%%************** Agregar Clase
-
+%%************** 2a) Agregar Clase
 agregar_clase(NewClass,Padre,KB,NuevaKB) :-
 	append(KB,[class(NewClass,Padre,[],[],[])],NuevaKB).
 
-%%************** Agregar Individuo/Objeto
-
+%%************** 2a) Agregar Individuo/Objeto
 agregar_individuo(NuevoIndiv,Class,KB,NuevaKB) :-
 	cambiaElemento(class(Class,Padre,PropPref,RelPref,Indiv),class(Class,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),
 	append(Indiv,[[id=>NuevoIndiv,[],[]]],ListaNuevosIndiv).
 
-%%************** Agregar nueva propiedad de clase
-
+%%************** 2b) Agregar nueva propiedad de clase
 agregar_propiedad_clase(Class,NuevaProp,Valor,Negacion,KB,NuevaKB) :-
 	cambiaElemento(class(Class,Padre,PropPref,PropRel,Indiv),class(Class, Padre, ListaNuevasPropPref, PropRel, Indiv),KB,NuevaKB),
 	agregar_propiedad_relacion(PropPref,NuevaProp,Valor,Negacion,ListaNuevasPropPref).
 
-%%************** Agregar nueva propiedad de Individuo/Objeto
+%*************** 2b) Agregar nueva propiedad de Individuo/Objeto
+agregar_propiedad_objeto(ObjectName,NuevaProp,Valor,Negacion,KB,NuevaKB):-
+	obtener_data_objeto(ObjectName,KB,ObjClass,ObjNames),
+	cambiaElemento(class(ObjClass,Padre,PropPref,RelPref,Indivs),class(ObjClass,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),
+	cambiaElemento([id=>ObjNames,PropPrefIndiv,RelPrefIndiv],[id=>ObjNames,ListaNuevaPropPref,RelPrefIndiv],Indivs,ListaNuevosIndiv),
+	agregar_propiedad_relacion(PropPrefIndiv,NuevaProp,Valor,Negacion,ListaNuevaPropPref).
 
-agregar_propiedad_individuo(Clase,Indiv,NuevaProp,Valor,Negacion,KB,NuevaKB) :-
-	cambiaElemento(class(Clase,Padre,PropPref,RelPref,Indivs),class(Clase,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),
-	member([id=>Indiv,PropPrefIndiv,RelPrefIndiv],Indivs),
-	cambiaElemento([id=>Indiv,PropPrefIndiv,RelPrefIndiv],[id=>Indiv,ListaNuevasPropPref,RelPrefIndiv],Indivs,ListaNuevosIndiv),
-	agregar_propiedad_relacion(PropPrefIndiv,NuevaProp,Valor,Negacion,ListaNuevasPropPref).
-
-%%************** Agregar nueva preferencia de propiedades de clase
-
-agregar_preferencia_propiedad_clase(Class, Antecedente, Consecuente, Valor, Negacion, KB, NuevaKB) :-
-	cambiaElemento(class(Class, Padre, PropPref, PropRel, Indiv),class(Class, Padre, ListaNuevasPropPref, PropRel, Indiv), KB, NuevaKB),
-	agregar_preferencia(PropPref, Antecedente, Consecuente, Valor, Negacion, ListaNuevasPropPref).
-
-%%************** Agregar nueva relacion de clase
-
+%%************** 2c) Agregar nueva relacion de clase
 agregar_relacion_clase(Class,NuevaRel,Valor,Negacion,KB,NuevaKB) :-
 	cambiaElemento(class(Class,Padre,PropPref,RelPref,Indiv),class(Class,Padre,PropPref,ListaNuevaRelPref,Indiv),KB,NuevaKB),
 	agregar_propiedad_relacion(RelPref,NuevaRel,Valor,Negacion,ListaNuevaRelPref).
 
-%%************** Agregar nueva relacion de Individuo/Objeto
-
-agregar_relacion_individuo(Clase,Indiv,NuevaRel,Valor,Negacion,KB,NuevaKB) :-
-	cambiaElemento(class(Clase,Padre,PropPref,RelPref,Indivs),class(Clase,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),
-	member([id=>Indiv,PropPrefIndiv,RelPrefIndiv],Indivs),
-	cambiaElemento([id=>Indiv,PropPrefIndiv,RelPrefIndiv],[id=>Indiv,PropPrefIndiv,ListaNuevaRelPref],Indivs,ListaNuevosIndiv),
+%*************** 2c) Agregar nueva relacion de Individuo/Objeto
+agregar_relacion_objeto(ObjectName,NuevaRel,Valor,Negacion,KB,NuevaKB):-
+	obtener_data_objeto(ObjectName,KB,ObjClass,ObjNames),
+	cambiaElemento(class(ObjClass,Padre,PropPref,RelPref,Indivs),class(ObjClass,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),
+	cambiaElemento([id=>ObjNames,PropPrefIndiv,RelPrefIndiv],[id=>ObjNames,PropPrefIndiv,ListaNuevaRelPref],Indivs,ListaNuevosIndiv),
 	agregar_propiedad_relacion(RelPrefIndiv,NuevaRel,Valor,Negacion,ListaNuevaRelPref).
 
-%%************** Agregar nueva preferencia de relacion de clase
+%%************** 2d) Agregar nueva preferencia de propiedades de clase
+agregar_preferencia_propiedad_clase(Class, Antecedente, Consecuente, Valor, Negacion, KB, NuevaKB) :-
+	cambiaElemento(class(Class, Padre, PropPref, PropRel, Indiv),class(Class, Padre, ListaNuevasPropPref, PropRel, Indiv), KB, NuevaKB),
+	agregar_preferencia(PropPref, Antecedente, Consecuente, Valor, Negacion, ListaNuevasPropPref).
 
+%%************** 2d) Agregar nueva preferencia de relacion de clase
 agregar_preferencia_relacion_clase(Class, Antecedente, Consecuente, Valor, Negacion, KB, NuevaKB) :-
 	cambiaElemento(class(Class,Padre,PropPref,RelPref,Indiv),class(Class,Padre,PropPref,ListaNuevaRelPref,Indiv),KB,NuevaKB),
-	agregar_preferencia(RelPref,NuevaRel,Valor,Negacion,ListaNuevaRelPref).
+	agregar_preferencia(RelPref, Antecedente, Consecuente, Valor, Negacion, ListaNuevaRelPref).
+
+%%************** 2d) Agregar nueva preferencia de propiedades de Individuos/Objeto
+agregar_preferencia_propiedad_objeto(ObjectName,Antecedente,Consecuente,Valor,Negacion,KB,NuevaKB):-
+	obtener_data_objeto(ObjectName,KB,ObjClass,ObjNames),
+	cambiaElemento(class(ObjClass,Padre,PropPref,RelPref,Indivs),class(ObjClass,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),
+	cambiaElemento([id=>ObjNames,PropPrefIndiv,RelPrefIndiv],[id=>ObjNames,ListaNuevaPropPref,RelPrefIndiv],Indivs,ListaNuevosIndiv),
+	agregar_preferencia(PropPrefIndiv,Antecedente,Consecuente,Valor,Negacion,ListaNuevaPropPref).
+
+%%************** 2d) Agregar nueva preferencia de relacion de Individuo/Objeto
+agregar_preferencia_relacion_objeto(ObjectName,Antecedente,Consecuente,Valor,Negacion,KB,NuevaKB):-
+	obtener_data_objeto(ObjectName,KB,ObjClass,ObjNames),
+	cambiaElemento(class(ObjClass,Padre,PropPref,RelPref,Indivs),class(ObjClass,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),
+	cambiaElemento([id=>ObjNames,PropPrefIndiv,RelPrefIndiv],[id=>ObjNames,PropPrefIndiv,ListaNuevaRelPref],Indivs,ListaNuevosIndiv),
+	agregar_preferencia(RelPrefIndiv,Antecedente,Consecuente,Valor,Negacion,ListaNuevaPropPref).
 
 
-%% Predicados para agregar una nueva propiedad o relacion de clase
+%--------------------------------------------------------------------------------------------------
+%Ejercicio 1d) -> Todas las clases a las que pertenece un objeto
+%--------------------------------------------------------------------------------------------------
+obtener_clases_objeto(ObjectName, KB, Clases):-
+	obtener_data_objeto(ObjectName,KB,ObjClass,ObjNames),
+	ancestros_clase(ObjClass,KB,Ancestros),
+	append([ObjClass], Ancestros, Clases).
 
+padre_clase(_,[],desconocido).
+padre_clase(Class,[class(Class,Padre,_,_,_)|_],Padre).
+padre_clase(Class,[_|T],Padre):-
+	padre_clase(Class,T,Padre).
+
+ancestros_clase(desconocido,_,[]).
+ancestros_clase(top,_,[]).
+ancestros_clase(Class,KB,Ancestro):-
+	padre_clase(Class,KB,Padre),
+	append([Padre],Abuelo,Ancestro),
+	ancestros_clase(Padre,KB,Abuelo).
+
+
+%--------------------------------------------------------------------------------------------------
+%Ejercicio 4d) Modificar el peso de una preferencia de propiedad/relacion a una clase/objeto
+%--------------------------------------------------------------------------------------------------
+cambia_peso_preferencias_clase(Clase,Preferencia,PesoNuevo,KB,NuevaKB):-
+	cambia_peso_preferencia_propiedad_clase(Clase,Preferencia,PesoNuevo,KB,AuxNuevaKB),
+	cambia_peso_preferencia_relacion_clase(Clase,Preferencia,PesoNuevo,AuxNuevaKB,NuevaKB).
+
+cambia_peso_preferencia_propiedad_clase(Clase,Preferencia,PesoNuevo,KB,NuevaKB):-
+	cambiaElemento(class(Clase,Padre,PropPref,RelPref,Indivs),class(Clase,Padre,ListaNuevasPropPref,RelPref,Indivs),KB,NuevaKB),
+	cambiaElemento([A=>>Preferencia=>(B,C)],[A=>>Preferencia=>(B,PesoNuevo)],PropPref,ListaNuevasPropPref).
+
+cambia_peso_preferencia_relacion_clase(Clase,Preferencia,PesoNuevo,KB,NuevaKB):-
+	cambiaElemento(class(Clase,Padre,PropPref,RelPref,Indivs),class(Clase,Padre,PropPref,ListaNuevaRelPref,Indivs),KB,NuevaKB),
+	cambiaElemento([A=>>Preferencia=>(B,C)],[A=>>Preferencia=>(B,PesoNuevo)],RelPref,ListaNuevaRelPref).
+
+cambia_peso_preferencias_individuo(ObjectName,Preferencia,PesoNuevo,KB,NuevaKB):-
+	cambia_peso_preferencia_propiedad_individuo(ObjectName,Preferencia,PesoNuevo,KB,AuxNuevaKB),
+	cambia_peso_preferencia_relacion_individuo(ObjectName,Preferencia,PesoNuevo,AuxNuevaKB,NuevaKB).
+
+cambia_peso_preferencia_propiedad_individuo(ObjectName,Preferencia,PesoNuevo,KB,NuevaKB):-
+	obtener_data_objeto(ObjectName,KB,ObjClass,ObjNames),
+	cambiaElemento(class(ObjClass,Padre,PropPref,RelPref,Indivs),class(ObjClass,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),
+	cambiaElemento([id=>ObjNames,PropPrefIndiv,RelPrefIndiv],[id=>ObjNames,ListaNuevasPropPref,RelPrefIndiv],Indivs,ListaNuevosIndiv),
+	cambiaElemento([A=>>Preferencia=>(B,C)],[A=>>Preferencia=>(B,PesoNuevo)],PropPrefIndiv,ListaNuevasPropPref).
+
+cambia_peso_preferencia_relacion_individuo(ObjectName,Preferencia,PesoNuevo,KB,NuevaKB):-
+	obtener_data_objeto(ObjectName,KB,ObjClass,ObjNames),
+	cambiaElemento(class(ObjClass,Padre,PropPref,RelPref,Indivs),class(ObjClass,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),
+	cambiaElemento([id=>ObjNames,PropPrefIndiv,RelPrefIndiv],[id=>ObjNames,PropPrefIndiv,ListaNuevaRelPref],Indivs,ListaNuevosIndiv),
+	cambiaElemento([A=>>Preferencia=>(B,C)],[A=>>Preferencia=>(B,PesoNuevo)],RelPrefIndiv,ListaNuevaRelPref).
+
+
+%--------------------------------------------------------------------------------------------------
+%  Predicados auxiliares
+%--------------------------------------------------------------------------------------------------
+
+%%************ Cambiar todas las ocurrencias de un elemento X en una lista por el valor de Y
+%% Caso Base
+cambiaElemento(_,_,[],[]).
+%% Encuentra X en lsita [X|T] y guardar Y en [Y|N]
+cambiaElemento(X,Y,[X|T],[Y|N]):-
+	cambiaElemento(X,Y,T,N).
+%% Sigue iterando sobre la lista
+cambiaElemento(X,Y,[H|T],[H|N]):-
+	cambiaElemento(X,Y,T,N).
+
+%%************ Cehca si una lista contiene elementos
+list_has_elements([_|_], true).
+
+%%************ Obetener data (clase y nombres) de un objeto
+%% Caso Base
+obtener_data_objeto(_,[],_,[]).
+%% Checa objetos de la clase
+obtener_data_objeto(ObjectName, [class(Clase,_,_,_,O)|_], ObjClass, ObjNames):-
+	list_has_elements(O,R),
+	busca_objecto(ObjectName, O, ObjClass, ObjNames),
+	list_has_elements(ObjNames,R),
+	ObjClass = Clase.
+%% Itera sobre clases (KB)
+obtener_data_objeto(ObjectName, [_|Resto], ObjClass, ObjNames):-
+	obtener_data_objeto(ObjectName, Resto, ObjClass, ObjNames).
+%% Busca nombre de objeto
+busca_objecto(ObjectName, [[id=>Nombres,Prop,_]|_], ObjClass, ObjNames):-
+	member(ObjectName,Nombres),
+	ObjNames = Nombres.
+%% Itera sobre Objetos
+busca_objecto(ObjectName, [_|Resto], ObjClass, ObjNames):-
+	busca_objecto(ObjectName, Resto, ObjClass, ObjNames).
+%% Caso base
+busca_objecto(_,[],desconocido,[]).
+
+%%************ Predicados para agregar una nueva propiedad o relacion de clase/individuo
 agregar_propiedad_relacion([],NuevaPropRel,Valor,si,ListaNuevasPropRelPref):-
 	append([],[[no(NuevaPropRel=>Valor)], []],ListaNuevasPropRelPref).
 
-agregar_propiedad_relacion([Props|Pref],NuevaPropRel,Valor,si,ListaNuevasPropRelPref):-
-	append(Props,[no(NuevaPropRel=>Valor)],ListaActualPropRel),
+agregar_propiedad_relacion([PropsRels|Pref],NuevaPropRel,Valor,si,ListaNuevasPropRelPref):-
+	append(PropsRels,[no(NuevaPropRel=>Valor)],ListaActualPropRel),
 	append([ListaActualPropRel],Pref,ListaNuevasPropRelPref).
 
 agregar_propiedad_relacion([],NuevaPropRel,Valor,no,ListaNuevasPropRelPref):-
 	append([],[[NuevaPropRel=>Valor], []],ListaNuevasPropRelPref).
 
-agregar_propiedad_relacion([Props|Pref],NuevaPropRel,Valor,no,ListaNuevasPropRelPref):-
-	append(Props,[NuevaPropRel=>Valor],ListaActualPropRel),
+agregar_propiedad_relacion([PropsRels|Pref],NuevaPropRel,Valor,no,ListaNuevasPropRelPref):-
+	append(PropsRels,[NuevaPropRel=>Valor],ListaActualPropRel),
 	append([ListaActualPropRel],Pref,ListaNuevasPropRelPref).
 
-%% Predicados para agregar nueva preferencia de propiedad o relacion de clase
-
+%%************ Predicados para agregar nueva preferencia de propiedad o relacion de clase/individuo
 agregar_preferencia([], Antecedente, Consecuente, Valor, si, ListaNuevasPropPref):-
 	append([], [[], [Antecedente=>>no(Consecuente=>Valor)]], ListaNuevasPropPref).
 
@@ -191,3 +269,9 @@ agregar_preferencia([Props|[[]]], Antecedente, Consecuente, Valor, no, ListaNuev
 agregar_preferencia([Props|[Pref|_]], Antecedente, Consecuente, Valor, no, ListaNuevasPropPref):-
 	append(Pref, [Antecedente=>>Consecuente=>Valor], ListaActualPref),
 	append([Props], [ListaActualPref], ListaNuevasPropPref).
+
+
+
+
+
+
