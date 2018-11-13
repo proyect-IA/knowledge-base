@@ -1,0 +1,6 @@
+[
+class(top,none,[],[],[]),
+class(animales,top,[[],[[tiene_alas=>(si,0),color=>(variable,0)]=>>feroz=>(si,0)]],[],[]),
+class(mamiferos,animales,[[vuela=>(no,0)],[ [corre=>(si,0),vuela=>(si,0)]=>>tiene_alas=>(si,0),[feroz=>(si,0)]=>>peligroso=>(si,0)]],[],[]),
+class(raton,mamiferos,[[vuela=>(si,0)],[]],[],[[id=>[mickey,miky],[[color=>(azul,0)],[[color=>(azul,0)]=>>corre=>(si,0)]],[]]])
+]
