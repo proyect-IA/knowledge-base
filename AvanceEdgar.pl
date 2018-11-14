@@ -1,7 +1,7 @@
 % --- predicado para abrir un archivo ---------------------------------
 abrir(KB):-
     % open('/home/edgar/Documents/Maestría_IIMASS/1erSemestre/inteligencia/knowledge-base/EstructuraBase.txt',read,Stream),
-    open('d:/maestria/inteligenciaArtif/knowledge-base/EstructuraBase(edd).txt',read,Stream),
+    open('d:/maestria/inteligenciaArtif/knowledge-base/bases/basePrueba.txt',read,Stream),
     readclauses(Stream,X),
     close(Stream),
     atom_to_term_conversion(X,KB).
@@ -10,7 +10,7 @@ abrir(KB):-
 % --- predicado para guardar un archivo --------------------------------
 guardar(KB):-
     % open('/home/edgar/Documents/Maestría_IIMASS/1erSemestre/inteligencia/knowledge-base/update_KB(edd).txt',write,Stream),
-    open('d:/maestria/inteligenciaArtif/knowledge-base/update_KB(edd).txt',write,Stream),
+    open('d:/maestria/inteligenciaArtif/knowledge-base/bases/basePrueba.txt',write,Stream),
     writeq(Stream,KB),
     close(Stream).
 
@@ -66,17 +66,70 @@ es_elemento(X,[_|T]):-
 
 % Cambiar el nombre de un elemento en una lista de relaciones
 % ---------------------------------------------------------------------
+buscar_objeto_cambiar_objeto_en_relacion(_,_,[],[]).
+
+buscar_objeto_cambiar_objeto_en_relacion(Acc=>(Name, Val), Acc=>(NewName, Val),[Acc=>(Name, Val)|T],[Acc=>(NewName, Val)|N]):-
+    buscar_objeto_cambiar_objeto_en_relacion(NextAcc=>(Name, NextVal),NextAcc=>(NewName, NextVal),T,N).
+
+buscar_objeto_cambiar_objeto_en_relacion(Acc=>(Name, Val),Acc=>(NewName, Val),[H|T],[H|N]):-
+    buscar_objeto_cambiar_objeto_en_relacion(NextAcc=>(Name, NextVal), NextAcc=>(NewName, NextVal),T,N).
+
+cambiar_objeto_objeto_en_relacion(Objeto,NombreNuevo,Rels,Result):-
+    buscar_objeto_cambiar_objeto_en_relacion(_=>(Objeto,_), _=>(NombreNuevo, _), Rels, Result).
+
+
+buscar_acc_cambiar_objeto_en_relacion(_,_,[],[]).
+
+buscar_acc_cambiar_objeto_en_relacion(Acc=>(Name, Val), Acc=>(NewName, Val),[Acc=>(Name, Val)|T],[Acc=>(NewName, Val)|N]):-
+    buscar_acc_cambiar_objeto_en_relacion(NextAcc=>(Name, NextVal),NextAcc=>(NewName, NextVal),T,N).
+
+buscar_acc_cambiar_objeto_en_relacion(Acc=>(Name, Val),Acc=>(NewName, Val),[H|T],[H|N]):-
+    buscar_acc_cambiar_objeto_en_relacion(NextAcc=>(Name, NextVal), NextAcc=>(NewName, NextVal),T,N).
+
+cambiar_accion_objeto_en_relacion(Acc,NombreNuevo,Rels,Result):-
+    buscar_acc_cambiar_objeto_en_relacion(Acc=>(_,_), _=>(NombreNuevo, _), Rels, Result).
+
+
 buscar_cambiar_objeto_en_relacion(_,_,[],[]).
 
 buscar_cambiar_objeto_en_relacion(Acc=>(Name, Val), Acc=>(NewName, Val),[Acc=>(Name, Val)|T],[Acc=>(NewName, Val)|N]):-
     buscar_cambiar_objeto_en_relacion(NextAcc=>(Name, NextVal),NextAcc=>(NewName, NextVal),T,N).
 
+buscar_cambiar_objeto_en_relacion(no(Acc=>(Name, Val)), no(Acc=>(NewName, Val)),[no(Acc=>(Name, Val))|T],[no(Acc=>(NewName, Val))|N]):-
+    buscar_cambiar_objeto_en_relacion(NextAcc=>(Name, NextVal),NextAcc=>(NewName, NextVal),T,N).
+
 buscar_cambiar_objeto_en_relacion(A=>(Name, Val),A=>(NewName, Val),[H|T],[H|N]):-
     buscar_cambiar_objeto_en_relacion(NextAcc=>(Name, NextVal), NextAcc=>(NewName, NextVal),T,N).
 
-
+% Busca por un objeto en una relacion  y lo cambia de nombre
 cambiar_objeto_en_relacion(Objeto,NombreNuevo,Rels,Result):-
     buscar_cambiar_objeto_en_relacion(_=>(Objeto,_), _=>(NombreNuevo, _), Rels, Result).
+
+
+buscar_cambiar_objeto_en_relacion_neg(_,_,[],[]).
+
+buscar_cambiar_objeto_en_relacion_neg(no(Acc=>(Name, Val)), no(Acc=>(NewName, Val)),[no(Acc=>(Name, Val))|T],[no(Acc=>(NewName, Val))|N]):-
+    buscar_cambiar_objeto_en_relacion_neg(no(NextAcc=>(Name, NextVal)),no(NextAcc=>(NewName, NextVal)),T,N).
+
+buscar_cambiar_objeto_en_relacion_neg(no(A=>(Name, Val)),no(A=>(NewName, Val)),[H|T],[H|N]):-
+    buscar_cambiar_objeto_en_relacion_neg(no(NextAcc=>(Name, NextVal)), no(NextAcc=>(NewName, NextVal)),T,N).
+
+% Busca por un objeto en una relacion  y lo cambia de nombre
+cambiar_objeto_objeto_en_relacion_neg(Objeto,NombreNuevo,Rels,Result):-
+    buscar_cambiar_objeto_en_relacion_neg(no(_=>(Objeto,_)), no(_=>(NombreNuevo, _)), Rels, Result).
+
+
+buscar_acc_cambiar_objeto_en_relacion_neg(_,_,[],[]).
+
+buscar_acc_cambiar_objeto_en_relacion_neg(no(Acc=>(Name, Val)), no(Acc=>(NewName, Val)),[no(Acc=>(Name, Val))|T],[no(Acc=>(NewName, Val))|N]):-
+    buscar_acc_cambiar_objeto_en_relacion_neg(no(NextAcc=>(Name, NextVal)),no(NextAcc=>(NewName, NextVal)),T,N).
+
+buscar_acc_cambiar_objeto_en_relacion_neg(no(A=>(Name, Val)),no(A=>(NewName, Val)),[H|T],[H|N]):-
+    buscar_acc_cambiar_objeto_en_relacion_neg(no(NextAcc=>(Name, NextVal)), no(NextAcc=>(NewName, NextVal)),T,N).
+
+% Busca por Acc y cambia a los elementos que cumplen esa accion.
+cambiar_accion_objeto_en_relacion_neg(Acc,NombreNuevo,Rels,Result):-
+    buscar_acc_cambiar_objeto_en_relacion_neg(no(Acc=>(_,_)), no(_=>(NombreNuevo, _)), Rels, Result).
 
 
 
@@ -89,11 +142,28 @@ buscar_cambiar_valor_prop(Prop=>(Val, Peso), Prop=>(NuevoVal, Peso),
         [Prop=>(NuevoVal, Peso)|N]):-
     buscar_cambiar_valor_prop(NextProp=>(Val, NextPeso),NextProp=>(NuevoVal, NextPeso),T,N).
 
+buscar_cambiar_valor_prop(no(Prop=>(Val, Peso)), no(Prop=>(NuevoVal, Peso)),
+        [no(Prop=>(Val, Peso))|T],
+        [no(Prop=>(NuevoVal, Peso))|N]):-
+    buscar_cambiar_valor_prop(NextProp=>(Val, NextPeso),NextProp=>(NuevoVal, NextPeso),T,N).
+
 buscar_cambiar_valor_prop(Prop=>(Val, Peso), Prop=>(NuevoVal, Peso),[H|T],[H|N]):-
     buscar_cambiar_valor_prop(NextProp=>(Val, NextPeso),NextProp=>(NuevoVal, NextPeso),T,N).
 
-cambiar_valor_prop(Prop,NuevoValor,PropList,Result):-
+cambiar_valor_prop(Prop, NuevoValor,PropList,Result):-
     buscar_cambiar_objeto_en_relacion(Prop=>(_,_), Prop=>(NuevoValor, _), PropList, Result).
+
+buscar_cambiar_valor_prop_neg(_,_,[],[]).
+
+buscar_cambiar_valor_prop_neg(no(Prop=>(Val, Peso)), no(Prop=>(NuevoVal, Peso)), [no(Prop=>(Val, Peso))|T], [no(Prop=>(NuevoVal, Peso))|N]):-
+    buscar_cambiar_valor_prop_neg(no(NextProp=>(Val, NextPeso)), no(NextProp=>(NuevoVal, NextPeso)),T,N).
+
+buscar_cambiar_valor_prop_neg(no(Prop=>(Val, Peso)), no(Prop=>(NuevoVal, Peso)),[H|T],[H|N]):-
+    buscar_cambiar_valor_prop_neg(no(NextProp=>(Val, NextPeso)),no(NextProp=>(NuevoVal, NextPeso)),T,N).
+
+% Cambia el valor de una propiedad negada en una lista de propiedades
+cambiar_valor_prop_neg(Prop,NuevoValor,PropList,Result):-
+    buscar_cambiar_valor_prop_neg(no(Prop=>(_,_)), no(Prop=>(NuevoValor, _)), PropList, Result).
 
 
 
@@ -112,17 +182,8 @@ iterar_individuos_nombre(Name,NewName,[H|T],[H|N]):-
 iterar_preferencias_relaciones_antec(_,_,[],[]).
 
 iterar_preferencias_relaciones_antec(Name,NewName,[AntPrefRel=>>ConsPrefRel|T],[NewAntPrefRel=>>ConsPrefRel|N]):-
-    cambiar_objeto_en_relacion(Name,NewName,AntPrefRel,NewAntPrefRel),
-    iterar_preferencias_relaciones_antec(Name,NewName,T,N).
-
-iterar_preferencias_relaciones_antec(Name,NewName,[H|T],[H|N]):-
-    iterar_preferencias_relaciones_antec(Name,NewName,T,N).
-
-
-iterar_preferencias_relaciones_antec(_,_,[],[]).
-
-iterar_preferencias_relaciones_antec(Name,NewName,[AntPrefRel=>>ConsPrefRel|T],[NewAntPrefRel=>>ConsPrefRel|N]):-
-    cambiar_objeto_en_relacion(Name,NewName,AntPrefRel,NewAntPrefRel),
+    cambiar_objeto_objeto_en_relacion(Name,NewName,AntPrefRel,NewAntPrefRelAux),
+    cambiar_objeto_objeto_en_relacion_neg(Name,NewName,NewAntPrefRelAux, NewAntPrefRel),
     iterar_preferencias_relaciones_antec(Name,NewName,T,N).
 
 iterar_preferencias_relaciones_antec(Name,NewName,[H|T],[H|N]):-
@@ -130,6 +191,7 @@ iterar_preferencias_relaciones_antec(Name,NewName,[H|T],[H|N]):-
 
 
 cambia_consc(Name, NewName, A=>(Name, Val), A=>(NewName, Val)).
+cambia_consc(Name, NewName, no(A=>(Name, Val)), no(A=>(NewName, Val))).
 
 iterar_preferencias_relaciones_consec(_,_,[],[]).
 
@@ -173,11 +235,12 @@ cambiar_relaciones_nivelClase(_,_,[],[]).
 
 cambiar_relaciones_nivelClase(Nombre,NombreNuevo,
             [class(C,Padre,P,[Rels,PrefRel],O)|T],[class(C,Padre,P,[RelsNew,PrefRel],O)|N]):-
-    cambiar_objeto_en_relacion(Nombre,NombreNuevo,Rels,RelsNew),    
+    cambiar_objeto_objeto_en_relacion(Nombre,NombreNuevo,Rels,RelsNewAux),
+    cambiar_objeto_objeto_en_relacion_neg(Nombre,NombreNuevo,RelsNewAux, RelsNew),    
     cambiar_relaciones_nivelClase(Nombre,NombreNuevo,T,N).
 
 cambiar_relaciones_nivelClase(Nombre,NombreNuevo,[H|T],[H|N]):-
-    cambiar_relaciones_nivelClase(Nombre,NombreNuevo,T,N).
+     cambiar_relaciones_nivelClase(Nombre,NombreNuevo,T,N).
 
 
 cambiar_relaciones_antecedentes_nivelClase(_,_,[],[]).
@@ -209,10 +272,19 @@ cambiar_propiedades_nivelClase(Clase, Prop, NewValue, KB,NewKB):-
                 class(Clase,Padre,[NewProps,PrefProps],Rels,Objects),KB,NewKB),
     cambiar_valor_prop(Prop,NewValue,PropList, NewProps).
 
+cambiar_propiedades_nivelClase_neg(Clase, Prop, NewValue, KB,NewKB):-
+    cambiar_elemento(class(Clase,Padre,[PropList,PrefProps],Rels,Objects),
+                class(Clase,Padre,[NewProps,PrefProps],Rels,Objects),KB,NewKB),
+    cambiar_valor_prop_neg(Prop,NewValue,PropList, NewProps).
+
 cambiar_relacion_nivelClase(Clase, Relacion, NuevoSujeto,KB,NewKB):-
-    cambiar_elemento(class(Clase,Padre,Props,[RelsList, PrefRels],Objects),
-                class(Clase,Padre,Props,[NewRels,PrefRels],Objects),KB,NewKB),
-    buscar_cambiar_objeto_en_relacion(Relacion=>(_, _), Relacion=>(NuevoSujeto,_),RelsList, NewRels).
+    cambiar_elemento(class(Clase,Padre,Props,[RelsList, PrefRels],Objects), class(Clase,Padre,Props,[NewRels,PrefRels],Objects),KB,NewKB),
+    cambiar_accion_objeto_en_relacion(Relacion,NuevoSujeto,RelsList,NewRels).
+
+cambiar_relacion_nivelClase_neg(Clase, Relacion, NuevoSujeto,KB,NewKB):-
+    cambiar_elemento(class(Clase,Padre,Props,[RelsList, PrefRels],Objects), class(Clase,Padre,Props,[NewRels,PrefRels],Objects),KB,NewKB),
+    cambiar_accion_objeto_en_relacion_neg(Relacion,NuevoSujeto,RelsList,NewRels).
+
 
 
 
@@ -223,7 +295,8 @@ cambiar_relaciones_nivelIndividuo(_,_,[],[]).
 cambiar_relaciones_nivelIndividuo(Nombre,NombreNuevo, 
         [class(C,Padre,P,R,[[id=>Id,Prop,[Rels,PrefRel]]|H])|T],
         [class(C,Padre,P,R,[[id=>Id,Prop,[RelsNew,PrefRel]]|H])|N]):-
-    cambiar_objeto_en_relacion(Nombre,NombreNuevo,Rels,RelsNew),    
+    cambiar_objeto_objeto_en_relacion(Nombre,NombreNuevo,Rels,RelsNewAux),
+    cambiar_objeto_objeto_en_relacion_neg(Nombre,NombreNuevo,RelsNewAux,RelsNew),    
     cambiar_relaciones_nivelIndividuo(Nombre,NombreNuevo,T,N).
 
 cambiar_relaciones_nivelIndividuo(Nombre,NombreNuevo,[H|T],[H|N]):-
@@ -278,12 +351,12 @@ cambiar_propiedades_nivelIndividuo(Objeto, Prop, NewValue, KB,NewKB):-
 % 4  a)
 cambiar_nombre_de_individuo(Objeto,NombreNuevo,KB,NewKB):-
     cambiar_nombre(Objeto, NombreNuevo, KB, KBnameUpdate),
-    cambiar_relaciones_nivelClase(Clase,NombreNuevo,KBnameUpdate,KBrelationUpdate),
-    cambiar_relaciones_antecedentes_nivelClase(Clase, NombreNuevo, KBrelationUpdate, KBantePrefUpdate),
-    cambiar_relaciones_consecuentes_nivelClase(Clase, NombreNuevo, KBantePrefUpdate, KBconsecPrefUpdate),
-    cambiar_relaciones_nivelIndividuo(Clase,NombreNuevo,KBconsecPrefUpdate,KBrelation2Update),
-    cambiar_relaciones_antecedentes_nivelIndividuo(Clase, NombreNuevo, KBrelation2Update, KBantePref2Update),
-    cambiar_relaciones_consecuentes_nivelIndividuo(Clase, NombreNuevo, KBantePref2Update, NewKB).
+    cambiar_relaciones_nivelClase(Objeto,NombreNuevo,KBnameUpdate,KBrelationUpdate),
+    cambiar_relaciones_antecedentes_nivelClase(Objeto, NombreNuevo, KBrelationUpdate, KBantePrefUpdate),
+    cambiar_relaciones_consecuentes_nivelClase(Objeto, NombreNuevo, KBantePrefUpdate, KBconsecPrefUpdate),
+    cambiar_relaciones_nivelIndividuo(Objeto,NombreNuevo,KBconsecPrefUpdate,KBrelation2Update),
+    cambiar_relaciones_antecedentes_nivelIndividuo(Objeto, NombreNuevo, KBrelation2Update, KBantePref2Update),
+    cambiar_relaciones_consecuentes_nivelIndividuo(Objeto, NombreNuevo, KBantePref2Update, NewKB).
 
 % -- Predicado para cambiar nombre a una clase ---
 % 4  a)
@@ -299,24 +372,23 @@ cambiar_nombre_de_clase(Clase,NombreNuevo,KB,NewKB):-
     cambiar_relaciones_consecuentes_nivelIndividuo(Clase, NombreNuevo, KBantePref2Update, NewKB).
 
 
+
 % -- Predicado para cambiar valor de una propiedad de clase ---
 % 4 b)
 cambiar_valor_propiedad_clase(Clase, Propiedad, NuevoValor, KB, NewKB):-
-    cambiar_propiedades_nivelClase(Clase, Propiedad, NuevoValor,KB,NewKB).
+    cambiar_propiedades_nivelClase(Clase, Propiedad, NuevoValor,KB,KBAux),
+    cambiar_propiedades_nivelClase_neg(Clase, Propiedad, NuevoValor,KBAux,NewKB).
 
 % -- Predicado para cambiar valor de una propiedad de clase ---
 %4 b)
-%cambiar_valor_propiedad_objeto(Objeto, Propiedad, NuevoValor):-
-%.
+
 
 
 % -- Predicado para cambiar con quien tiene relacion una clase ---
 % 4 c)
 cambiar_valor_relacion_especifica_en_clase(Clase, Relacion, NuevoSujeto, KB, NewKB):-
-    cambiar_relacion_nivelClase(Clase, Relacion, NuevoSujeto,KB,NewKB).
-
+    cambiar_relacion_nivelClase(Clase, Relacion, NuevoSujeto,KB,KBAux),
+    cambiar_relacion_nivelClase_neg(Clase, Relacion, NuevoSujeto,KBAux,NewKB).
 
 % -- Predicado para cambiar con quien tiene relacion una clase ---
 % 4 c)
-% cambiar_valor_relacion_especifica_en_clase(Clase, Propiedad, NuevoValor, KB, NewKB):-
-%    cambiar_propiedades_nivelClase(Clase, Propiedad, NuevoValor,KB,NewKB).
