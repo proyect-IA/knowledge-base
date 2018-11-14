@@ -8,7 +8,8 @@
 %predicado para abrir un archivo -------------------------------------------------------------------------
 abrir(KB):- 
 	%open('/Users/juan/Desktop/Proyecto Representacion del conocimiento/KnowledgeBase/KB.txt',read,Stream),
-	open('d:/maestria/inteligenciaArtif/knowledge-base/bases/KBArticulo.txt',read,Stream),
+	%open('d:/maestria/inteligenciaArtif/knowledge-base/bases/KBArticulo.txt',read,Stream),
+	open('d:/maestria/inteligenciaArtif/knowledge-base/bases/KBEjemploExamen.txt',read,Stream),
 	readclauses(Stream,X),
 	close(Stream),
 	atom_to_term_conversion(X,KB).
@@ -16,7 +17,7 @@ abrir(KB):-
 % predicado para guardar un archivo ---------------------------------------------------------------------
 guardar(KB):-
 	%open('/Users/juan/Desktop/Proyecto Representacion del conocimiento/KnowledgeBase/KB.txt',write,Stream),
-	open('d:/maestria/inteligenciaArtif/knowledge-base/bases/KB_update.txt',write,Stream),
+	open('d:/maestria/inteligenciaArtif/knowledge-base/bases/KBEjemploExamen.txt',write,Stream),
 	writeq(Stream,KB),
 	close(Stream).
 
@@ -130,7 +131,6 @@ deleteElementPref(X,_,[[H]=>>A=>_|T],[[H]=>>A=>_|N]):-
 %Verify if an element X is in a list 
 %isElement(X,List)
 %Example (n,[b,a,n,a,n,a])
-
 member(X,[X|_]).
 member(X,[_|T]) :- member(X,T).
 
@@ -140,9 +140,17 @@ isElement(X,[[id=>Lista|_]|_]):-
 isElement(X,[ _ |T]):-
 	isElement(X,T).
 
+
+%predicados auxiliares en las validaciones ----------------------------------------
+es_clase(_,[],desconocido).
+
+es_clase(Clase,[class(Clase,_,_,_,_)|_],si).
+
+es_clase(Clase,[_|T],Resultado):-
+	es_clase(Clase,T,Resultado).
+
 %Convert in a single list a list of lists
 %Example ([[a],[b,c],[],[d]],[a,b,c,d]).
-
 append_list_of_lists([],[]).
 
 append_list_of_lists([H|T],X):-
@@ -1516,8 +1524,6 @@ cambiar_padre(OldFather,NewFather,[class(C,OldFather,P,R,O)|T],[class(C,NewFathe
 cambiar_padre(OldFather,NewFather,[H|T],[H|N]):-
     cambiar_padre(OldFather,NewFather,T,N).
 
-
-
 cambiar_nombre(_,_,[],[]).
 
 cambiar_nombre(Nombre,NombreNuevo,
@@ -1528,9 +1534,6 @@ cambiar_nombre(Nombre,NombreNuevo,
 
 cambiar_nombre(Nombre,NombreNuevo,[H|T],[H|N]):-
     cambiar_nombre(Nombre,NombreNuevo,T,N).
-
-
-
 
 % -- Predicado para cambiar nombre a un elemento en una relacion ---
 % -----------     A nivel de CLASE  ----------------------------
@@ -1579,8 +1582,8 @@ cambiar_propiedades_nivelClase(Clase, Prop, NewValue, KB,NewKB):-
 cambiar_relacion_nivelClase(Clase, Relacion, NuevoSujeto,KB,NewKB):-
     cambiar_elemento(class(Clase,Padre,Props,[RelsList, PrefRels],Objects),
                 class(Clase,Padre,Props,[NewRels,PrefRels],Objects),KB,NewKB),
-    buscar_cambiar_objeto_en_relacion(Relacion=>(_, _), Relacion=>(NuevoSujeto,_),RelsList, NewRelsAux),
-    buscar_cambiar_objeto_en_relacion(no(Relacion=>(_, _)), no(Relacion=>(NuevoSujeto,_)),NewRelsAux, NewRels).
+    buscar_cambiar_objeto_en_relacion(Relacion=>(_, _), Relacion=>(NuevoSujeto,_),RelsList, NewRels).%,
+    %buscar_cambiar_objeto_en_relacion(no(Relacion=>(_, _)), no(Relacion=>(NuevoSujeto,_)),NewRelsAux, NewRels).
 
 
 
