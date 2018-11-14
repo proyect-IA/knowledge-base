@@ -7,9 +7,9 @@
 
 %predicado para abrir un archivo -------------------------------------------------------------------------
 abrir(KB):- 
-	%open('/Users/juan/Desktop/Proyecto Representacion del conocimiento/KnowledgeBase/KB.txt',read,Stream),
+	open('/Users/juan/Desktop/Proyecto Representacion del conocimiento/KnowledgeBase/KB2.txt',read,Stream),
 	%open('d:/maestria/inteligenciaArtif/knowledge-base/bases/KBArticulo.txt',read,Stream),
-	open('d:/maestria/inteligenciaArtif/knowledge-base/bases/KBEjemploExamen.txt',read,Stream),
+	%open('d:/maestria/inteligenciaArtif/knowledge-base/bases/KBEjemploExamen.txt',read,Stream),
 	readclauses(Stream,X),
 	close(Stream),
 	atom_to_term_conversion(X,KB).
@@ -436,22 +436,6 @@ compara_preferencias([Propiedad=>(V,_)|R],Prop,Desicion,Valor):-
 	comparar_propiedad_preferencia(Propiedad=>(V,_),Prop,Valor,Desicion3),
 	decidir(Desicion2,Desicion3,Desicion).
 
-%compara_preferencias([A|[]],Prop,Desicion,Valor):-
-	%comparar_propiedad_preferencia(A,Prop,Valor,Desicion2),
-	%decidir(Desicion2,si,Desicion).
-
-%compara_preferencias([Propiedad=>(variable,_)|B],Prop,Desicion,ValorVariable):-
-	%comparar_propiedad_preferencia(A,Prop,ValorVariable,Desicion2),
-	%comparar_propiedad_preferencia(B,Prop,ValorVariable,Desicion3),
-	%decidir(Desicion2,Desicion3,Desicion).
-
-%compara_preferencias([A|B],Prop,Desicion,Valor):-
-	%comparar_propiedad_preferencia(A,Prop,Valor,Desicion2),
-	%comparar_propiedad_preferencia(B,Prop,Valor2,Desicion3),
-	%decidir(Desicion2,Desicion3,Desicion).
-
-
-
 decidir(si,si,si).
 decidir(_,_,no).
 
@@ -787,6 +771,9 @@ buscar_propiedad_individuo_lista([_|Resto],PropIndi,IndividuoBuscar,PropHerencia
 extraer_todas_propiedades_individuo([PropIndI|[PrefIndI]],PropHerencia,PrefHerencia,Resultado):-
 	obtener_nuevas_propiedades_individuo(PropIndI,PrefIndI,PropHerencia,PrefHerencia,Resultado).
 
+extraer_todas_propiedades_individuo([[PropIndI]|[]],PropHerencia,PrefHerencia,Resultado):-
+	obtener_nuevas_propiedades_individuo(PropIndI,[],PropHerencia,PrefHerencia,Resultado).
+
 extraer_todas_propiedades_individuo([PropIndI|[]],PropHerencia,PrefHerencia,Resultado):-
 	obtener_nuevas_propiedades_individuo(PropIndI,[],PropHerencia,PrefHerencia,Resultado).
 
@@ -962,62 +949,65 @@ recorrer_arbol_propiedades_completos_objetos([],_,_,_,_,[]).
 
 %--------------------------------------------------------------------------------------------------------
 
-buscar_propiedades_clase(ClaseBuscar,ClaseBuscar,KB,PropiedadesHeredadas,Propiedades):-
+buscar_propiedades_clase(ClaseBuscar,ClaseBuscar,KB,PropiedadesHeredadas,PrefHerencia,Propiedades):-
 	obtener_propiedades_clase(ClaseBuscar,KB,PropiedadesClase),
-	append(PropiedadesClase,PropiedadesHeredadas,Propiedades).
+	obtener_preferencias_clase(ClaseBuscar,KB,PreferenciasClase), 
+	extraer_todas_propiedades_individuo([PropiedadesClase,PreferenciasClase],PropiedadesHeredadas,PrefHerencia,Propiedades).
 
-buscar_propiedades_clase(ClaseActual,ClaseBuscar,KB,PropiedadesHeredadas,Propiedades):-
+buscar_propiedades_clase(ClaseActual,ClaseBuscar,KB,PropiedadesHeredadas,PrefHerencia,Propiedades):-
 	obtener_hijos(ClaseActual,KB,Hijos),
 	obtener_propiedades_clase(ClaseActual,KB,PropiedadesClase),
+	obtener_preferencias_clase(ClaseActual,KB,PreferenciasClase), 	 	 
 	append(PropiedadesClase,PropiedadesHeredadas,PropiedadesHerencia),
-	bajar_por_hijos_propiedades_clase(Hijos,ClaseBuscar,KB,PropiedadesHerencia,Propiedades).
+	decide_heredar_preferencias(PreferenciasClase,PrefHerencia,PreferenciasHerencia),
+	bajar_por_hijos_propiedades_clase(Hijos,ClaseBuscar,KB,PropiedadesHerencia,PreferenciasHerencia,Propiedades).
 
 %si ya no tiene hijos se detiene
-bajar_por_hijos_propiedades_clase([],_,_,_,_).
+bajar_por_hijos_propiedades_clase([],_,_,_,_,_).
 
-bajar_por_hijos_propiedades_clase(Hijos,ClaseBuscar,KB,PropiedadesHerencia,Propiedades):-
-	recorre_hijos_propiedad_clase(Hijos,ClaseBuscar,KB,PropiedadesHerencia,Propiedades).
+bajar_por_hijos_propiedades_clase(Hijos,ClaseBuscar,KB,PropiedadesHerencia,PrefHerencia,Propiedades):-
+	recorre_hijos_propiedad_clase(Hijos,ClaseBuscar,KB,PropiedadesHerencia,PrefHerencia,Propiedades).
 
-recorre_hijos_propiedad_clase([P|H],ClaseBuscar,KB,PropiedadesHeredadas,Propiedades):-
-	buscar_propiedades_clase(P,ClaseBuscar,KB,PropiedadesHeredadas,Propiedades2),
-	recorre_hijos_propiedad_clase(H,ClaseBuscar,KB,PropiedadesHeredadas,Propiedades3),
+recorre_hijos_propiedad_clase([P|H],ClaseBuscar,KB,PropiedadesHeredadas,PrefHerencia,Propiedades):-
+	buscar_propiedades_clase(P,ClaseBuscar,KB,PropiedadesHeredadas,PrefHerencia,Propiedades2),
+	recorre_hijos_propiedad_clase(H,ClaseBuscar,KB,PropiedadesHeredadas,PrefHerencia,Propiedades3),
 	append(Propiedades2,Propiedades3,Propiedades).
 
-recorre_hijos_propiedad_clase([],_,_,_,[]).
-recorre_hijos_propiedad_clase(_,_,[],_,[]).
+recorre_hijos_propiedad_clase([],_,_,_,_,[]).
+recorre_hijos_propiedad_clase(_,_,[],_,_,[]).
 
 %--------------------------------------------------------------------------------------------------------
 
 % predicados para obtener todas las relaciones de una clase ---------------------------------------------
 
 
-buscar_relaciones_clase(ClaseBuscar,ClaseBuscar,KB,RelacionesHeredadas,Relaciones):-
-	obtener_relaciones_clase(ClaseBuscar,KB,RelacionesClase),
-	append(RelacionesClase,RelacionesHeredadas,Relaciones).
+buscar_relaciones_clase(ClaseBuscar,ClaseBuscar,KB,RelHerencia,PrefHerencia,Relaciones):-
+	obtener_relaciones_clase(ClaseBuscar,KB,RelInd),
+	obtener_preferencias_relaciones(ClaseBuscar,KB,PrefIndI),
+	extraer_todas_relaciones_individuo([RelInd,PrefIndI],RelHerencia,PrefHerencia,Relaciones,KB).
 
-buscar_relaciones_clase(ClaseActual,ClaseBuscar,KB,RelacionesHeredadas,Relaciones):-
+buscar_relaciones_clase(ClaseActual,ClaseBuscar,KB,RelacionesHeredadas,PreferenciasHerencia,Relaciones):-
 	obtener_hijos(ClaseActual,KB,Hijos),
 	obtener_relaciones_clase(ClaseActual,KB,RelacionesClase),
 	append(RelacionesClase,RelacionesHeredadas,RelacionesHerencia),
-	bajar_por_hijos_relaciones_clase(Hijos,ClaseBuscar,KB,RelacionesHerencia,Relaciones).
+	obtener_preferencias_relaciones(ClaseActual,KB,PreferenciasClase),
+	decide_heredar_preferencias(PreferenciasClase,PreferenciasHerencia,PrefCompletas), 
+	bajar_por_hijos_relaciones_clase(Hijos,ClaseBuscar,KB,RelacionesHerencia,PrefCompletas,Relaciones).
 
 %si ya no tiene hijos se detiene
-bajar_por_hijos_relaciones_clase([],_,_,_,_).
+bajar_por_hijos_relaciones_clase([],_,_,_,_,_).
 
-bajar_por_hijos_relaciones_clase(Hijos,ClaseBuscar,KB,RelacionesHerencia,Relaciones):-
-	recorre_hijos_relacion_clase(Hijos,ClaseBuscar,KB,RelacionesHerencia,Relaciones).
+bajar_por_hijos_relaciones_clase(Hijos,ClaseBuscar,KB,RelacionesHerencia,PrefHerencia,Relaciones):-
+	recorre_hijos_relacion_clase(Hijos,ClaseBuscar,KB,RelacionesHerencia,PrefHerencia,Relaciones).
 
-recorre_hijos_relacion_clase([P|H],ClaseBuscar,KB,RelacionesHeredadas,Relaciones):-
-	buscar_relaciones_clase(P,ClaseBuscar,KB,RelacionesHeredadas,Propiedades2),
-	recorre_hijos_relacion_clase(H,ClaseBuscar,KB,RelacionesHeredadas,Propiedades3),
+recorre_hijos_relacion_clase([P|H],ClaseBuscar,KB,RelacionesHeredadas,PrefHerencia,Relaciones):-
+	buscar_relaciones_clase(P,ClaseBuscar,KB,RelacionesHeredadas,PrefHerencia,Propiedades2),
+	recorre_hijos_relacion_clase(H,ClaseBuscar,KB,RelacionesHeredadas,PrefHerencia,Propiedades3),
 	append(Propiedades2,Propiedades3,Relaciones).
 
-recorre_hijos_relacion_clase([],_,_,_,[]).
-recorre_hijos_relacion_clase(_,_,[],_,[]).
-
+recorre_hijos_relacion_clase([],_,_,_,_,[]).
+recorre_hijos_relacion_clase(_,_,[],_,_,[]).
 %--------------------------------------------------------------------------------------------------------
-
-
 
 
 %predicado para obtener 
@@ -1673,7 +1663,7 @@ obtener_clases_objeto(ObjectName, KB, Clases):-
 % Inciso e)
 % predicados para obtener todas las propiedades de una clase -------------
 obtener_propiedades_completas_clase(ClaseBuscar,KB,Propiedades):-
-	buscar_propiedades_clase(top,ClaseBuscar,KB,[],Propiedades),
+	buscar_propiedades_clase(top,ClaseBuscar,KB,[],[],Propiedades),
 	imprime_lista_resultados(Propiedades).
 
 %predicado que se encarga de obtener todas las propiedades de un objeto especifico
@@ -1685,7 +1675,7 @@ obtener_propiedades_completas_objeto(Individuo,KB,Resultado):-
 % Inciso f)
 % predicados para obtener todas las relaciones de un objeto ---------------
 obtener_relaciones_completas_clase(ClaseBuscar,KB,Relaciones):-
-	buscar_relaciones_clase(top,ClaseBuscar,KB,[],Relaciones),
+	buscar_relaciones_clase(top,ClaseBuscar,KB,[],[],Relaciones),
 	imprime_lista_resultados(Relaciones).
 
 obtener_relaciones_completas_objeto(Individuo,KB,Resultado):-
