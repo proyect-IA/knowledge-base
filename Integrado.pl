@@ -1958,11 +1958,19 @@ cambiar_nombre_de_clase(Clase,NombreNuevo,KB,NewKB):-
 cambiar_valor_propiedad_clase(Clase, Propiedad, NuevoValor, KB, NewKB):-
     cambiar_propiedades_nivelClase(Clase, Propiedad, NuevoValor,KB,NewKB).
 
-% -- Predicado para cambiar valor de una propiedad de clase ---
+% -- Predicado para cambiar valor de una propiedad/relacion de individuo ---
 %4 b)
-%cambiar_valor_propiedad_objeto(Objeto, Propiedad, NuevoValor, KB, NewKB):-
-%.
+cambia_propiedad_objeto(ObjectName,Propiedad,NuevaProiedad,KB,NuevaKB):-
+	obtener_data_objeto(ObjectName,KB,ObjClass,ObjNames),
+	cambiaElemento(class(ObjClass,Padre,PropPref,RelPref,Indivs),class(ObjClass,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),
+	cambiaElemento([id=>ObjNames,[Prop|Pref],RelPrefIndiv],[id=>ObjNames,ListaNuevasPropPref,RelPrefIndiv],Indivs,ListaNuevosIndiv),
+	cambiaElemento(Propiedad,NuevaProiedad,Prop,ListaNuevasPropPref).
 
+cambia_relacion_objeto(ObjectName,Relacion,NuevaRelacion,KB,NuevaKB):-
+	obtener_data_objeto(ObjectName,KB,ObjClass,ObjNames),
+	cambiaElemento(class(ObjClass,Padre,PropPref,RelPref,Indivs),class(ObjClass,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),
+	cambiaElemento([id=>ObjNames,PropPrefIndiv,[Prop|Pref]],[id=>ObjNames,PropPrefIndiv,ListaNuevasRelPref],Indivs,ListaNuevosIndiv),
+	cambiaElemento(Relacion,NuevaRelacion,Prop,ListaNuevasRelPref).
 
 % -- Predicado para cambiar con quien tiene relacion una clase ---
 % 4 c)
