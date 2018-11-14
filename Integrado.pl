@@ -1063,11 +1063,20 @@ buscar_relacion_individuo_lista([_|Resto],RelIndi, IndividuoBuscar,RelacionesHer
 %predicado base que detiene la recursividad
 %extraer_todas_relaciones_individuo(_,[],_,_,[],_).
 
-extraer_todas_relaciones_individuo([RelIndi|PrefIndi],RelHerencia,PrefHerencia,Resultado,KB):-
+extraer_todas_relaciones_individuo([[RelIndi]|[PrefIndi]],RelHerencia,PrefHerencia,Resultado,KB):-
 	obtener_nuevas_relaciones_inidividuo(RelIndi,PrefIndi,RelHerencia,PrefHerencia,Resultado,KB).
 
 extraer_todas_relaciones_individuo([RelIndi|[]],RelHerencia,PrefHerencia,Resultado,KB):-
 	obtener_nuevas_relaciones_inidividuo(RelIndi,[],RelHerencia,PrefHerencia,Resultado,KB).
+	
+extraer_todas_relaciones_individuo([[RelIndi]|PrefIndi],RelHerencia,PrefHerencia,Resultado,KB):-
+	obtener_nuevas_relaciones_inidividuo(RelIndi,[],RelHerencia,PrefHerencia,Resultado,KB).
+
+extraer_todas_relaciones_individuo([RelIndi|[PrefIndi]],RelHerencia,PrefHerencia,Resultado,KB):-
+	obtener_nuevas_relaciones_inidividuo(RelIndi,PrefIndi,RelHerencia,PrefHerencia,Resultado,KB).
+
+extraer_todas_relaciones_individuo([RelIndi|PrefIndi],RelHerencia,PrefHerencia,Resultado,KB):-
+	obtener_nuevas_relaciones_inidividuo(RelIndi,PrefIndi,RelHerencia,PrefHerencia,Resultado,KB).
 
 extraer_todas_relaciones_individuo([[]|PrefIndi],RelHerencia,PrefHerencia,Resultado,KB):-
 	obtener_nuevas_relaciones_inidividuo([],PrefIndi,RelHerencia,PrefHerencia,Resultado,KB).
