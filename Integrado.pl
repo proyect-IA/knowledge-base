@@ -768,12 +768,21 @@ buscar_propiedad_individuo_lista([_|Resto],PropIndi,IndividuoBuscar,PropHerencia
 %extraer_todas_propiedades_individuo([],_,_,[]).
 
 %  precidado que permite obtener todas las propiedades de un individuo, las propias y las inferidas ----------------
-extraer_todas_propiedades_individuo([PropIndI|[PrefIndI]],PropHerencia,PrefHerencia,Resultado):-
+extraer_todas_propiedades_individuo([[PropIndI]|[PrefIndI]],PropHerencia,PrefHerencia,Resultado):-
 	obtener_nuevas_propiedades_individuo(PropIndI,PrefIndI,PropHerencia,PrefHerencia,Resultado).
 
 extraer_todas_propiedades_individuo([[PropIndI]|[]],PropHerencia,PrefHerencia,Resultado):-
 	obtener_nuevas_propiedades_individuo(PropIndI,[],PropHerencia,PrefHerencia,Resultado).
-
+	
+extraer_todas_propiedades_individuo([[PropIndI]|PrefIndI],PropHerencia,PrefHerencia,Resultado):-
+	obtener_nuevas_propiedades_individuo(PropIndI,[],PropHerencia,PrefHerencia,Resultado).
+	
+extraer_todas_propiedades_individuo([PropIndI|[PrefIndI]],PropHerencia,PrefHerencia,Resultado):-
+	obtener_nuevas_propiedades_individuo(PropIndI,[],PropHerencia,PrefHerencia,Resultado).
+	
+extraer_todas_propiedades_individuo([PropIndI|PrefIndI],PropHerencia,PrefHerencia,Resultado):-
+	obtener_nuevas_propiedades_individuo(PropIndI,[],PropHerencia,PrefHerencia,Resultado).
+	
 extraer_todas_propiedades_individuo([PropIndI|[]],PropHerencia,PrefHerencia,Resultado):-
 	obtener_nuevas_propiedades_individuo(PropIndI,[],PropHerencia,PrefHerencia,Resultado).
 
