@@ -436,6 +436,12 @@ compara_preferencias([Propiedad=>(V,_)|R],Prop,Desicion,Valor):-
 	comparar_propiedad_preferencia(Propiedad=>(V,_),Prop,Valor,Desicion3),
 	decidir(Desicion2,Desicion3,Desicion).
 
+compara_preferencias([no(Propiedad=>(V,_))|R],Prop,Desicion,Valor):-
+	compara_preferencias(R,Prop,Desicion2,Valor),	
+	comparar_propiedad_preferencia(no(Propiedad=>(V,_)),Prop,Valor,Desicion3),
+	decidir(Desicion2,Desicion3,Desicion).
+
+
 decidir(si,si,si).
 decidir(_,_,no).
 
@@ -451,9 +457,12 @@ comparar_propiedad_preferencia([Propiedad=>(Valor,_)],[Propiedad=>(Valor,_)|_],_
 comparar_propiedad_preferencia([Propiedad=>(_,_)],[Propiedad=>(Valor2,_)|_],_,no).
 
 comparar_propiedad_preferencia(no(Propiedad=>(variable,_)),[Propiedad=>(Valor,_)|_],Valor,si).
+comparar_propiedad_preferencia(no(Propiedad=>(variable,_)),[no(Propiedad=>(Valor,_))|_],Valor,si).
 comparar_propiedad_preferencia(no(Propiedad=>(Valor,_)),[Propiedad=>(Valor,_)|_],_,si).
+comparar_propiedad_preferencia(no(Propiedad=>(Valor,_)),[no(Propiedad=>(Valor,_))|_],_,si).
 comparar_propiedad_preferencia(no(Propiedad=>(_,_)),[Propiedad=>(Valor2,_)|_],_,no).
 comparar_propiedad_preferencia([no(Propiedad=>(Valor,_))],[Propiedad=>(Valor,_)|_],_,si).
+comparar_propiedad_preferencia([no(Propiedad=>(Valor,_))],[no(Propiedad=>(Valor,_))|_],_,si).
 comparar_propiedad_preferencia([no(Propiedad=>(_,_))],[Propiedad=>(Valor2,_)|_],_,no).
 
 comparar_propiedad_preferencia(Buscar,[_|T],Valor,R):-
@@ -637,15 +646,20 @@ buscar_relacion(_,[],desconocido,_).
 
 %propiedades que son positivas
 buscar_relacion(Relacion, [Relacion=>(Individuo,_)|_],Valor,RespaldoKB):-
-	individuos_de_una_clase(Individuo,RespaldoKB,Valor).
+	individuos_de_una_clase(Individuo,RespaldoKB,ValorEcontrado),
+	validar_individuo_buscado(ValorEcontrado,Individuo,Valor).
 
 buscar_relacion(Relacion, [no(Relacion=>(Individuo,_))|_],Valor,RespaldoKB):-
-	individuos_de_una_clase(Individuo,RespaldoKB,Valor).
-
+	individuos_de_una_clase(Individuo,RespaldoKB,ValorEcontrado),
+	validar_individuo_buscado(ValorEcontrado,Individuo,Valor).
 
 %si no unifica en la relación entonces se siguen buscando en la relaciones
 buscar_relacion(Relacion,[_|T],Valor,KB):-
 	buscar_relacion(Relacion,T,Valor,KB).
+
+
+validar_individuo_buscado(desconocido,V,V).
+validar_individuo_buscado(V,_,V).
 
 obtener_relaciones_clase(_,[],[]).
 obtener_relaciones_clase(Clase,[class(Clase,_,_,[[A|B]|_],_)|_], [A|B]).
@@ -1072,7 +1086,7 @@ buscar_relacion_individuo_lista([_|Resto],RelIndi, IndividuoBuscar,RelacionesHer
 %predicado base que detiene la recursividad
 %extraer_todas_relaciones_individuo(_,[],_,_,[],_).
 
-extraer_todas_relaciones_individuo([[RelIndi]|[PrefIndi]],RelHerencia,PrefHerencia,Resultado,KB):-
+extraer_todas_relaciones_individuo([RelIndi|[PrefIndi]],RelHerencia,PrefHerencia,Resultado,KB):-
 	obtener_nuevas_relaciones_inidividuo(RelIndi,PrefIndi,RelHerencia,PrefHerencia,Resultado,KB).
 
 extraer_todas_relaciones_individuo([RelIndi|[]],RelHerencia,PrefHerencia,Resultado,KB):-
