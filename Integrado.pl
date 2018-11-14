@@ -1747,7 +1747,7 @@ agregar_preferencia_relacion_objeto(ObjectName,Antecedente,Consecuente,Valor,Neg
 	obtener_data_objeto(ObjectName,KB,ObjClass,ObjNames),
 	cambiar_elemento(class(ObjClass,Padre,PropPref,RelPref,Indivs),class(ObjClass,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),
 	cambiar_elemento([id=>ObjNames,PropPrefIndiv,RelPrefIndiv],[id=>ObjNames,PropPrefIndiv,ListaNuevaRelPref],Indivs,ListaNuevosIndiv),
-	agregar_preferencia(RelPrefIndiv,Antecedente,Consecuente,Valor,Negacion,ListaNuevaPropPref).
+	agregar_preferencia(RelPrefIndiv,Antecedente,Consecuente,Valor,Negacion,ListaNuevaRelPref).
 
 % --------------------------------------------------------------------
 %    CONSULTAS PRINCIPALES PARA ELIMINAR INFO KB
@@ -1943,33 +1943,36 @@ cambiar_valor_relacion_especifica_en_clase(Clase, Relacion, NuevoSujeto, KB, New
 % cambiar_valor_relacion_especifica_en_clase(Clase, Propiedad, NuevoValor, KB, NewKB):-
 %    cambiar_propiedades_nivelClase(Clase, Propiedad, NuevoValor,KB,NewKB).
 
-%--------------------------------------------------------------------------------------------------
-%Ejercicio 4d) Modificar el peso de una preferencia de propiedad/relacion a una clase/objeto
-%--------------------------------------------------------------------------------------------------
-cambia_peso_preferencias_clase(Clase,Preferencia,PesoNuevo,KB,NuevaKB):-
-	cambia_peso_preferencia_propiedad_clase(Clase,Preferencia,PesoNuevo,KB,AuxNuevaKB),
-	cambia_peso_preferencia_relacion_clase(Clase,Preferencia,PesoNuevo,AuxNuevaKB,NuevaKB).
+% --  Modificar el peso de una preferencia de propiedad/relacion a una clase/objeto ---
+% 4 d)
+cambia_peso_preferencias_clase(Clase,Preferencia,PreferenciaNueva,KB,NuevaKB):-
+	cambia_peso_preferencia_propiedad_clase(Clase,Preferencia,PreferenciaNueva,KB,AuxNuevaKB),
+	cambia_peso_preferencia_relacion_clase(Clase,Preferencia,PreferenciaNueva,AuxNuevaKB,NuevaKB).
 
-cambia_peso_preferencia_propiedad_clase(Clase,Preferencia,PesoNuevo,KB,NuevaKB):-
-	cambiar_elemento(class(Clase,Padre,PropPref,RelPref,Indivs),class(Clase,Padre,ListaNuevasPropPref,RelPref,Indivs),KB,NuevaKB),
-	cambiar_elemento([A=>>Preferencia=>(B,C)],[A=>>Preferencia=>(B,PesoNuevo)],PropPref,ListaNuevasPropPref).
+cambia_peso_preferencia_propiedad_clase(Clase,Preferencia,PreferenciaNueva,KB,NuevaKB):-
+	cambiaElemento(class(Clase,Padre,[Prop|[Pref|_]],RelPref,Indivs),class(Clase,Padre,ListaNuevasPropPref,RelPref,Indivs),KB,NuevaKB),
+	cambiaElemento(A=>>Preferencia,A=>>PreferenciaNueva,Pref,Aux),
+	append([Prop],[Aux],ListaNuevasPropPref).
 
-cambia_peso_preferencia_relacion_clase(Clase,Preferencia,PesoNuevo,KB,NuevaKB):-
-	cambiar_elemento(class(Clase,Padre,PropPref,RelPref,Indivs),class(Clase,Padre,PropPref,ListaNuevaRelPref,Indivs),KB,NuevaKB),
-	cambiar_elemento([A=>>Preferencia=>(B,C)],[A=>>Preferencia=>(B,PesoNuevo)],RelPref,ListaNuevaRelPref).
+cambia_peso_preferencia_relacion_clase(Clase,Preferencia,PreferenciaNueva,KB,NuevaKB):-
+	cambiaElemento(class(Clase,Padre,PropPref,[Rel|[Pref|_]],Indivs),class(Clase,Padre,PropPref,ListaNuevaRelPref,Indivs),KB,NuevaKB),
+	cambiaElemento(A=>>Preferencia,A=>>PreferenciaNueva,Pref,Aux),
+	append([Rel],[Aux],ListaNuevaRelPref).
 
-cambia_peso_preferencias_individuo(ObjectName,Preferencia,PesoNuevo,KB,NuevaKB):-
-	cambia_peso_preferencia_propiedad_individuo(ObjectName,Preferencia,PesoNuevo,KB,AuxNuevaKB),
-	cambia_peso_preferencia_relacion_individuo(ObjectName,Preferencia,PesoNuevo,AuxNuevaKB,NuevaKB).
+cambia_peso_preferencias_individuo(ObjectName,Preferencia,PreferenciaNueva,KB,NuevaKB):-
+	cambia_peso_preferencia_propiedad_individuo(ObjectName,Preferencia,PreferenciaNueva,KB,AuxNuevaKB),
+	cambia_peso_preferencia_relacion_individuo(ObjectName,Preferencia,PreferenciaNueva,AuxNuevaKB,NuevaKB).
 
-cambia_peso_preferencia_propiedad_individuo(ObjectName,Preferencia,PesoNuevo,KB,NuevaKB):-
+cambia_peso_preferencia_propiedad_individuo(ObjectName,Preferencia,PreferenciaNueva,KB,NuevaKB):-
 	obtener_data_objeto(ObjectName,KB,ObjClass,ObjNames),
-	cambiar_elemento(class(ObjClass,Padre,PropPref,RelPref,Indivs),class(ObjClass,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),
-	cambiar_elemento([id=>ObjNames,PropPrefIndiv,RelPrefIndiv],[id=>ObjNames,ListaNuevasPropPref,RelPrefIndiv],Indivs,ListaNuevosIndiv),
-	cambiar_elemento([A=>>Preferencia=>(B,C)],[A=>>Preferencia=>(B,PesoNuevo)],PropPrefIndiv,ListaNuevasPropPref).
+	cambiaElemento(class(ObjClass,Padre,PropPref,RelPref,Indivs),class(ObjClass,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),
+	cambiaElemento([id=>ObjNames,[Prop|[Pref|_]],RelPrefIndiv],[id=>ObjNames,ListaNuevasPropPref,RelPrefIndiv],Indivs,ListaNuevosIndiv),
+	cambiaElemento(A=>>Preferencia,A=>>PreferenciaNueva,Pref,Aux),
+	append([Prop],[Aux],ListaNuevasPropPref).
 
-cambia_peso_preferencia_relacion_individuo(ObjectName,Preferencia,PesoNuevo,KB,NuevaKB):-
+cambia_peso_preferencia_relacion_individuo(ObjectName,Preferencia,PreferenciaNueva,KB,NuevaKB):-
 	obtener_data_objeto(ObjectName,KB,ObjClass,ObjNames),
-	cambiar_elemento(class(ObjClass,Padre,PropPref,RelPref,Indivs),class(ObjClass,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),
-	cambiar_elemento([id=>ObjNames,PropPrefIndiv,RelPrefIndiv],[id=>ObjNames,PropPrefIndiv,ListaNuevaRelPref],Indivs,ListaNuevosIndiv),
-	cambiar_elemento([A=>>Preferencia=>(B,C)],[A=>>Preferencia=>(B,PesoNuevo)],RelPrefIndiv,ListaNuevaRelPref).
+	cambiaElemento(class(ObjClass,Padre,PropPref,RelPref,Indivs),class(ObjClass,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),
+	cambiaElemento([id=>ObjNames,PropPrefIndiv,[Rel|[Pref|_]]],[id=>ObjNames,PropPrefIndiv,ListaNuevaRelPref],Indivs,ListaNuevosIndiv),
+	cambiaElemento(A=>>Preferencia,A=>>PreferenciaNueva,Pref,Aux),
+	append([Rel],[Aux],ListaNuevaRelPref).
