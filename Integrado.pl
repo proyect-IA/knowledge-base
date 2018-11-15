@@ -1444,6 +1444,7 @@ unificarListas([A|C],[B|D],[[A|C],[B|D]]).
 % ------------------------------------------------------------------------------------
 % Cambiar el nombre de un elemento en una lista de relaciones
 % ---------------------------------------------------------------------
+% Predicados auxiliares cambiar elementos
 % Cambiar el nombre de un elemento en una lista de relaciones
 % ---------------------------------------------------------------------
 buscar_objeto_cambiar_objeto_en_relacion(_,_,[],[]).
@@ -1461,10 +1462,10 @@ cambiar_objeto_objeto_en_relacion(Objeto,NombreNuevo,Rels,Result):-
 buscar_acc_cambiar_objeto_en_relacion(_,_,[],[]).
 
 buscar_acc_cambiar_objeto_en_relacion(Acc=>(Name, Val), Acc=>(NewName, Val),[Acc=>(Name, Val)|T],[Acc=>(NewName, Val)|N]):-
-    buscar_acc_cambiar_objeto_en_relacion(NextAcc=>(Name, NextVal),NextAcc=>(NewName, NextVal),T,N).
+    buscar_acc_cambiar_objeto_en_relacion(Acc=>(NextName, NextVal), Acc=>(NewName, NextVal),T,N).
 
 buscar_acc_cambiar_objeto_en_relacion(Acc=>(Name, Val),Acc=>(NewName, Val),[H|T],[H|N]):-
-    buscar_acc_cambiar_objeto_en_relacion(NextAcc=>(Name, NextVal), NextAcc=>(NewName, NextVal),T,N).
+    buscar_acc_cambiar_objeto_en_relacion(Acc=>(NextName, NextVal), Acc=>(NewName, NextVal),T,N).
 
 cambiar_accion_objeto_en_relacion(Acc,NombreNuevo,Rels,Result):-
     buscar_acc_cambiar_objeto_en_relacion(Acc=>(_,_), _=>(NombreNuevo, _), Rels, Result).
@@ -1531,7 +1532,7 @@ buscar_cambiar_valor_prop(Prop=>(Val, Peso), Prop=>(NuevoVal, Peso),[H|T],[H|N])
     buscar_cambiar_valor_prop(NextProp=>(Val, NextPeso),NextProp=>(NuevoVal, NextPeso),T,N).
 
 cambiar_valor_prop(Prop, NuevoValor,PropList,Result):-
-    buscar_cambiar_objeto_en_relacion(Prop=>(_,_), Prop=>(NuevoValor, _), PropList, Result).
+    buscar_acc_cambiar_objeto_en_relacion(Prop=>(_,_), Prop=>(NuevoValor, _), PropList, Result).
 
 buscar_cambiar_valor_prop_neg(_,_,[],[]).
 
@@ -2028,11 +2029,12 @@ cambiar_nombre_de_clase(Clase,NombreNuevo,KB,NewKB):-
 % -- Predicado para cambiar valor de una propiedad de clase ---
 % 4 b)
 cambiar_valor_propiedad_clase(Clase, Propiedad, NuevoValor, KB, NewKB):-
-    cambiar_propiedades_nivelClase(Clase, Propiedad, NuevoValor,KB,NewKB).
+    cambiar_propiedades_nivelClase(Clase, Propiedad, NuevoValor,KB, KBaux),
+    cambiar_propiedades_nivelClase_neg(Clase, Propiedad, NuevoValor, KBaux, NewKB).
 
 % -- Predicado para cambiar valor de una propiedad/relacion de individuo ---	
 %4 b)	
-cambia_propiedad_objeto(ObjectName,Propiedad,NuevaProiedad,KB,NuevaKB):-	
+cambiar_valor_propiedad_objeto(ObjectName,Propiedad,NuevaProiedad,KB,NuevaKB):-	
 	obtener_data_objeto(ObjectName,KB,ObjClass,ObjNames),	%.
 	cambiar_elemento(class(ObjClass,Padre,PropPref,RelPref,Indivs),class(ObjClass,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),	
 	cambiar_elemento([id=>ObjNames,[Prop|Pref],RelPrefIndiv],[id=>ObjNames,ListaNuevasPropPref,RelPrefIndiv],Indivs,ListaNuevosIndiv),	
@@ -2041,13 +2043,13 @@ cambia_propiedad_objeto(ObjectName,Propiedad,NuevaProiedad,KB,NuevaKB):-
 
 % -- Predicado para cambiar con quien tiene relacion una clase ---
 % 4 c)
-cambiar_valor_relacion_especifica_en_clase(Clase, Relacion, NuevoSujeto, KB, NewKB):-
-    cambiar_relacion_nivelClase(Clase, Relacion, NuevoSujeto,KB,NewKB).
-
+cambiar_valor_relacion_clase(Clase, Relacion, NuevoSujeto, KB, NewKB):-
+    cambiar_relacion_nivelClase(Clase, Relacion, NuevoSujeto,KB,KBAux),
+    cambiar_relacion_nivelClase_neg(Clase, Relacion, NuevoSujeto,KBAux,NewKB).
 
 % -- Predicado para cambiar con quien tiene relacion una clase ---
 % 4 c)
-cambia_relacion_objeto(ObjectName,Relacion,NuevaRelacion,KB,NuevaKB):-	
+cambiar_valor_relacion_objeto(ObjectName,Relacion,NuevaRelacion,KB,NuevaKB):-	
 	obtener_data_objeto(ObjectName,KB,ObjClass,ObjNames),	
 	cambiar_elemento(class(ObjClass,Padre,PropPref,RelPref,Indivs),class(ObjClass,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),	
 	cambiar_elemento([id=>ObjNames,PropPrefIndiv,[Prop|Pref]],[id=>ObjNames,PropPrefIndiv,ListaNuevasRelPref],Indivs,ListaNuevosIndiv),	
@@ -2055,32 +2057,32 @@ cambia_relacion_objeto(ObjectName,Relacion,NuevaRelacion,KB,NuevaKB):-
 
 % --  Modificar el peso de una preferencia de propiedad/relacion a una clase/objeto ---
 % 4 d)
-cambia_peso_preferencias_clase(Clase,Preferencia,PreferenciaNueva,KB,NuevaKB):-
-	cambia_peso_preferencia_propiedad_clase(Clase,Preferencia,PreferenciaNueva,KB,AuxNuevaKB),
-	cambia_peso_preferencia_relacion_clase(Clase,Preferencia,PreferenciaNueva,AuxNuevaKB,NuevaKB).
+cambiar_peso_preferencias_clase(Clase,Preferencia,PreferenciaNueva,KB,NuevaKB):-
+	cambiar_peso_preferencia_propiedad_clase(Clase,Preferencia,PreferenciaNueva,KB,AuxNuevaKB),
+	cambiar_peso_preferencia_relacion_clase(Clase,Preferencia,PreferenciaNueva,AuxNuevaKB,NuevaKB).
 
-cambia_peso_preferencia_propiedad_clase(Clase,Preferencia,PreferenciaNueva,KB,NuevaKB):-
+cambiar_peso_preferencia_propiedad_clase(Clase,Preferencia,PreferenciaNueva,KB,NuevaKB):-
 	cambiar_elemento(class(Clase,Padre,[Prop|[Pref|_]],RelPref,Indivs),class(Clase,Padre,ListaNuevasPropPref,RelPref,Indivs),KB,NuevaKB),
 	cambiar_elemento(A=>>Preferencia,A=>>PreferenciaNueva,Pref,Aux),
 	append([Prop],[Aux],ListaNuevasPropPref).
 
-cambia_peso_preferencia_relacion_clase(Clase,Preferencia,PreferenciaNueva,KB,NuevaKB):-
+cambiar_peso_preferencia_relacion_clase(Clase,Preferencia,PreferenciaNueva,KB,NuevaKB):-
 	cambiar_elemento(class(Clase,Padre,PropPref,[Rel|[Pref|_]],Indivs),class(Clase,Padre,PropPref,ListaNuevaRelPref,Indivs),KB,NuevaKB),
 	cambiar_elemento(A=>>Preferencia,A=>>PreferenciaNueva,Pref,Aux),
 	append([Rel],[Aux],ListaNuevaRelPref).
 
-cambia_peso_preferencias_individuo(ObjectName,Preferencia,PreferenciaNueva,KB,NuevaKB):-
-	cambia_peso_preferencia_propiedad_individuo(ObjectName,Preferencia,PreferenciaNueva,KB,AuxNuevaKB),
-	cambia_peso_preferencia_relacion_individuo(ObjectName,Preferencia,PreferenciaNueva,AuxNuevaKB,NuevaKB).
+cambiar_peso_preferencias_individuo(ObjectName,Preferencia,PreferenciaNueva,KB,NuevaKB):-
+	cambiar_peso_preferencia_propiedad_individuo(ObjectName,Preferencia,PreferenciaNueva,KB,AuxNuevaKB),
+	cambiar_peso_preferencia_relacion_individuo(ObjectName,Preferencia,PreferenciaNueva,AuxNuevaKB,NuevaKB).
 
-cambia_peso_preferencia_propiedad_individuo(ObjectName,Preferencia,PreferenciaNueva,KB,NuevaKB):-
+cambiar_peso_preferencia_propiedad_individuo(ObjectName,Preferencia,PreferenciaNueva,KB,NuevaKB):-
 	obtener_data_objeto(ObjectName,KB,ObjClass,ObjNames),
 	cambiar_elemento(class(ObjClass,Padre,PropPref,RelPref,Indivs),class(ObjClass,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),
 	cambiar_elemento([id=>ObjNames,[Prop|[Pref|_]],RelPrefIndiv],[id=>ObjNames,ListaNuevasPropPref,RelPrefIndiv],Indivs,ListaNuevosIndiv),
 	cambiar_elemento(A=>>Preferencia,A=>>PreferenciaNueva,Pref,Aux),
 	append([Prop],[Aux],ListaNuevasPropPref).
 
-cambia_peso_preferencia_relacion_individuo(ObjectName,Preferencia,PreferenciaNueva,KB,NuevaKB):-
+cambiar_peso_preferencia_relacion_individuo(ObjectName,Preferencia,PreferenciaNueva,KB,NuevaKB):-
 	obtener_data_objeto(ObjectName,KB,ObjClass,ObjNames),
 	cambiar_elemento(class(ObjClass,Padre,PropPref,RelPref,Indivs),class(ObjClass,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),
 	cambiar_elemento([id=>ObjNames,PropPrefIndiv,[Rel|[Pref|_]]],[id=>ObjNames,PropPrefIndiv,ListaNuevaRelPref],Indivs,ListaNuevosIndiv),
