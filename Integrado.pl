@@ -2088,12 +2088,13 @@ cambiar_valor_propiedad_clase(Clase, Propiedad, ValorActual ,NuevoValor, KB, New
 
 % -- Predicado para cambiar valor de una propiedad/relacion de individuo ---	
 %4 b)	
-cambiar_valor_propiedad_objeto(ObjectName,Propiedad,NuevaProiedad,KB,NuevaKB):-	
-	obtener_data_objeto(ObjectName,KB,ObjClass,ObjNames),	%.
-	cambiar_elemento(class(ObjClass,Padre,PropPref,RelPref,Indivs),class(ObjClass,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),	
-	cambiar_elemento([id=>ObjNames,[Prop|Pref],RelPrefIndiv],[id=>ObjNames,ListaNuevasPropPref,RelPrefIndiv],Indivs,ListaNuevosIndiv),	
-	cambiar_elemento(Propiedad,NuevaProiedad,Prop,ListaNuevasPropPref).
 
+cambiar_valor_propiedad_objeto(ObjectName,Propiedad,NuevaProiedad,KB,NuevaKB):-
+	obtener_data_objeto(ObjectName,KB,ObjClass,ObjNames),
+	cambiaElemento(class(ObjClass,Padre,PropPref,RelPref,Indivs),class(ObjClass,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),
+	cambiaElemento([id=>ObjNames,[Prop|Pref],RelPrefIndiv],[id=>ObjNames,ListaNuevasPropPref,RelPrefIndiv],Indivs,ListaNuevosIndiv),
+	cambiaElemento(Propiedad,NuevaProiedad,Prop,Aux),
+	append([Aux],Pref,ListaNuevasPropPref).
 
 % -- Predicado para cambiar con quien tiene relacion una clase ---
 % 4 c)
@@ -2103,11 +2104,13 @@ cambiar_valor_relacion_clase(Clase, Relacion, Sujeto,NuevoSujeto, KB, NewKB):-
 
 % -- Predicado para cambiar con quien tiene relacion una clase ---
 % 4 c)
-cambiar_valor_relacion_objeto(ObjectName,Relacion,NuevaRelacion,KB,NuevaKB):-	
-	obtener_data_objeto(ObjectName,KB,ObjClass,ObjNames),	
-	cambiar_elemento(class(ObjClass,Padre,PropPref,RelPref,Indivs),class(ObjClass,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),	
-	cambiar_elemento([id=>ObjNames,PropPrefIndiv,[Prop|Pref]],[id=>ObjNames,PropPrefIndiv,ListaNuevasRelPref],Indivs,ListaNuevosIndiv),	
-	cambiar_elemento(Relacion,NuevaRelacion,Prop,ListaNuevasRelPref).
+
+cambiar_valor_relacion_objeto(ObjectName,Relacion,NuevaRelacion,KB,NuevaKB):-
+	obtener_data_objeto(ObjectName,KB,ObjClass,ObjNames),
+	cambiaElemento(class(ObjClass,Padre,PropPref,RelPref,Indivs),class(ObjClass,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),
+	cambiaElemento([id=>ObjNames,PropPrefIndiv,[Rel|Pref]],[id=>ObjNames,PropPrefIndiv,ListaNuevasRelPref],Indivs,ListaNuevosIndiv),
+	cambiaElemento(Relacion,NuevaRelacion,Rel,Aux),
+	append([Aux],Pref,ListaNuevasRelPref).
 
 % --  Modificar el peso de una preferencia de propiedad/relacion a una clase/objeto ---
 % 4 d)
