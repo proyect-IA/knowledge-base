@@ -1,9 +1,9 @@
 % --------------- Proyecto 1  -------------------
 % -------- INTELIGENCIA  ARTIFICIAL  ------------
-% --  Yoshio Ismael
-% --  Andrick
-% --  Raul
-% --  Edgar Vazquez
+% --  Yoshio Ismael Martínez Arévalo
+% --  Andrick Valdez Valenzuela
+% --  Raul González Cruz
+% --  Edgar de Jesús Vázquez Silva
 
 %predicado para abrir un archivo -------------------------------------------------------------------------
 abrir(KB):- 
@@ -1321,11 +1321,11 @@ borrarElementosConPropiedadNegada(X,[H|T],[H|N]):-
 
 %Delete all elements with a specific negated property in a property-value list
 %borrarElementosConPropiedadNegadaPref(P,InputList,OutputList).
-%Example (p2,[p1=>v1,no(p2=>v2),not(p3=>v3),p2=>v4,p4=>v4],[p1=>v1,not(p3=>v3),p2=>v4,p4=>v4])
+%Example (p2,[p1=>v1,no(p2=>v2),no(p3=>v3),p2=>v4,p4=>v4],[p1=>v1,no(p3=>v3),p2=>v4,p4=>v4])
 
 borrarElementosConPropiedadNegadaPref(_,_,[],[]).
 
-borrarElementosConPropiedadNegadaPref(X,Peso,[ [_|_]=>>no(X)=>(_,Peso)|T ],N):-
+borrarElementosConPropiedadNegadaPref(X,Peso,[ [_|_]=>>no(X=>(_,Peso))|T ],N):-
 	borrarElementosConPropiedadNegadaPref(X,Peso,T,N).
 
 borrarElementosConPropiedadNegadaPref(X,Peso,[H|T],[H|N]):-
@@ -1848,7 +1848,6 @@ agregar_preferencia_relacion_objeto(ObjectName,Antecedente,Consecuente,Valor,Neg
 % 3 a)  Eliminar clases u objetos
 % Example: abrir1(KB), eliminar_clase(raton,KB,NewKB), guardar1(NewKB).
 % Example: abrir1(KB), eliminar_clase(humano,KB,NewKB), guardar1(NewKB).
-% Example: abrir1(KB), eliminar_clase(mamiferos,KB,NewKB), guardar1(NewKB).
 eliminar_clase(Class,OriginalKB,NewKB) :-
 	borrar_clase(class(Class,Father,_,_,_),OriginalKB,TemporalKB),
 	cambiarPadre(Class,Father,TemporalKB,TemporalKB2),
@@ -1870,21 +1869,30 @@ eliminar_objeto(Object,OriginalKB,NewKB) :-
 %Remove a class property
 % Example: abrir1(KB), eliminar_clase_propiedad(ballena,ponen_huevos,KB,NewKB), guardar1(NewKB).
 % Example: abrir1(KB), eliminar_clase_propiedad(humano,muerde,KB,NewKB), guardar1(NewKB).
+
 eliminar_clase_propiedad(Class,Property,OriginalKB,NewKB) :-
 	cambiarGrupoObjetos(class(Class,Father,[Props,T],Rels,Objects),class(Class,Father,ListProp,Rels,Objects),OriginalKB,NewKB),
 	borrarElementosConPropiedad(Property,Props,Aux),
 	borrarElemento(no(Property),Aux,Aux2),
 	borrarElemento(Property,Aux2,NewProps),
-	unificarListas(NewProps,T,ListProp),
-	write(ListProp).
+	write("A"),
+	write(Aux),
+	unificarListas(NewProps,T,ListProp).
+
+eliminar_clase_propiedad(Class,no,Property,OriginalKB,NewKB) :-
+	cambiarGrupoObjetos(class(Class,Father,[Props,T],Rels,Objects),class(Class,Father,ListProp,Rels,Objects),OriginalKB,NewKB),
+	borrarElementosConPropiedadNegada(Property,Props,Aux),
+	borrarElemento(no(Property),Aux,Aux2),
+	borrarElemento(Property,Aux2,NewProps),
+	write("A"),
+	write(Props),
+	unificarListas(NewProps,T,ListProp).
 
 %Remove an object property
 %Example: abrir1(KB), eliminar_objeto_propiedad(dumbito,vuela,KB,NewKB), guardar1(NewKB).
 %Example: abrir1(KB), eliminar_objeto_propiedad(msJumbo,no(vuela),KB,NewKB), guardar1(NewKB).
 eliminar_objeto_propiedad(Object,Property,OriginalKB,NewKB) :-
 	cambiarGrupoObjetos(class(Class,Father,Props,Rels,Objects),class(Class,Father,Props,Rels,NewObjects),OriginalKB,NewKB),
-	write("Objects:"),
-	write(Objects),
 	esObjetoCompleto([id=>Object,[Properties,T],Relations],Objects,AObject),
 	write(Properties),
 	cambiarGrupoObjetos([id=>AObject,[Properties,T],Relations],[id=>AObject,ListProp,Relations],Objects,NewObjects),
@@ -1893,12 +1901,11 @@ eliminar_objeto_propiedad(Object,Property,OriginalKB,NewKB) :-
 	borrarElemento(Property,Aux2,NewProperties),
 	unificarListas(NewProperties,T,ListProp).
 
-eliminar_objeto_propiedad(Object,no(Property),OriginalKB,NewKB) :-
+eliminar_objeto_propiedad(Object,no,Property,OriginalKB,NewKB) :-
 	cambiarGrupoObjetos(class(Class,Father,Props,Rels,Objects),class(Class,Father,Props,Rels,NewObjects),OriginalKB,NewKB),
-	write("Objects:"),
-	write(Objects),
 	esObjetoCompleto([id=>Object,[Properties,T],Relations],Objects,AObject),
-	write(Properties),
+	write("A:"),
+	write(Aux),
 	cambiarGrupoObjetos([id=>AObject,[Properties,T],Relations],[id=>AObject,ListProp,Relations],Objects,NewObjects),
 	borrarElementosConPropiedadNegada(Property,Properties,Aux),
 	borrarElemento(no(Property),Aux,Aux2),
@@ -1941,7 +1948,7 @@ eliminar_objeto_relacion(Object,Relation,OriginalKB,NewKB) :-
 %Remove an object relation preference
 %Example: abrir1(KB), eliminar_objeto_relacion_pref(monstruo,ecologista,1,KB,NewKB), guardar1(NewKB).
 %Example: abrir1(KB), eliminar_objeto_relacion_pref(monstruo,ecologista,2,KB,NewKB), guardar1(NewKB).
-eliminar_objeto_relacion_pref(Object,no(Preference),Peso,OriginalKB,NewKB) :-
+eliminar_objeto_relacion_preferencia(Object,no(Preference),Peso,OriginalKB,NewKB) :-
 	cambiarGrupoObjetos(class(Class,Father,Props,Rels,Objects),class(Class,Father,Props,Rels,NewObjects),OriginalKB,NewKB),
 	esObjetoCompleto([id=>Object,Properties,[Relations,Preferences]],Objects,AObject),
 	write(Preferences),
@@ -1949,7 +1956,7 @@ eliminar_objeto_relacion_pref(Object,no(Preference),Peso,OriginalKB,NewKB) :-
 	borrarElementosConPropiedadNegadaPref(Preference,Peso,Preferences,NewPreferences),
 	unificarListas(Relations,NewPreferences,ListPref).
 
-eliminar_objeto_relacion_pref(Object,Preference,Peso,OriginalKB,NewKB) :-
+eliminar_objeto_relacion_preferencia(Object,Preference,Peso,OriginalKB,NewKB) :-
 	cambiarGrupoObjetos(class(Class,Father,Props,Rels,Objects),class(Class,Father,Props,Rels,NewObjects),OriginalKB,NewKB),
 	esObjetoCompleto([id=>Object,Properties,[Relations,Preferences]],Objects, AObject),
 	write(Preferences),
@@ -1959,7 +1966,7 @@ eliminar_objeto_relacion_pref(Object,Preference,Peso,OriginalKB,NewKB) :-
 
 % Remove a class property preference
 % Example: abrir1(KB), eliminar_clase_propiedad_preference(humano,carnivoro,2,KB,NewKB), guardar1(NewKB).
-eliminar_clase_propiedad_preference(Class,Preference,Peso,OriginalKB,NewKB) :-
+eliminar_clase_propiedad_preferencia(Class,Preference,Peso,OriginalKB,NewKB) :-
 	cambiarGrupoObjetos(class(Class,Father,[H,Prefs],Rels,Objects),class(Class,Father,ListPref,Rels,Objects),OriginalKB,NewKB),
 	write("Pref:"),
 	write(Prefs),
@@ -1968,16 +1975,36 @@ eliminar_clase_propiedad_preference(Class,Preference,Peso,OriginalKB,NewKB) :-
 	borrarElemento(Preference,Aux2,NewPrefs),
 	unificarListas(H, NewPrefs, ListPref).
 
+eliminar_clase_propiedad_preferencia(Class,no,Preference,Peso,OriginalKB,NewKB) :-
+	cambiarGrupoObjetos(class(Class,Father,[H,Prefs],Rels,Objects),class(Class,Father,ListPref,Rels,Objects),OriginalKB,NewKB),
+	write("Pref:"),
+	write(Prefs),
+	borrarElementosConPropiedadNegadaPref(Preference,Peso,Prefs,Aux),
+	borrarElemento(no(Preference),Aux,Aux2),
+	borrarElemento(Preference,Aux2,NewPrefs),
+	unificarListas(H, NewPrefs, ListPref).
+
 %Remove an object property preference
 %Example: abrir1(KB), eliminar_objeto_propiedad_preference(miky,no(miedoso),0,KB,NewKB), guardar1(NewKB).
 %Example: abrir1(KB), eliminar_objeto_propiedad_preference(timothy,animal,0,KB,NewKB), guardar1(NewKB).
-eliminar_objeto_propiedad_preference(Object,Preference,Peso,OriginalKB,NewKB) :-
+eliminar_objeto_propiedad_preferencia(Object,Preference,Peso,OriginalKB,NewKB) :-
 	cambiarGrupoObjetos(class(Class,Father,Props,Rels,Objects),class(Class,Father,Props,Rels,NewObjects),OriginalKB,NewKB),
 	esObjetoCompleto([id=>Object,[H,Preferences],Relations],Objects,AObject),
 	write("Pref:"),
 	write(Preferences),
 	cambiarGrupoObjetos([id=>AObject,[H,Preferences],Relations],[id=>AObject,ListPref,Relations],Objects,NewObjects),
 	borrarElementosConPropiedadPref(Preference,Peso,Preferences,Aux),
+	borrarElemento(no(Preference),Aux,Aux2),
+	borrarElemento(Preference,Aux2,NewPreferences),
+	unificarListas(H,NewPreferences,ListPref).
+
+eliminar_objeto_propiedad_preferencia(Object,no,Preference,Peso,OriginalKB,NewKB) :-
+	cambiarGrupoObjetos(class(Class,Father,Props,Rels,Objects),class(Class,Father,Props,Rels,NewObjects),OriginalKB,NewKB),
+	esObjetoCompleto([id=>Object,[H,Preferences],Relations],Objects,AObject),
+	write("Pref:"),
+	write(Preferences),
+	cambiarGrupoObjetos([id=>AObject,[H,Preferences],Relations],[id=>AObject,ListPref,Relations],Objects,NewObjects),
+	borrarElementosConPropiedadNegadaPref(Preference,Peso,Preferences,Aux),
 	borrarElemento(no(Preference),Aux,Aux2),
 	borrarElemento(Preference,Aux2,NewPreferences),
 	unificarListas(H,NewPreferences,ListPref).
