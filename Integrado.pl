@@ -7,9 +7,10 @@
 
 %predicado para abrir un archivo -------------------------------------------------------------------------
 abrir(KB):- 
-	open('/Users/juan/Desktop/Proyecto Representacion del conocimiento/KnowledgeBase/KB2.txt',read,Stream),
+	%open('/Users/juan/Desktop/Proyecto Representacion del conocimiento/KnowledgeBase/basePrueba.txt',read,Stream),
 	%open('d:/maestria/inteligenciaArtif/knowledge-base/bases/KBArticulo.txt',read,Stream),
 	%open('d:/maestria/inteligenciaArtif/knowledge-base/bases/KBEjemploExamen.txt',read,Stream),
+	open('d:/maestria/inteligenciaArtif/knowledge-base/basePrueba.txt',read,Stream),
 	readclauses(Stream,X),
 	close(Stream),
 	atom_to_term_conversion(X,KB).
@@ -17,7 +18,8 @@ abrir(KB):-
 % predicado para guardar un archivo ---------------------------------------------------------------------
 guardar(KB):-
 	%open('/Users/juan/Desktop/Proyecto Representacion del conocimiento/KnowledgeBase/KB.txt',write,Stream),
-	open('d:/maestria/inteligenciaArtif/knowledge-base/bases/KBEjemploExamen.txt',write,Stream),
+	%open('d:/maestria/inteligenciaArtif/knowledge-base/basePrueba.txt',write,Stream),
+	open('d:/maestria/inteligenciaArtif/knowledge-base/basePrueba.txt',write,Stream),
 	writeq(Stream,KB),
 	close(Stream).
 
@@ -360,8 +362,14 @@ prepar_proceso_inferencia(_,_,_,Inferido,Inferido).
 ordenar_preferencias([],[]).
 
 ordenar_preferencias(Preferencias,Ordenadas):-
-	orden_bur(Preferencias,EnOrden),
+	set(Preferencias,Filtradas),
+	orden_bur(Filtradas,EnOrden),
 	reversa(EnOrden,Ordenadas).
+
+set([],[]).
+set([H|T], [H|T1]):-
+	subtract(T, [H], T2),
+	set(T2, T1).
 
 concatener(A,B,X):-
 	append(A,B,X).
@@ -779,13 +787,13 @@ extraer_todas_propiedades_individuo([[PropIndI]|[]],PropHerencia,PrefHerencia,Re
 	obtener_nuevas_propiedades_individuo(PropIndI,[],PropHerencia,PrefHerencia,Resultado).
 	
 extraer_todas_propiedades_individuo([[PropIndI]|PrefIndI],PropHerencia,PrefHerencia,Resultado):-
-	obtener_nuevas_propiedades_individuo(PropIndI,[],PropHerencia,PrefHerencia,Resultado).
+	obtener_nuevas_propiedades_individuo(PropIndI,PrefIndI,PropHerencia,PrefHerencia,Resultado).
 	
 extraer_todas_propiedades_individuo([PropIndI|[PrefIndI]],PropHerencia,PrefHerencia,Resultado):-
-	obtener_nuevas_propiedades_individuo(PropIndI,[],PropHerencia,PrefHerencia,Resultado).
+	obtener_nuevas_propiedades_individuo(PropIndI,PrefIndI,PropHerencia,PrefHerencia,Resultado).
 	
 extraer_todas_propiedades_individuo([PropIndI|PrefIndI],PropHerencia,PrefHerencia,Resultado):-
-	obtener_nuevas_propiedades_individuo(PropIndI,[],PropHerencia,PrefHerencia,Resultado).
+	obtener_nuevas_propiedades_individuo(PropIndI,PrefIndI,PropHerencia,PrefHerencia,Resultado).
 	
 extraer_todas_propiedades_individuo([PropIndI|[]],PropHerencia,PrefHerencia,Resultado):-
 	obtener_nuevas_propiedades_individuo(PropIndI,[],PropHerencia,PrefHerencia,Resultado).
@@ -1996,12 +2004,12 @@ eliminar_clase_relacion_preferencia(Class,Preference,Peso,OriginalKB,NewKB) :-
 % 4  a)
 cambiar_nombre_de_individuo(Objeto,NombreNuevo,KB,NewKB):-
     cambiar_nombre(Objeto, NombreNuevo, KB, KBnameUpdate),
-    cambiar_relaciones_nivelClase(Clase,NombreNuevo,KBnameUpdate,KBrelationUpdate),
-    cambiar_relaciones_antecedentes_nivelClase(Clase, NombreNuevo, KBrelationUpdate, KBantePrefUpdate),
-    cambiar_relaciones_consecuentes_nivelClase(Clase, NombreNuevo, KBantePrefUpdate, KBconsecPrefUpdate),
-    cambiar_relaciones_nivelIndividuo(Clase,NombreNuevo,KBconsecPrefUpdate,KBrelation2Update),
-    cambiar_relaciones_antecedentes_nivelIndividuo(Clase, NombreNuevo, KBrelation2Update, KBantePref2Update),
-    cambiar_relaciones_consecuentes_nivelIndividuo(Clase, NombreNuevo, KBantePref2Update, NewKB).
+    cambiar_relaciones_nivelClase(Objeto,NombreNuevo,KBnameUpdate,KBrelationUpdate),
+    cambiar_relaciones_antecedentes_nivelClase(Objeto, NombreNuevo, KBrelationUpdate, KBantePrefUpdate),
+    cambiar_relaciones_consecuentes_nivelClase(Objeto, NombreNuevo, KBantePrefUpdate, KBconsecPrefUpdate),
+    cambiar_relaciones_nivelIndividuo(Objeto,NombreNuevo,KBconsecPrefUpdate,KBrelation2Update),
+    cambiar_relaciones_antecedentes_nivelIndividuo(Objeto, NombreNuevo, KBrelation2Update, KBantePref2Update),
+    cambiar_relaciones_consecuentes_nivelIndividuo(Objeto, NombreNuevo, KBantePref2Update, NewKB).
 
 % -- Predicado para cambiar nombre a una clase ---
 % 4  a)
@@ -2022,10 +2030,13 @@ cambiar_nombre_de_clase(Clase,NombreNuevo,KB,NewKB):-
 cambiar_valor_propiedad_clase(Clase, Propiedad, NuevoValor, KB, NewKB):-
     cambiar_propiedades_nivelClase(Clase, Propiedad, NuevoValor,KB,NewKB).
 
-% -- Predicado para cambiar valor de una propiedad de clase ---
-%4 b)
-%cambiar_valor_propiedad_objeto(Objeto, Propiedad, NuevoValor, KB, NewKB):-
-%.
+% -- Predicado para cambiar valor de una propiedad/relacion de individuo ---	
+%4 b)	
+cambia_propiedad_objeto(ObjectName,Propiedad,NuevaProiedad,KB,NuevaKB):-	
+	obtener_data_objeto(ObjectName,KB,ObjClass,ObjNames),	%.
+	cambiar_elemento(class(ObjClass,Padre,PropPref,RelPref,Indivs),class(ObjClass,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),	
+	cambiar_elemento([id=>ObjNames,[Prop|Pref],RelPrefIndiv],[id=>ObjNames,ListaNuevasPropPref,RelPrefIndiv],Indivs,ListaNuevosIndiv),	
+	cambiar_elemento(Propiedad,NuevaProiedad,Prop,ListaNuevasPropPref).
 
 
 % -- Predicado para cambiar con quien tiene relacion una clase ---
@@ -2036,8 +2047,11 @@ cambiar_valor_relacion_especifica_en_clase(Clase, Relacion, NuevoSujeto, KB, New
 
 % -- Predicado para cambiar con quien tiene relacion una clase ---
 % 4 c)
-% cambiar_valor_relacion_especifica_en_clase(Clase, Propiedad, NuevoValor, KB, NewKB):-
-%    cambiar_propiedades_nivelClase(Clase, Propiedad, NuevoValor,KB,NewKB).
+cambia_relacion_objeto(ObjectName,Relacion,NuevaRelacion,KB,NuevaKB):-	
+	obtener_data_objeto(ObjectName,KB,ObjClass,ObjNames),	
+	cambiar_elemento(class(ObjClass,Padre,PropPref,RelPref,Indivs),class(ObjClass,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),	
+	cambiar_elemento([id=>ObjNames,PropPrefIndiv,[Prop|Pref]],[id=>ObjNames,PropPrefIndiv,ListaNuevasRelPref],Indivs,ListaNuevosIndiv),	
+	cambiar_elemento(Relacion,NuevaRelacion,Prop,ListaNuevasRelPref).
 
 % --  Modificar el peso de una preferencia de propiedad/relacion a una clase/objeto ---
 % 4 d)
@@ -2046,13 +2060,13 @@ cambia_peso_preferencias_clase(Clase,Preferencia,PreferenciaNueva,KB,NuevaKB):-
 	cambia_peso_preferencia_relacion_clase(Clase,Preferencia,PreferenciaNueva,AuxNuevaKB,NuevaKB).
 
 cambia_peso_preferencia_propiedad_clase(Clase,Preferencia,PreferenciaNueva,KB,NuevaKB):-
-	cambiaElemento(class(Clase,Padre,[Prop|[Pref|_]],RelPref,Indivs),class(Clase,Padre,ListaNuevasPropPref,RelPref,Indivs),KB,NuevaKB),
-	cambiaElemento(A=>>Preferencia,A=>>PreferenciaNueva,Pref,Aux),
+	cambiar_elemento(class(Clase,Padre,[Prop|[Pref|_]],RelPref,Indivs),class(Clase,Padre,ListaNuevasPropPref,RelPref,Indivs),KB,NuevaKB),
+	cambiar_elemento(A=>>Preferencia,A=>>PreferenciaNueva,Pref,Aux),
 	append([Prop],[Aux],ListaNuevasPropPref).
 
 cambia_peso_preferencia_relacion_clase(Clase,Preferencia,PreferenciaNueva,KB,NuevaKB):-
-	cambiaElemento(class(Clase,Padre,PropPref,[Rel|[Pref|_]],Indivs),class(Clase,Padre,PropPref,ListaNuevaRelPref,Indivs),KB,NuevaKB),
-	cambiaElemento(A=>>Preferencia,A=>>PreferenciaNueva,Pref,Aux),
+	cambiar_elemento(class(Clase,Padre,PropPref,[Rel|[Pref|_]],Indivs),class(Clase,Padre,PropPref,ListaNuevaRelPref,Indivs),KB,NuevaKB),
+	cambiar_elemento(A=>>Preferencia,A=>>PreferenciaNueva,Pref,Aux),
 	append([Rel],[Aux],ListaNuevaRelPref).
 
 cambia_peso_preferencias_individuo(ObjectName,Preferencia,PreferenciaNueva,KB,NuevaKB):-
@@ -2061,14 +2075,14 @@ cambia_peso_preferencias_individuo(ObjectName,Preferencia,PreferenciaNueva,KB,Nu
 
 cambia_peso_preferencia_propiedad_individuo(ObjectName,Preferencia,PreferenciaNueva,KB,NuevaKB):-
 	obtener_data_objeto(ObjectName,KB,ObjClass,ObjNames),
-	cambiaElemento(class(ObjClass,Padre,PropPref,RelPref,Indivs),class(ObjClass,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),
-	cambiaElemento([id=>ObjNames,[Prop|[Pref|_]],RelPrefIndiv],[id=>ObjNames,ListaNuevasPropPref,RelPrefIndiv],Indivs,ListaNuevosIndiv),
-	cambiaElemento(A=>>Preferencia,A=>>PreferenciaNueva,Pref,Aux),
+	cambiar_elemento(class(ObjClass,Padre,PropPref,RelPref,Indivs),class(ObjClass,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),
+	cambiar_elemento([id=>ObjNames,[Prop|[Pref|_]],RelPrefIndiv],[id=>ObjNames,ListaNuevasPropPref,RelPrefIndiv],Indivs,ListaNuevosIndiv),
+	cambiar_elemento(A=>>Preferencia,A=>>PreferenciaNueva,Pref,Aux),
 	append([Prop],[Aux],ListaNuevasPropPref).
 
 cambia_peso_preferencia_relacion_individuo(ObjectName,Preferencia,PreferenciaNueva,KB,NuevaKB):-
 	obtener_data_objeto(ObjectName,KB,ObjClass,ObjNames),
-	cambiaElemento(class(ObjClass,Padre,PropPref,RelPref,Indivs),class(ObjClass,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),
-	cambiaElemento([id=>ObjNames,PropPrefIndiv,[Rel|[Pref|_]]],[id=>ObjNames,PropPrefIndiv,ListaNuevaRelPref],Indivs,ListaNuevosIndiv),
-	cambiaElemento(A=>>Preferencia,A=>>PreferenciaNueva,Pref,Aux),
+	cambiar_elemento(class(ObjClass,Padre,PropPref,RelPref,Indivs),class(ObjClass,Padre,PropPref,RelPref,ListaNuevosIndiv),KB,NuevaKB),
+	cambiar_elemento([id=>ObjNames,PropPrefIndiv,[Rel|[Pref|_]]],[id=>ObjNames,PropPrefIndiv,ListaNuevaRelPref],Indivs,ListaNuevosIndiv),
+	cambiar_elemento(A=>>Preferencia,A=>>PreferenciaNueva,Pref,Aux),
 	append([Rel],[Aux],ListaNuevaRelPref).
