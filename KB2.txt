@@ -1,0 +1,8 @@
+[
+class(top,none,[],[],[]),
+class(escenario,top,[],[],[]),
+class(lugares,escenario,[],[],[]),
+class(estante_comida,lugares,[],[],
+	[ 
+		[ id=>[galletas],[ 	[ubi_ideal=>(estante_comida,0), ubi_real=>(estante_comida,0), ubi_obs=>(desconocido,0),ubi_inf=>(desconocido,0)],[]]  ]   ])
+]
