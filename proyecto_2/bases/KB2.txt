@@ -34,7 +34,7 @@ class(estante_comida,escenario,[[dist_robot=>(10,0)],[]],[],
 class(estante_bebidas,escenario,[[dist_robo=>(10,0)],[]],[],
 [
 	[id=>[tequila],[
-		[ubi_ideal=>(estante_pan,0),ubi_obs=>(desconocido,0),ubi_inf=>(desconocido,0),colocar=>(1,0),
+		[ubi_ideal=>(estante_bebidas,0),ubi_obs=>(desconocido,0),ubi_inf=>(desconocido,0),colocar=>(1,0),
 		buscar=>(1,0),agarrar=>(1,0)],[]],[]]
 ]),
 
