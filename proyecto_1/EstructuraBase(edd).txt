@@ -5,7 +5,7 @@ class(animales,top,[[],[[color=>(azul,1), vuela=>(si,1)]=>>carnivoro=>(si,1)]],
 [],
 []),
 
-class(mamiferos,animales,[], [[], [[odia=>(animales,0)]=>>dentro=>(animales,0),[dentro=>(animales,0)]=>>amigo=>(pinocho,2)]],
+class(mamiferos,animales,[], [[], [[no(odia=>(animales,0))]=>>no(dentro=>(animales,0)),[dentro=>(animales,0)]=>>amigo=>(pinocho,2)]],
 []),
 
 class(raton,mamiferos,[[],[[carnivoro=>(si,1)]=>>come=>(si,0)]],[],

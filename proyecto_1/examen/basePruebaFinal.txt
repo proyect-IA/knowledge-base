@@ -1,0 +1,15 @@
+[
+class(top,none,[],[],[]),
+
+class(animales,top,[[respiran=>(si,0),vuela=>(no,0)],[[terrestre=>(si,0)]=>>caminan=>(si,0),[trabaja=>(variable,0)]=>>vive=>(variable,2),[nace=>(variable,0)]=>>vive=>(variable,5)]],[[odian=>(maquinas,0)],[]],[]),
+
+class(mamiferos,animales,[[],[[vuela=>(no,0),respiran=>(si,0)]=>>terrestre=>(si,0)]],[[],[ [odian=>(maquinas,0)]=>>amigos=>(raton,0) ]],[]),
+
+class(raton,mamiferos,[],[],[[id=>[miky,mickey],[[vuela=>(si,0),tamanio=>(largo,1), nace=>(mexico,0), trabaja=>(usa,0)],[]],[[primo=>(juguetes,0)],[]]]]),
+
+class(gato,mamiferos,[],[],[[id=>[tom],[[],[[vuela=>(no,0)]=>>tiene_patas=>(si,0)]],[[],[[odian=>(maquinas,0)]=>>primo=>(pinocho,0)]]]]),
+
+class(maquinas,top,[[comen=>(no,0)],[]],[[no(odian=>(animales,0))],[]],[]),
+
+class(juguetes,maquinas,[[respiran=>(no,0),color=>(rojo,0)],[]],[],[[id=>[pinocho,muneco, anonimo],[[],[[respiran=>(no,0)]=>>vivo=>(no,0)]],[[juega=>(raton,0)],[[no(odian=>(animales,0))]=>>no(odian=>(mamiferos,1)), [juega=>(raton,0)]=>>no(juega=>(raton,0))]]]])
+]

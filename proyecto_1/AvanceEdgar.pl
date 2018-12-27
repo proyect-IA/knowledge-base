@@ -63,7 +63,7 @@ es_elemento(X,[_|T]):-
     es_elemento(X,T).
 
 
-
+% Predicados auxiliares cambiar elementos
 % Cambiar el nombre de un elemento en una lista de relaciones
 % ---------------------------------------------------------------------
 buscar_objeto_cambiar_objeto_en_relacion(_,_,[],[]).
@@ -81,10 +81,10 @@ cambiar_objeto_objeto_en_relacion(Objeto,NombreNuevo,Rels,Result):-
 buscar_acc_cambiar_objeto_en_relacion(_,_,[],[]).
 
 buscar_acc_cambiar_objeto_en_relacion(Acc=>(Name, Val), Acc=>(NewName, Val),[Acc=>(Name, Val)|T],[Acc=>(NewName, Val)|N]):-
-    buscar_acc_cambiar_objeto_en_relacion(NextAcc=>(Name, NextVal),NextAcc=>(NewName, NextVal),T,N).
+    buscar_acc_cambiar_objeto_en_relacion(Acc=>(NextName, NextVal), Acc=>(NewName, NextVal),T,N).
 
 buscar_acc_cambiar_objeto_en_relacion(Acc=>(Name, Val),Acc=>(NewName, Val),[H|T],[H|N]):-
-    buscar_acc_cambiar_objeto_en_relacion(NextAcc=>(Name, NextVal), NextAcc=>(NewName, NextVal),T,N).
+    buscar_acc_cambiar_objeto_en_relacion(Acc=>(NextName, NextVal), Acc=>(NewName, NextVal),T,N).
 
 cambiar_accion_objeto_en_relacion(Acc,NombreNuevo,Rels,Result):-
     buscar_acc_cambiar_objeto_en_relacion(Acc=>(_,_), _=>(NombreNuevo, _), Rels, Result).
@@ -151,7 +151,7 @@ buscar_cambiar_valor_prop(Prop=>(Val, Peso), Prop=>(NuevoVal, Peso),[H|T],[H|N])
     buscar_cambiar_valor_prop(NextProp=>(Val, NextPeso),NextProp=>(NuevoVal, NextPeso),T,N).
 
 cambiar_valor_prop(Prop, NuevoValor,PropList,Result):-
-    buscar_cambiar_objeto_en_relacion(Prop=>(_,_), Prop=>(NuevoValor, _), PropList, Result).
+    buscar_acc_cambiar_objeto_en_relacion(Prop=>(_,_), Prop=>(NuevoValor, _), PropList, Result).
 
 buscar_cambiar_valor_prop_neg(_,_,[],[]).
 

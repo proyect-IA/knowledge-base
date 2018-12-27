@@ -1,8 +1,0 @@
-[
-class(top,none,[],[],[]),
-class(animales,top,	[ [respiran=>(si,0),vuelan=>(no,0)],[ [terrestre=>(si,0)]=>>caminan=>(si,0), [trabaja=>(variable,0)]=>>vive(variable,2),[nace=>(variable,0)]=>>vive(variable,5)]],	[[odian=>(maquinas,0)],[]],	[]),
-class(mamiferos,animales,[],[ [],[ [vuelan=>(si,0),respiran=>(si,0)]=>>terrestre=>(si,0)]],[]),
-class(raton,mamiferos,[],[],[ [id=>[miky, mouse], [[vuelan=>(si,0),tamanio=>(largo,1)],[] ],[[primo=>(juguetes,0)], [] ]]]),
-class(gato,mamiferos,[],[],[ [id=>[tom], [[],[[vuelan=>(no,0)]=>>tiene_patas=>(si,0)] ],[[],[[odian=>(maquinas,0)]=>>primo=>(pinocho,0)] ]]]),class(maquinas,top,[[comen=>(no,0),no(odian=>(animales,0))],[]],[],[]),
-class(juguetes,maquinas,[[respiran=>(no,0),color=>(desconocido,0)],[]],[],[[id=>[pinocho,muneco, anonimo],[[comen=>(si,0)],[[respiran=>(no,0)]=>>vivo=>(no,0)] ],[[juega=>(raton,0)],[[no(odian=>(animales,0))]=>>no(odian=>(mamiferos,1)), [juega=>(raton,0)]=>>juega=>no(juega=>(raton,0))]]]])
-]
