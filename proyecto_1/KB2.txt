@@ -1,8 +1,18 @@
 [
 class(top,none,[],[],[]),
 class(escenario,top,[],[],[]),
-class(lugares,escenario,[],[],[]),
-class(estante_comida,lugares,[],[],
-	[ 
-		[ id=>[galletas],[ 	[ubi_ideal=>(estante_comida,0), ubi_real=>(estante_comida,0), ubi_obs=>(desconocido,0),ubi_inf=>(desconocido,0)],[]]  ]   ])
+class(estante_comida,escenario,[[dist_robot=>(10,0)],[]],[],
+[ 
+	[id=>[galletas],[	
+		[ubi_ideal=>(estante_comida,0),ubi_obs=>(desconocido,0),ubi_inf=>(desconocido,0),colocar=>(1,0),
+		buscar=>(1,0),agarrar=>(1,0)],[]
+		],[]]
+]),
+	class(estante_bebidas,escenario,[[dist_robo=>(10,0)],[]],[],
+[
+	[id=>[tequila],[
+		[ubi_ideal=>(estante_pan,0),ubi_obs=>(desconocido,0),ubi_inf=>(desconocido,0),colocar=>(1,0),
+		buscar=>(1,0),agarrar=>(1,0)],[]],[]]
+]),
+	class(estante_pan,escenario,[[dist_robot=>(10,0)],[]],[],[])
 ]
