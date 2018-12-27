@@ -1,0 +1,39 @@
+[
+class(top,none,[],[],[]),
+class(escenario,top,[],[],[]),
+
+class(lugares,escenario,[],[],[
+	[id=>[estante_bebidas], [not(observado),xy=>[0,0],prob=>1],[]],
+	[id=>[estante_comida], [not(observado),xy=>[10,0],prob=>1],[]],
+	[id=>[estante_pan], [not(observado),xy=>[5,10*sqrt(3)/2],prob=>1],[]],
+	[id=>[posicion_inicial], [xy=>[5,10/(2*sqrt(3))],prob=>1],[]]
+	]),
+
+class(objetos,escenario,[],[],[
+	[id=>[coca],[[prob=>[colocar=>1,buscar=>1,agarrar=>1]]],[[posR=>(estante_pan,si),posO=>(estante_bebidas,si),posI=>(estante_bebidas,si)]]],
+	[id=>[heineken],[[prob=>[colocar=>1,buscar=>1,agarrar=>1]]],[[posR=>(estante_bebidas,si),posO=>(estante_bebidas,si),posI=>(estante_bebidas,si)]]],
+	[id=>[noodles],[[prob=>[colocar=>1,buscar=>1,agarrar=>1]]],[[posR=>(estante_bebidas,si),posO=>(estante_comida,si),posI=>(estante_comida,si)]]],
+	[id=>[galletas],[[prob=>[colocar=>1,buscar=>1,agarrar=>1]]],[[posR=>(estante_pan,si),posO=>(estante_pan,si),posI=>(estante_pan,si)]]],
+	[id=>[kellogs],[[prob=>[colocar=>1,buscar=>1,agarrar=>1]]],[[posR=>(estante_comida,si),posI=>(estante_comida,si)]]]
+	]),
+
+class(personajes,top,[],[],[
+	[id=>robot,[],[pos=>posicion_inicial]]
+	]),
+class(actividades,top,[],[],[]),
+class(objetivos,actividades,[],[],[]),
+class(plan,actividades,[],[],[]),
+
+class(cost_y_rec,actividades,[],[],[
+	[id=>(colocar=>entregar),[costo=>5,recompensa=>100],[]],
+	[id=>(colocar=>reacomodar),[costo=>5,recompensa=>90],[]],
+	[id=>(buscar=>entregar),[costo=>5,recompensa=>80],[]],
+	[id=>(buscar=>reacomodar),[costo=>5,recompensa=>70],[]],
+	[id=>(agarrar=>entregar),[costo=>5,recompensa=>60],[]],
+	[id=>(agarrar=>reacomodar),[costo=>5,recompensa=>50],[]],
+	[id=>(mover=>entregar),[recompensa=>40],[]],
+	[id=>(mover=>cliente),[recompensa=>30],[]],
+	[id=>(mover=>reacomodar),[recompensa=>10],[]]
+	])
+
+]
