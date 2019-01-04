@@ -10,7 +10,7 @@ abrir(KB):-
 	%open('/Users/juan/Desktop/Proyecto Representacion del conocimiento/KnowledgeBase/basePrueba.txt',read,Stream),
 	%open('d:/maestria/inteligenciaArtif/knowledge-base/bases/KBArticulo.txt',read,Stream),
 	%open('d:/maestria/inteligenciaArtif/knowledge-base/bases/KBEjemploExamen.txt',read,Stream),
-	open('d:/maestria/inteligenciaArtif/knowledge-base/proyecto_2/KB2.txt',read,Stream),
+	open('d:/maestria/inteligenciaArtif/knowledge-base/proyecto_2/bases/KB2.txt',read,Stream),
 	readclauses(Stream,X),
 	close(Stream),
 	atom_to_term_conversion(X,KB).
@@ -2172,3 +2172,39 @@ write('Muy bien, entonces le traire ->'),tab(1),write(Orden).
 % modulo de ejecucion   --------------------------------------------------------------------------------------------------------
 % este modulo tiene como objetivo ejecucion cada una de las acciones del modulo anterior mas especificamente
 %-------------------------------------------------------------------------------------------------------------------------------
+
+% Se planea utilizar una lista de acciones objeto para representar cada una de las 
+% acciones a ejecutar tambien se pretende utilizar las probabilidades de exito para 
+% cada una de las acciones a ejecutar.
+% list [acc_0=>obj_0, acc_1=>obj_1, acc_2=>obj_2, acc_3=>obj_3... acc_n=>obj_n]
+
+
+ejecutar_accion(moverse_a, Objeto):-
+	cambiar_propiedades_nivelIndividuo(ubic_actu=>).
+
+% ejecutar_accion(colocar, Objeto):-
+%	cambiar_objeto_de_clase().
+
+% ejecutar_accion(buscar, Objeto):-
+%	.
+
+% ejecutar_accion(tomar, Objeto):-
+%	.
+
+% ejecutar_accion(entregar_a_cliente, Objeto):-
+%	.
+
+
+
+get_action([H=>Obj|T], Res):-
+ 	write('Accion: '), write(H), tab(3),
+ 	write('   Objectos:   '), write(Obj), nl,
+	get_action(T, Res).
+
+get_action([], Res).
+
+
+ejecutar_plan(Plan, KB):-
+	write('Ejecutando plan:'), nl,
+	write('Lista acciones:'), tab(2), 
+	get_action(Plan, _).
