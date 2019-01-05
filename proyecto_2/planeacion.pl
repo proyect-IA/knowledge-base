@@ -2160,6 +2160,81 @@ write('Muy bien, entonces le traire ->'),tab(1),write(Orden).
 % este modulo tiene como objetivo consultar el conocimiento en la base de datos
 
 %-------------------------------------------------------------------------------------------------------------------------------
+comenzar_sis(KB,Producto):-
+	write("Hola, ¿qué chingados quieres?"),
+	nl,
+	read(Producto),
+	verExistenciaProducto(Producto,[],KB).
+	%diagnosticar(KB,Producto,Resultado).
+
+verExistenciaProducto(Producto,ListaProductos,KB):-
+	write(Producto),
+	obtener_relaciones_completas_objeto(Producto,KB,Relaciones),
+	write(Relaciones),
+	agregarProducto(Relaciones,Producto,ListaActual,NuevaLista),
+	%informarNoProducto(Relaciones),
+	tomarNuevaOrden(KB,NuevoProducto),
+	%extension_de_clase(objetos, KB, Productos),
+	%write(Productos),
+	nl.
+
+agregarProducto(Relaciones,Producto,ListaProductos,NuevaLista):-
+	not(Relaciones=[]),
+	append(ListaProductos,[Producto],NuevaLista),
+	write(NuevaLista).
+
+tomarNuevaOrden(KB,NuevoProducto):-
+	write("¿Quieres algo más?"),
+	nl,
+	mostrarDiagnostico(KB).
+
+informarNoProducto(Relaciones):-
+	Relaciones=[],
+	write("Este producto no está en mi tienda"),
+	nl.
+
+mostrarDiagnostico(KB):-
+	write("El diagnostico acerca de la ubicación actual de los productos es:"),
+	nl,
+	extension_de_clase(lugares,KB,Lugares),
+	extension_de_clase(objetos,KB,Productos),
+	agruparPorLugar(Lugares,Productos,[],NuevaLista,KB).
+	%write(Lugares),write(Productos).
+	
+%abrir(KB), extension_de_clase(lugares,KB,Lugares),extension_de_clase(objetos,KB,Productos),agruparPorLugar(Lugares,Productos,[],NuevaLista,KB).
+agruparPorLugar([],Productos,ListaActual,NuevaLista,KB):-
+	NuevaLista = ListaActual.
+
+agruparPorLugar([Lugar|Resto],Productos,ListaActual,NuevaLista,KB):-
+	agruparPorProducto(Lugar,Productos,[],ProductosDeLugar,KB),
+	append(ListaActual,[Lugar=>ProductosDeLugar],NuevaLista),
+	write(NuevaLista),
+	agruparPorLugar(Resto,Productos,NuevaLista,NuevaLista2,KB).
+
+%abrir(KB), extension_de_clase(objetos,KB,Productos),agruparPorProducto(estante_bebidas,Productos,[],NuevaLista,KB).
+agruparPorProducto(Lugar,[],ListaActual,ListaActual,KB):-
+	writeln("Fin1"),
+	NuevaLista = ListaActual,
+	writeln(NuevaLista).
+
+agruparPorProducto(Lugar,[Obj1|Resto],ListaActual,NuevaLista,KB):-
+	writeln(Obj1),
+	obtener_relaciones_completas_objeto(Obj1,KB,Relaciones),
+	writeln(Relaciones),
+	agregarALista(Lugar,Obj1,Relaciones,ListaActual,NuevaLista),
+	writeln(NuevaLista),	
+	agruparPorProducto(Lugar,Resto,NuevaLista,NuevaLista2,KB).
+
+agregarALista(Lugar,Obj1,[],ListaActual,NuevaLista):-
+	writeln("Fin2"),
+	NuevaLista = ListaActual,
+	writeln(NuevaLista).
+
+agregarALista(Lugar,Obj1,[posO=>(Lugar,_)|_],ListaActual,NuevaLista):-
+	append(ListaActual,[Obj1],NuevaLista).
+
+agregarALista(Lugar,Obj1,[_=>(_,_)|T],ListaActual,NuevaLista):-
+	agregarALista(Lugar,Obj1,T,ListaActual,NuevaLista).
 
 
 
