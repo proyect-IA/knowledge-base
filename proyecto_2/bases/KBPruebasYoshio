@@ -1,0 +1,48 @@
+[
+class(top,none,[],[],[]),
+class(escenario,top,[],[],[]),
+class(acciones,top,[],[],
+[
+	[id=>[moverse],[costo=>10],[]],
+	[id=>[entregar],[costo=>10],[]],
+	[id=>[tomar],[costo=>10],[]],
+	[id=>[colocar],[costo=>10],[]],
+	[id=>[buscar],[costo=>10],[]]
+]),
+class(robot,top,[],[],[[id=>[robocop],[[ubic_inicial=>(estante_comida,0),ubic_actual=>(estante_pan,0),mano_der=>(desconocido,0),mano_izq=>(desconocido,0),ver=>(nada,0),en_entrega=>(si,0)],[]],[]]]),
+class(lugares_por_visitar,top,[],[],
+[
+	[id=>[estante_bebidas],[],[]],
+	[id=>[estante_comida],[],[]],
+	[id=>[estante_pan],[],[]]
+]),
+class(estante_comida,escenario,[[dist_robot=>(10,0)],[]],[],
+[ 
+	[id=>[galletas],[[ubi_ideal=>(estante_comida,0),ubi_obs=>(desconocido,0),ubi_inf=>(estante_comida,0),colocar=>(1,0),buscar=>(1,0),agarrar=>(1,0)],[]],[]],
+	[id=>[coca],[[ubi_ideal=>(estante_comida,0),ubi_obs=>(estante_bebidas,0),ubi_inf=>(estante_comida,0),colocar=>(1,0),buscar=>(1,0),agarrar=>(1,0)],[]],[]],
+	[id=>[crema],[[ubi_ideal=>(estante_comida,0),ubi_obs=>(estante_bebidas,0),ubi_inf=>(estante_comida,0),colocar=>(1,0),buscar=>(1,0),agarrar=>(1,0)],[]],[]]
+]),
+
+class(estante_bebidas,escenario,[[dist_robo=>(10,0)],[]],[],
+[
+	[id=>[tequila],[
+		[ubi_ideal=>(estante_pan,0),ubi_obs=>(estante_comida,0),ubi_inf=>(estante_comida,0),colocar=>(1,0),
+		buscar=>(1,0),agarrar=>(1,0)],[]],[]]
+]),
+
+class(estante_pan,escenario,[[dist_robot=>(10,0)],[]],[],[]),
+class(acciones,top,
+	[
+		[
+			moverse_a=>(costo,1),moverse_a=>(recompensa,1),
+			entregar=>(costo,10),entregar=>(recompensa,10),
+			tomar=>(costo,10),tomar=>(recompensa,10),
+			colocar=>(costo,10),colocar=>(recompensa,70),
+			buscar=>(costo,100),buscar=>(recompensa,10),
+			estante_comida=>(costo,100),
+			estante_pan=>(costo,10),
+			estante_bebidas=>(costo,10)
+		],[]
+	],[],[])
+
+]
