@@ -2263,6 +2263,249 @@ mostrarDiagnostico([Obj1|Resto],Ubicacion,KB):-
 
 % modulo de desición  --------------------------------------------------------------------------------------------------------
 % este modulo tiene como objetivo relizar una planeacion de acciones que nos lleven a un objetivo
+
+iniciar_modulo_planificacion(KB,Decisiones,Objeto,Plan):-
+	obtener_propiedades_completas_objeto(robocop,KB,PropRobo), 	% obtenemos las propiedades del robot las inicales antes de todo
+	obtener_propiedades_clase(acciones,KB,ListaAcciones),
+	construir_arbol_busqueda(Decisiones,Decisiones,Arbol,KB,PropRobo),
+	CostoRecompensaPlan = [costo=>(0,0),recompensa=>(0,0)],
+	CostoInicial = [costo=>(1000000,0),recompensa=>(0,0)],
+	obtener_mejor_plan_en_arbol(CostoRecompensaPlan,[],CostoInicial,[],Arbol,ListaAcciones,Objeto,si,A,Plan),
+	write(Plan).
+
+imprimir_arbol([],_).
+
+imprimir_arbol([A|B],V):-
+	imprimir_hoja(A,V),
+	imprimir_arbol(B,V).
+
+imprimir_hoja([A|B],V):-
+	tab(V),
+	write(A),
+	nl,
+	V2 is V + 5 ,
+	imprimir_arbol(B,V2).
+
+calcular_mejor_plan(CR,[],CRV,PlV,CRV,PlV).
+
+calcular_mejor_plan(CR,PlN,CRV,PlV,CRN,PlNN):-
+	buscar_propiedad(costo,CR,_,Costo),			    % se obtiene se obtiene el costo actual acumulado
+	buscar_propiedad(recompensa,CR,_,Recompensa),   % se obtiene la recompensa actual acumulada
+	buscar_propiedad(costo,CRV,_,Costo2),			% se obtiene se obtiene el costo actual acumulado
+	buscar_propiedad(recompensa,CRV,_,Recompensa2), % se obtiene la recompensa actual acumulada
+	ValorAcumulador is Costo - Recompensa,
+	ValorCompetir   is Costo2 - Recompensa2,
+	mayor([ValorAcumulador,PlN,CR,ValorCompetir,PlV,CRV],[V,PlNN,CRN]).
+
+
+obtener_mejor_plan_en_arbol(AcumuladorPorNivel,PlanPorNivel, [costo=>(1000000, 0), recompensa=>(0, 0)],[],[],_,_,_,AcumuladorPorNivel,PlanPorNivel).
+%nl,write(AcumuladorPorNivel),tab(5),write(PlanPorNivel).
+
+obtener_mejor_plan_en_arbol(AcumuladorPorNivel,PlanPorNivel,AcumuladorValido,[],[],_,_,_,AcumuladorPorNivel,PlanPorNivel).
+%nl,write(AcumuladorPorNivel),tab(5),write(PlanPorNivel).
+
+obtener_mejor_plan_en_arbol(AcumuladorPorNivel,PlanPorNivel,AcumuladorValido,PlanValido,[A|[]],ListaAcciones,Objeto,Estado,AcumN,PlanN):-	
+	explorar_hijos(AcumuladorPorNivel,AcumuladorValido,PlanPorNivel,PlanValido,A,ListaAcciones,Objeto,Estado,AcumN,PlanN).
+
+obtener_mejor_plan_en_arbol(AcumuladorPorNivel,PlanPorNivel,AcumuladorValido,PlanValido,[A|B],ListaAcciones,Objeto,Estado,AcumN,PlanN):-	
+	explorar_hijos(AcumuladorPorNivel,AcumuladorValido,PlanPorNivel,PlanValido,A,ListaAcciones,Objeto,Estado,AcumN2,PlanN2),
+	obtener_mejor_plan_en_arbol(AcumuladorPorNivel,PlanPorNivel,AcumN2,PlanN2,B,ListaAcciones,Objeto,Estado,AcumN,PlanN).
+
+obtener_mejor_plan_en_arbol(AcumuladorPorNivel,PlanPorNivel,AcumuladorValido,PlanValido,[],_,_,_,AcumN,PlanN):-
+	calcular_mejor_plan(AcumuladorPorNivel,PlanPorNivel,AcumuladorValido,PlanValido,AcumN,PlanN).
+	%nl,write(AcumuladorPorNivel),tab(5),write(PlanPorNivel).
+
+%PREDICADO QUE RECIBE LOS SIGUIENTES PARAMETROS
+%ACUMULADOR DE COSTOS Y RECOMPENSAS, LISTA DEL PLAN ACTUAL, LISTA DEL ÁRBOL, ESTADO ENTREGA, OBJETO ENTREGAR Y LISTA DE ACCIONES
+explorar_hijos(AcumuladorPorNivel,AcumuladorValido,Nivel,PlanValido,[A|B],ListaAcciones,Objeto,Estado,AcumN,PlanN):-
+	append(Nivel,A,PlanHijo),
+	desicion_acumulacion(Estado,A,Objeto,NuevoEstado,AcumuladorPorNivel,AcumuladorPorNivel2,ListaAcciones),
+	obtener_mejor_plan_en_arbol(AcumuladorPorNivel2,PlanHijo,AcumuladorValido,PlanValido,B,ListaAcciones,Objeto,NuevoEstado,AcumN,PlanN).
+
+
+desicion_acumulacion(V,[],_,V,CR,CR,_).
+
+desicion_acumulacion(si,[colocar=>Objeto|R],Objeto,V,CR,CR2,ListaAcciones):-
+	actualizar_costos_recompensas(CR,CR3,colocar,ListaAcciones,si),
+	desicion_acumulacion(no,R,Objeto,V,CR3,CR2,ListaAcciones).
+
+
+desicion_acumulacion(si,[Accion=>Objeto|R],Objet,V,CR,CR2,ListaAcciones):-
+	actualizar_costos_recompensas(CR,CR3,Accion=>Objeto,ListaAcciones,si),
+	desicion_acumulacion(si,R,Objet,V,CR3,CR2,ListaAcciones).
+
+desicion_acumulacion(no,[Accion=>_|R],Objeto,V,CR,CR2,ListaAcciones):-
+	desicion_acumulacion(no,R,Objeto,V,CR,CR2,ListaAcciones).
+
+
+mayor(A,A).
+mayor([Valor,PlanNivel,Acumulado|T],[V,PlanMejor,CosteR]):-
+    mayor(T,[X2,Y2,Z2]),
+    	(X2 < Valor,V=X2, PlanMejor=Y2, CosteR=Z2; V=Valor, PlanMejor=PlanNivel, CosteR=Acumulado),!.
+
+%PREDICADOS QUE PERMITEN CONSTRUIR EL ARBOL DE BUSQUEDA ------------------------------------------------------------------------
+
+%predicado base que detiene la recursividad
+construir_arbol_busqueda([],_,[],_,_).
+
+construir_arbol_busqueda([Orden=>Objetivo|R],Desiciones,[Nodo1|NodoN],KB,Prop):-
+	obtener_elementos_distintos(Orden=>Objetivo,Desiciones,Filtrados), % primero filtramos por elementos diferentes para el siguiente nivel
+	contruir_rama_arbol(Orden=>Objetivo,Filtrados,Desiciones,Nodo1,KB,Prop), % inicia con el calculo de planes para ese nivel
+	construir_arbol_busqueda(R,Desiciones,NodoN,KB,Prop).
+
+contruir_rama_arbol(Orden=>Objetivo,Filtrados,Desiciones,[Nodo1|NodoN],KB,Prop):-
+	iniciar_planeacion(Orden=>Objetivo,Nodo1,KB,Prop,PropN), % inicia la planeación
+	construir_arbol_busqueda(Filtrados,Filtrados,NodoN,KB,PropN).
+
+%-------------------------------------------------------------------------------------------------------------------------------
+
+
+% PREDICADOS QUE PERMITEN FILTRAR UNA LISTA OBTENIENDO LOS ELEMENTOS DIFERENTES AL ELEMENTO DADO-------------------------------
+
+%predicado base que detiene la recursividad
+obtener_elementos_distintos(_,[],[]).
+
+obtener_elementos_distintos(A,[A|B],L):-
+	obtener_elementos_distintos(A,B,L).
+
+obtener_elementos_distintos(A,[B|C],[B|D]):-
+	obtener_elementos_distintos(A,C,D).
+
+%-------------------------------------------------------------------------------------------------------------------------------
+iniciar_planeacion([],[],_,A,A).
+
+iniciar_planeacion(ordenar=>Objeto,Plan,KB,PropRobo,PropN):-	
+	modificar_valor_propiedad_objeto(PropRobo,mano_izq,Objeto,PropRoboN),	
+	iniciar_planeacion_secuencia(Objeto,Plan,KB,PropRoboN,PropN).
+
+iniciar_planeacion(Accion=>Objeto,Plan,KB,PropRobo,PropN):-
+	iniciar_planeacion_secuencia(Objeto,Plan,KB,PropRobo,PropN).
+
+iniciar_planeacion_secuencia(Objeto,Plan,KB,PropRobo,PropN):-
+	obtener_estado_inicial(ClaseRobot,KB), 							% aqui se tiene el primer estado, el estado inicial
+	obtener_propiedades_completas_objeto(Objeto,KB,PropObj), 		% obtenemos las propiedades del objeto a buscar
+	buscar_propiedad(ubi_inf,PropObj,_,UbiEst),						% en este predicado se obtiene el posible estante donde podria estar el producto	
+	obtener_propiedades_clase(acciones,KB,ListaAcciones),
+	ejecutar_modulo_planeacion(PropRobo,Objeto,UbiEst,Plan,PropN2),
+	PropN = PropN2.
+
+ejecutar_modulo_planeacion(PropRobo,Objeto,EstInf,Secuencia,PropN):-
+	buscar_propiedad(ubic_actual,PropRobo,_,UbiR), % se obtiene la ubicación actual del robot
+	buscar_propiedad(mano_der,PropRobo,_,ManoDer), % se obtiene lo que tiene en la mano derecha
+	buscar_propiedad(mano_izq,PropRobo,_,ManoIzq), % se obtiene lo que tiene en la mano derecha
+	buscar_propiedad(ver,PropRobo,_,Visto), % se obtiene lo que tiene en la mano derecha
+	buscar_propiedad(en_entrega,PropRobo,_,Estado), % se obtiene el estado de la entrega
+	generar_estado(EstInf,ubic_actual=>(UbiR,_),mano_der=>(ManoDer,_),mano_izq=>(ManoIzq,_),ver=>(Visto,_),Objeto,PropRobo,Secuencia,PropN).
+
+actualizar_costos_recompensas(CR,CR2,moverse_a=>Estante,ListaAcciones,si):-
+	buscar_propiedad(costo,CR,_,Costo),			  % se obtiene se obtiene el costo actual acumulado
+	buscar_propiedad(recompensa,CR,_,Recompensa), % se obtiene la recompensa actual acumulada
+	obtener_propiedad_por_valor(Estante,costo,ListaAcciones,ValorCosto),
+	obtener_propiedad_por_valor(Estante,recompensa,ListaAcciones,ValorRecompensa),
+	C is Costo 		+ ValorCosto,
+	R is Recompensa + ValorRecompensa,
+	CR2 = [costo=>(C,0),recompensa=>(R,0)].
+
+actualizar_costos_recompensas(CR,CR2,Accion=>_,ListaAcciones,si):-
+	buscar_propiedad(costo,CR,_,Costo),			  % se obtiene se obtiene el costo actual acumulado
+	buscar_propiedad(recompensa,CR,_,Recompensa), % se obtiene la recompensa actual acumulada
+	obtener_propiedad_por_valor(Accion,costo,ListaAcciones,ValorCosto),
+	obtener_propiedad_por_valor(Accion,recompensa,ListaAcciones,ValorRecompensa),
+	C is Costo 		+ ValorCosto,
+	R is Recompensa + ValorRecompensa,
+	CR2 = [costo=>(C,0),recompensa=>(R,0)].
+
+actualizar_costos_recompensas(CR,CR,Accion,ListaAcciones,no).
+
+
+%predicado que genera el estado para obtener un producto de un estante
+%REGLA PARA TOMAR UN ELEMENTO DE UN ESTANTE
+generar_estado(Estante,ubic_actual=>(Estante,_),mano_der=>(desconocido,_),
+			mano_izq=>(_,_),ver=>(Objeto,_),Objeto,PropRobo,
+			[tomar=>(Objeto)|R],PropN):-
+	modificar_valor_propiedad_objeto(PropRobo,mano_der,Objeto,PropRoboN),
+	modificar_valor_propiedad_objeto(PropRoboN,ver,nada,PropRoboNN),
+	%actualizar_costos_recompensas(CR,CR3,tomar,ListaAcciones,Estado),	
+	ejecutar_modulo_planeacion(PropRoboNN,Objeto,Estante,R,PropN).
+
+%cuando ya se esta con el cliente queda solo entrar el producto
+% REGLA PARA COLOCAR AL CLIENTE
+generar_estado(_,ubic_actual=>(cliente,_),mano_der=>(Objeto,_),
+			mano_izq=>(_,_),ver=>(X,_),Objeto,PropRobo,
+			[colocar=>(Objeto)],PropN2):-
+	modificar_valor_propiedad_objeto(PropRobo,mano_der,desconocido,PropN),
+	modificar_valor_propiedad_objeto(PropN,ver,nada,PropN2).
+	%modificar_valor_propiedad_objeto(PropN2,en_entrega,no,PropNN).
+	%actualizar_costos_recompensas(CR,CR3,tomar,ListaAcciones,Estado), CR2 = CR3.
+
+% REGLA PARA BUSCAR UN ELEMENTO EN EL ESTANTE
+generar_estado(Estante,ubic_actual=>(Estante,_),mano_der=>(_,_),
+			mano_izq=>(desconocido,_),ver=>(nada,_),Objeto,PropRobo,
+			[buscar=>(Objeto)|R],PropN):-
+	modificar_valor_propiedad_objeto(PropRobo,ver,Objeto,PropRoboN),
+	%actualizar_costos_recompensas(CR,CR3,buscar,ListaAcciones,Estado),
+	ejecutar_modulo_planeacion(PropRoboN,Objeto,Estante,R,PropN).
+
+%PERMITE COLOCAR UN PRODUCTO EN SU LUGAR
+generar_estado(Estante,ubic_actual=>(Estante,_),mano_der=>(_,_),
+			mano_izq=>(ObjetoOrdenar,_),ver=>(nada,_),Objeto,PropRobo,
+			[colocar=>(ObjetoOrdenar)],PropN):-
+	modificar_valor_propiedad_objeto(PropRobo,mano_izq,desconocido,PropN).
+	%actualizar_costos_recompensas(CR,CR2,colocar,ListaAcciones,Estado).
+
+%predicado que genera el estado para obtener un producto de un estante
+%REGLA PARA IR FRENTE AL CLIENTE
+generar_estado(Estante,ubic_actual=>(Estante,_),mano_der=>(Objeto,_),
+				mano_izq=>(_,_),ver=>(X,_),Objeto,PropRobo,
+				[moverse_a=>(cliente)|R],PropN):-
+	modificar_valor_propiedad_objeto(PropRobo,ubic_actual,cliente,PropRoboN),
+	%actualizar_costos_recompensas(CR,CR3,moverse_a,ListaAcciones,Estado),
+	ejecutar_modulo_planeacion(PropRoboN,Objeto,Estante,R,PropN).
+
+%REGLA QUE PERMITE DIRIGIRISE A LA UBICACIÓN DONDE SE ORDENADA UN PRODUCTO
+generar_estado(EstanteA,ubic_actual=>(EstanteB,_),mano_der=>(_,_),
+			mano_izq=>(ObjetoOrdenar,_),ver=>(X,_),Objeto,PropRobo,
+			[moverse_a=>(EstanteA)|R],PropN):-
+	modificar_valor_propiedad_objeto(PropRobo,ubic_actual,EstanteA,PropRoboN),
+	%actualizar_costos_recompensas(CR,CR3,moverse_a,ListaAcciones,Estado),
+	%actualizar_costos_recompensas(CR3,CR4,EstanteA,ListaAcciones,Estado),
+	ejecutar_modulo_planeacion(PropRoboN,Objeto,EstanteA,R,PropN).
+
+%Predicado que genera el estado de cambio de posición
+% REGLA PARA MOVERSE
+generar_estado(EstanteA,ubic_actual=>(EstanteB,_),mano_der=>(_,_),
+	mano_izq=>(_,_),ver=>(X,_),Objeto,PropRobo,
+	[moverse_a=>(EstanteA)|R],PropN):-
+	modificar_valor_propiedad_objeto(PropRobo,ubic_actual,EstanteA,PropRoboN),
+	%actualizar_costos_recompensas(CR,CR3,moverse_a,ListaAcciones,Estado),
+	%actualizar_costos_recompensas(CR3,CR4,EstanteA,ListaAcciones,Estado),
+	ejecutar_modulo_planeacion(PropRoboN,Objeto,EstanteA,R,PropN).
+
+modificar_valor_propiedad_objeto([Prop=>(Val,Pes)|B],Prop,NuevoValor,[Prop=>(NuevoValor,Pes)|B]).
+
+modificar_valor_propiedad_objeto([A|B],Prop,NuevoValor,[A|C]):-
+	modificar_valor_propiedad_objeto(B,Prop,NuevoValor,C).
+
+obtener_propiedad_por_valor(_,_,[],0).
+
+obtener_propiedad_por_valor(P,V,[P=>(V,PE)|_],PE).
+
+obtener_propiedad_por_valor(P,V,[_|R],PE):-
+	obtener_propiedad_por_valor(P,V,R,PE).
+
+%esta es nuetra función, sirve para calcular el sguiente estado valido
+%calcular_siguiente_estado(UbiActual,UbiLlegar,Objeto,NuevoEstado):-
+
+% predicado que obtiene el estado inicial de el árbol de planeación
+obtener_estado_inicial(X,KB):-
+	buscar_obtener_clase(X,robot,KB).
+
+% Predicado que unifica donde coincida la clase a buscar
+buscar_obtener_clase([class(ClaseBuscar,Padre,P,R,O)],ClaseBuscar,[class(ClaseBuscar,Padre,P,R,O)|_]).
+
+buscar_obtener_clase(X,ClaseBuscar,[class(_,_,_,_,_)|R]):-
+	buscar_obtener_clase(X,ClaseBuscar,R).
+
 %-------------------------------------------------------------------------------------------------------------------------------
 toma_de_desiciones(ClientObj,KB,[entregar=>ClientObj|B]):-
 	obtener_estantes(KB,B).
