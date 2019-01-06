@@ -2506,48 +2506,67 @@ buscar_obtener_clase([class(ClaseBuscar,Padre,P,R,O)],ClaseBuscar,[class(ClaseBu
 buscar_obtener_clase(X,ClaseBuscar,[class(_,_,_,_,_)|R]):-
 	buscar_obtener_clase(X,ClaseBuscar,R).
 
+
+% Módulo de Toma de Decisión --------------------------------------------------------------------------------------------------------
 %-------------------------------------------------------------------------------------------------------------------------------
-toma_de_desiciones(ClientObj,KB,[entregar=>ClientObj|B]):-
-	obtener_estantes(KB,B).
+
+%%*** Predicado principal recibe: 
+%% ClientObj -> producto que pidio cliente
+%% KB -> la base de conocimiento
+%% Decision -> lista de salida con las acciones/desisciones tomadas
+toma_de_desiciones(Decision,KB):-
+	obtener_estantes_escenario(KB,AuxDecision),
+	obtener_producto_cliente(KB,Producto),
+	append([entregar=>Producto],AuxDecision,Decision),
+	write(Producto).
 	
-obtener_estantes([],[]).
-
-obtener_estantes([class(Class,escenario,_,_,O)|R],[A|B]):-
+%%*** Predicados para obtener los estantes del supermercado
+%% caso base
+obtener_estantes_escenario([],[]).
+%% obtener solo aquellos cuyo padre sea escenario (donde residen los estantes)
+obtener_estantes_escenario([class(Class,escenario,_,_,O)|R],[A|B]):-
 	write(Class), nl,
-	obtener_objetos_estantes(O, A),
-	obtener_estantes(R,B).
+	obtener_objetos_estantes(O,A),
+	obtener_estantes_escenario(R,B).
+%% siguiente iteracion
+obtener_estantes_escenario([_|R],X):-
+	obtener_estantes_escenario(R,X).
 
-obtener_estantes([_|R],X):-
-	obtener_estantes(R,X).
-
+%%*** Predicados para obtener los objetos que contienen los estantes
+%% Caso base
 obtener_objetos_estantes([],[]).
-
+%% obtener objeto, sus propiedades y ver su estado (ordenado, desordenado, desconocido)
 obtener_objetos_estantes([[id=>Obj,[Prop|_],_]|R],RR):-
 	estado_objeto(Obj,Prop,D,Edo),
 	obtener_objetos_estantes(R,BB),
 	append(D,BB,RR).
 
-estado_objeto(Obj, [ubi_ideal=>(A,_),ubi_obs=>(A,_),ubi_inf=>(desconocido,0),_,_,_], [], ordenado):-
+%%*** Predicados que indican el estado de un objeto (ordenado, desordenado, desconocido)
+%% Estado que indica que el objeto está ordenado (en su estante correcto)
+estado_objeto(Obj, [ubi_ideal=>(A,_),ubi_obs=>(A,_),ubi_inf=>(_,0),_,_,_], [], ordenado):-
 	write('Ordenado:'), write(Obj), nl.
-
-estado_objeto(Obj, [ubi_ideal=>(A,_),ubi_obs=>(desconocido,_),ubi_inf=>(desconocido,0),_,_,_], [], desconocido):-
+%% Estado que indica que el lugar del objeto es desconodico (aun on ha sido explorado)
+estado_objeto(Obj, [ubi_ideal=>(A,_),ubi_obs=>(desconocido,_),ubi_inf=>(_,0),_,_,_], [], desconocido):-
 	write('No Sabemos:'), write(Obj), nl.
-
-estado_objeto([Obj], [ubi_ideal=>(A,_),ubi_obs=>(B,_),ubi_inf=>(desconocido,0),_,_,_], ObjDesordenado, desordenado):-
+%% Estado que indica que el objeto está desordenado (en su estante incorrecto)
+estado_objeto([Obj], [ubi_ideal=>(A,_),ubi_obs=>(B,_),ubi_inf=>(_,0),_,_,_], ObjDesordenado, desordenado):-
 	write('No Ordenado:'), write(Obj), nl, 
 	ObjDesordenado = [ordenar=>Obj].
 
-agregar_objeto(Obj,_,ordenado).
-agregar_objeto(Obj,_,desconocido).
-agregar_objeto(Obj,Y,desordenado).
+%%*** Predicado para estado del producto solicitado por el cliente
+%% Caso base
+obtener_producto_cliente([],[]).
+%% obtener solo la clase cliente y sus propiedades
+obtener_producto_cliente([class(cliente,_,Prop,_,_)|R],Producto):-
+	estado_producto_cliente(Prop,Producto).
+%% siguiente iteracion/clase de la KB
+obtener_producto_cliente([_|R],P):-
+	obtener_producto_cliente(R,P).
 
-%% obtener_obj_desordenados(Obj,Prop,X,Edo):-
-%% 	estado_objeto(Obj,Prop,Y,Edo),
-%% 	isDisorder(Edo),
-%% 	append([Y],[],X).
-
-
-%% obtener_objetos_estantes(Resto,ListaObjDesordenados).
+%% Predicados que retorna el estado del producto
+estado_producto_cliente([peticion=>(A,0), obj_entregado=>(A,0)], []).
+estado_producto_cliente([peticion=>(desconocido,0), obj_entregado=>(desconocido,0)], []).
+estado_producto_cliente([peticion=>(A,0), obj_entregado=>(desconocido,0)], P):- P=[A].
 
 
 
