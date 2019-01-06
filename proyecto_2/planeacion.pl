@@ -2511,9 +2511,8 @@ buscar_obtener_clase(X,ClaseBuscar,[class(_,_,_,_,_)|R]):-
 %-------------------------------------------------------------------------------------------------------------------------------
 
 %%*** Predicado principal recibe: 
-%% ClientObj -> producto que pidio cliente
-%% KB -> la base de conocimiento
 %% Decision -> lista de salida con las acciones/desisciones tomadas
+%% KB -> la base de conocimiento
 toma_de_desiciones(Decision,KB):-
 	obtener_estantes_escenario(KB,AuxDecision),
 	obtener_producto_cliente(KB,Producto),
@@ -2552,7 +2551,7 @@ estado_objeto([Obj], [ubi_ideal=>(A,_),ubi_obs=>(B,_),ubi_inf=>(_,0),_,_,_], Obj
 	write('Desordenado:'), write(Obj), nl, 
 	ObjDesordenado = [ordenar=>Obj].
 
-%%*** Predicado para estado del producto solicitado por el cliente
+%%*** Predicados para estado del producto solicitado por el cliente
 %% Caso base
 obtener_producto_cliente([],[]).
 %% obtener solo la clase cliente y sus propiedades
