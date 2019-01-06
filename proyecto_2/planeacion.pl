@@ -2158,14 +2158,164 @@ write('Muy bien, entonces le traire ->'),tab(1),write(Orden).
 
 % modulo de diagnostico --------------------------------------------------------------------------------------------------------
 % este modulo tiene como objetivo consultar el conocimiento en la base de datos
-
+% Arranque: abrir(KB), comenzar_sis(KB,Producto,NewKB).
 %-------------------------------------------------------------------------------------------------------------------------------
+comenzar_sis(KB,Producto,NewKB):-
+	write("Hola, ¿qué producto quieres?"),
+	nl,
+	read(Producto),
+	obtenerDiagnostico(Producto,KB,NewKB),
+	writeln(NewKB).
+
+obtenerDiagnostico(Producto,KB,NewKB3):-
+	%write(Producto),
+	obtener_propiedades_completas_objeto(Producto,KB,Propiedades),
+	%writeln(Propiedades),
+	obtener_lugar_visitar(ubic_ideal,Propiedades,Lugar),
+	writeln(Lugar),
+	%Obtener objetos del lugar obtenido
+	extension_de_clase(Lugar,KB,Individuos),
+	cambiar_ubicaciones_objetos(Individuos,KB,Lugar,NewKB1),
+	writeln("NewkB1"),
+	writeln(NewKB1),
+	%Eliminar lugar que ya fue observado
+	eliminar_objeto(Lugar,NewKB1,NewKB2),
+	writeln("NewkB2"),
+	writeln(NewKB2),
+	%Obtener resto de los objetos
+	extension_de_clase(lugares_por_visitar,NewKB2,DemasLugares),
+	obtener_demas_objetos(DemasLugares,NewKB2,[],DemasObjetos),
+	writeln(""),
+	writeln(DemasObjetos),
+	length(DemasObjetos,NoElementos),
+	inferir_ubicaciones_resto(NoElementos,DemasLugares,DemasObjetos,NewKB2,NewKB3),
+	writeln(NewKB3),
+	% Mostrar todos los objetos para que sean mostrados en el diagnostico
+	writeln("El diagnostico acerca de la ubicación actual de los productos es:"),
+	mostrarDiagnostico(Individuos,ubic_obs,NewKB3),
+	mostrarDiagnostico(DemasObjetos,ubic_inf,NewKB3).
+
+%Cuando solo queda una ubicacion
+inferir_ubicaciones_resto(_,[_|_],[],NewKB2,NewKB2).
+inferir_ubicaciones_resto(1,[UnicoLugar|T],[Obj1|Resto],NewKB2,NewKB3):-
+	%Cambiar ubicacion observada de Obj1
+	cambiar_valor_propiedad_objeto(Obj1,ubic_inf=>(_,0),ubic_inf=>(UnicoLugar,0),NewKB2,AuxNewKB2),
+	writeln(""),
+	obtener_propiedades_completas_objeto(Obj1,AuxNewKB2,Propiedades),
+	writeln(Propiedades),
+	inferir_ubicaciones_resto(1,[UnicoLugar|T],Resto,AuxNewKB2,NewKB3).
+%Cuando tienes mas de una ubicacion por visitar
+inferir_ubicaciones_resto(NoElementos,Lugares,[Obj1|Resto],NewKB2,NewKB3):-
+	%Elegir número random de rotaciones
+	random_between(0, NoElementos, NoRandom),
+	rotar(Lugares, Resultado, NoRandom),
+	obtener_cabeza(Resultado, Lugar),
+	writeln(""),
+	writeln(""),
+	writeln(NoRandom),
+	writeln(Lugar),
+	%Cambiar ubicacion observada de Obj1
+	cambiar_valor_propiedad_objeto(Obj1,ubic_inf=>(_,0),ubic_inf=>(Lugar,0),NewKB2,AuxNewKB2),
+	writeln(""),
+	obtener_propiedades_completas_objeto(Obj1,AuxNewKB2,Propiedades),
+	writeln(Propiedades),
+	inferir_ubicaciones_resto(NoElementos,Lugares,Resto,AuxNewKB2,NewKB3).
+
+%Rotar lista (derecha) para hacer random la inferencia del lugar
+rotar(L,R, N):-
+	append(X, Y, L), 
+	size(X, N), 
+	append(Y, X, R).
+
+obtener_cabeza([Cabeza|_], Cabeza).
+
+obtener_demas_objetos([],_,DemasObjetos,DemasObjetos).
+obtener_demas_objetos([Lug1|Resto],NewKB2,ObjetosActuales,DemasObjetos):-
+	extension_de_clase(Lug1,NewKB2,AuxObjetos),
+	append(ObjetosActuales,AuxObjetos,AuxDemasObjetos),
+	obtener_demas_objetos(Resto,NewKB2,AuxDemasObjetos,DemasObjetos).
+
+obtener_lugar_visitar(_, [],"desconocido").
+obtener_lugar_visitar(Ubicacion, [Ubicacion=>(Lugar,_)|_],Lugar).
+obtener_lugar_visitar(Ubicacion,[_|Resto],Lugar):-
+	obtener_lugar_visitar(Ubicacion,Resto,Lugar).
+
+cambiar_ubicaciones_objetos([],KB,_,KB).
+cambiar_ubicaciones_objetos([Obj1|Resto],KB,Lugar,NuevaKB):-
+	%Cambiar ubicacion observada de Obj1
+	cambiar_valor_propiedad_objeto(Obj1,ubic_obs=>(_,0),ubic_obs=>(Lugar,0),KB,AuxNuevaKB),
+	writeln(""),
+	obtener_propiedades_completas_objeto(Obj1,AuxNuevaKB,Propiedades),
+	writeln(Obj1),
+	writeln(Propiedades),
+	cambiar_ubicaciones_objetos(Resto,AuxNuevaKB,Lugar,NuevaKB).
+
+mostrarDiagnostico([],_,_):-
+	!.
+mostrarDiagnostico([Obj1|Resto],Ubicacion,KB):-
+	writeln("El objeto ": Obj1),
+	obtener_propiedades_completas_objeto(Obj1,KB,Propiedades),
+	obtener_lugar_visitar(Ubicacion,Propiedades,Lugar),
+	writeln("está en": Lugar),
+	mostrarDiagnostico(Resto,Ubicacion,KB).
 
 
 
-% modulo de planeación  --------------------------------------------------------------------------------------------------------
+% modulo de desición  --------------------------------------------------------------------------------------------------------
 % este modulo tiene como objetivo relizar una planeacion de acciones que nos lleven a un objetivo
 %-------------------------------------------------------------------------------------------------------------------------------
+toma_de_desiciones(ClientObj,KB,Decisiones):-
+	obtener_estantes(KB, ObjDesordenados),
+	append([entregar=>[ClientObj]], ObjDesordenados, Decisiones).
+	
+obtener_estantes([],_).
+
+obtener_estantes([class(Class,escenario,_,_,O)|R],X):-
+	write(Class), nl,
+	obtener_objetos_estantes(O, X),
+	obtener_estantes(R,X).
+
+obtener_estantes([_|R],X):-
+	obtener_estantes(R,X).
+
+obtener_objetos_estantes([],[]).
+
+obtener_objetos_estantes([[id=>Obj,[Prop|_],_]|R],[A|B]):-
+	%% write(Obj), nl, 
+	%% write(Prop), nl,
+	estado_objeto(Obj,Prop,A2,Edo),
+	%% agregar_objeto(YY, NLista, Edo),
+	%% append([YY],NLista,Y),
+	%% write(Y),nl,
+	obtener_objetos_estantes(R,BB),
+	append([A2],[BB],B).
+	%% append(Y,[],XX),
+	%% write(Y).
+
+estado_objeto(Obj, [ubi_ideal=>(A,_),ubi_obs=>(A,_),ubi_inf=>(desconocido,0),_,_,_], [], ordenado):-
+	write('Ordenado:'), write(Obj), nl.
+
+estado_objeto(Obj, [ubi_ideal=>(A,_),ubi_obs=>(desconocido,_),ubi_inf=>(desconocido,0),_,_,_], [], desconocido):-
+	write('No Sabemos:'), write(Obj), nl.
+
+estado_objeto(Obj, [ubi_ideal=>(A,_),ubi_obs=>(B,_),ubi_inf=>(desconocido,0),_,_,_], ObjDesordenado, desordenado):-
+	write('No Ordenado:'), write(Obj), nl, 
+	ObjDesordenado = ordenar=>Obj.
+
+
+
+agregar_objeto(Obj,_,ordenado).
+agregar_objeto(Obj,_,desconocido).
+agregar_objeto(Obj,Y,desordenado).
+	%% append(Obj,[], Y).
+
+%% obtener_obj_desordenados(Obj,Prop,X,Edo):-
+%% 	estado_objeto(Obj,Prop,Y,Edo),
+%% 	isDisorder(Edo),
+%% 	append([Y],[],X).
+
+
+%% obtener_objetos_estantes(Resto,ListaObjDesordenados).
 
 
 
