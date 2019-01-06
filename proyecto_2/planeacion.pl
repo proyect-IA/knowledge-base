@@ -2517,8 +2517,7 @@ buscar_obtener_clase(X,ClaseBuscar,[class(_,_,_,_,_)|R]):-
 toma_de_desiciones(Decision,KB):-
 	obtener_estantes_escenario(KB,AuxDecision),
 	obtener_producto_cliente(KB,Producto),
-	append([entregar=>Producto],AuxDecision,Decision),
-	write(Producto).
+	append(Producto,AuxDecision,Decision).
 	
 %%*** Predicados para obtener los estantes del supermercado
 %% caso base
@@ -2547,10 +2546,10 @@ estado_objeto(Obj, [ubi_ideal=>(A,_),ubi_obs=>(A,_),ubi_inf=>(_,0),_,_,_], [], o
 	write('Ordenado:'), write(Obj), nl.
 %% Estado que indica que el lugar del objeto es desconodico (aun on ha sido explorado)
 estado_objeto(Obj, [ubi_ideal=>(A,_),ubi_obs=>(desconocido,_),ubi_inf=>(_,0),_,_,_], [], desconocido):-
-	write('No Sabemos:'), write(Obj), nl.
+	write('Desconocido:'), write(Obj), nl.
 %% Estado que indica que el objeto está desordenado (en su estante incorrecto)
 estado_objeto([Obj], [ubi_ideal=>(A,_),ubi_obs=>(B,_),ubi_inf=>(_,0),_,_,_], ObjDesordenado, desordenado):-
-	write('No Ordenado:'), write(Obj), nl, 
+	write('Desordenado:'), write(Obj), nl, 
 	ObjDesordenado = [ordenar=>Obj].
 
 %%*** Predicado para estado del producto solicitado por el cliente
@@ -2566,7 +2565,7 @@ obtener_producto_cliente([_|R],P):-
 %% Predicados que retorna el estado del producto
 estado_producto_cliente([peticion=>(A,0), obj_entregado=>(A,0)], []).
 estado_producto_cliente([peticion=>(desconocido,0), obj_entregado=>(desconocido,0)], []).
-estado_producto_cliente([peticion=>(A,0), obj_entregado=>(desconocido,0)], P):- P=[A].
+estado_producto_cliente([peticion=>(A,0), obj_entregado=>(desconocido,0)], P):- P=[entregar=>A].
 
 
 
