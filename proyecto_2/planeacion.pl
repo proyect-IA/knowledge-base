@@ -2158,83 +2158,106 @@ write('Muy bien, entonces le traire ->'),tab(1),write(Orden).
 
 % modulo de diagnostico --------------------------------------------------------------------------------------------------------
 % este modulo tiene como objetivo consultar el conocimiento en la base de datos
-
+% Arranque: abrir(KB), comenzar_sis(KB,Producto,NewKB).
 %-------------------------------------------------------------------------------------------------------------------------------
-comenzar_sis(KB,Producto):-
-	write("Hola, ¿qué chingados quieres?"),
+comenzar_sis(KB,Producto,NewKB):-
+	write("Hola, ¿qué producto quieres?"),
 	nl,
 	read(Producto),
-	verExistenciaProducto(Producto,[],KB).
-	%diagnosticar(KB,Producto,Resultado).
+	obtenerDiagnostico(Producto,KB,NewKB),
+	writeln(NewKB).
 
-verExistenciaProducto(Producto,ListaProductos,KB):-
-	write(Producto),
-	obtener_relaciones_completas_objeto(Producto,KB,Relaciones),
-	write(Relaciones),
-	agregarProducto(Relaciones,Producto,ListaActual,NuevaLista),
-	%informarNoProducto(Relaciones),
-	tomarNuevaOrden(KB,NuevoProducto),
-	%extension_de_clase(objetos, KB, Productos),
-	%write(Productos),
-	nl.
+obtenerDiagnostico(Producto,KB,NewKB3):-
+	%write(Producto),
+	obtener_propiedades_completas_objeto(Producto,KB,Propiedades),
+	%writeln(Propiedades),
+	obtener_lugar_visitar(ubic_ideal,Propiedades,Lugar),
+	writeln(Lugar),
+	%Obtener objetos del lugar obtenido
+	extension_de_clase(Lugar,KB,Individuos),
+	cambiar_ubicaciones_objetos(Individuos,KB,Lugar,NewKB1),
+	writeln("NewkB1"),
+	writeln(NewKB1),
+	%Eliminar lugar que ya fue observado
+	eliminar_objeto(Lugar,NewKB1,NewKB2),
+	writeln("NewkB2"),
+	writeln(NewKB2),
+	%Obtener resto de los objetos
+	extension_de_clase(lugares_por_visitar,NewKB2,DemasLugares),
+	obtener_demas_objetos(DemasLugares,NewKB2,[],DemasObjetos),
+	writeln(""),
+	writeln(DemasObjetos),
+	length(DemasObjetos,NoElementos),
+	inferir_ubicaciones_resto(NoElementos,DemasLugares,DemasObjetos,NewKB2,NewKB3),
+	writeln(NewKB3),
+	% Mostrar todos los objetos para que sean mostrados en el diagnostico
+	writeln("El diagnostico acerca de la ubicación actual de los productos es:"),
+	mostrarDiagnostico(Individuos,ubic_obs,NewKB3),
+	mostrarDiagnostico(DemasObjetos,ubic_inf,NewKB3).
 
-agregarProducto(Relaciones,Producto,ListaProductos,NuevaLista):-
-	not(Relaciones=[]),
-	append(ListaProductos,[Producto],NuevaLista),
-	write(NuevaLista).
+%Cuando solo queda una ubicacion
+inferir_ubicaciones_resto(_,[_|_],[],NewKB2,NewKB2).
+inferir_ubicaciones_resto(1,[UnicoLugar|T],[Obj1|Resto],NewKB2,NewKB3):-
+	%Cambiar ubicacion observada de Obj1
+	cambiar_valor_propiedad_objeto(Obj1,ubic_inf=>(_,0),ubic_inf=>(UnicoLugar,0),NewKB2,AuxNewKB2),
+	writeln(""),
+	obtener_propiedades_completas_objeto(Obj1,AuxNewKB2,Propiedades),
+	writeln(Propiedades),
+	inferir_ubicaciones_resto(1,[UnicoLugar|T],Resto,AuxNewKB2,NewKB3).
+%Cuando tienes mas de una ubicacion por visitar
+inferir_ubicaciones_resto(NoElementos,Lugares,[Obj1|Resto],NewKB2,NewKB3):-
+	%Elegir número random de rotaciones
+	random_between(0, NoElementos, NoRandom),
+	rotar(Lugares, Resultado, NoRandom),
+	obtener_cabeza(Resultado, Lugar),
+	writeln(""),
+	writeln(""),
+	writeln(NoRandom),
+	writeln(Lugar),
+	%Cambiar ubicacion observada de Obj1
+	cambiar_valor_propiedad_objeto(Obj1,ubic_inf=>(_,0),ubic_inf=>(Lugar,0),NewKB2,AuxNewKB2),
+	writeln(""),
+	obtener_propiedades_completas_objeto(Obj1,AuxNewKB2,Propiedades),
+	writeln(Propiedades),
+	inferir_ubicaciones_resto(NoElementos,Lugares,Resto,AuxNewKB2,NewKB3).
 
-tomarNuevaOrden(KB,NuevoProducto):-
-	write("¿Quieres algo más?"),
-	nl,
-	mostrarDiagnostico(KB).
+%Rotar lista (derecha) para hacer random la inferencia del lugar
+rotar(L,R, N):-
+	append(X, Y, L), 
+	size(X, N), 
+	append(Y, X, R).
 
-informarNoProducto(Relaciones):-
-	Relaciones=[],
-	write("Este producto no está en mi tienda"),
-	nl.
+obtener_cabeza([Cabeza|_], Cabeza).
 
-mostrarDiagnostico(KB):-
-	write("El diagnostico acerca de la ubicación actual de los productos es:"),
-	nl,
-	extension_de_clase(lugares,KB,Lugares),
-	extension_de_clase(objetos,KB,Productos),
-	agruparPorLugar(Lugares,Productos,[],NuevaLista,KB).
-	%write(Lugares),write(Productos).
-	
-%abrir(KB), extension_de_clase(lugares,KB,Lugares),extension_de_clase(objetos,KB,Productos),agruparPorLugar(Lugares,Productos,[],NuevaLista,KB).
-agruparPorLugar([],Productos,ListaActual,NuevaLista,KB):-
-	NuevaLista = ListaActual.
+obtener_demas_objetos([],_,DemasObjetos,DemasObjetos).
+obtener_demas_objetos([Lug1|Resto],NewKB2,ObjetosActuales,DemasObjetos):-
+	extension_de_clase(Lug1,NewKB2,AuxObjetos),
+	append(ObjetosActuales,AuxObjetos,AuxDemasObjetos),
+	obtener_demas_objetos(Resto,NewKB2,AuxDemasObjetos,DemasObjetos).
 
-agruparPorLugar([Lugar|Resto],Productos,ListaActual,NuevaLista,KB):-
-	agruparPorProducto(Lugar,Productos,[],ProductosDeLugar,KB),
-	append(ListaActual,[Lugar=>ProductosDeLugar],NuevaLista),
-	write(NuevaLista),
-	agruparPorLugar(Resto,Productos,NuevaLista,NuevaLista2,KB).
+obtener_lugar_visitar(_, [],"desconocido").
+obtener_lugar_visitar(Ubicacion, [Ubicacion=>(Lugar,_)|_],Lugar).
+obtener_lugar_visitar(Ubicacion,[_|Resto],Lugar):-
+	obtener_lugar_visitar(Ubicacion,Resto,Lugar).
 
-%abrir(KB), extension_de_clase(objetos,KB,Productos),agruparPorProducto(estante_bebidas,Productos,[],NuevaLista,KB).
-agruparPorProducto(Lugar,[],ListaActual,ListaActual,KB):-
-	writeln("Fin1"),
-	NuevaLista = ListaActual,
-	writeln(NuevaLista).
-
-agruparPorProducto(Lugar,[Obj1|Resto],ListaActual,NuevaLista,KB):-
+cambiar_ubicaciones_objetos([],KB,_,KB).
+cambiar_ubicaciones_objetos([Obj1|Resto],KB,Lugar,NuevaKB):-
+	%Cambiar ubicacion observada de Obj1
+	cambiar_valor_propiedad_objeto(Obj1,ubic_obs=>(_,0),ubic_obs=>(Lugar,0),KB,AuxNuevaKB),
+	writeln(""),
+	obtener_propiedades_completas_objeto(Obj1,AuxNuevaKB,Propiedades),
 	writeln(Obj1),
-	obtener_relaciones_completas_objeto(Obj1,KB,Relaciones),
-	writeln(Relaciones),
-	agregarALista(Lugar,Obj1,Relaciones,ListaActual,NuevaLista),
-	writeln(NuevaLista),	
-	agruparPorProducto(Lugar,Resto,NuevaLista,NuevaLista2,KB).
+	writeln(Propiedades),
+	cambiar_ubicaciones_objetos(Resto,AuxNuevaKB,Lugar,NuevaKB).
 
-agregarALista(Lugar,Obj1,[],ListaActual,NuevaLista):-
-	writeln("Fin2"),
-	NuevaLista = ListaActual,
-	writeln(NuevaLista).
-
-agregarALista(Lugar,Obj1,[posO=>(Lugar,_)|_],ListaActual,NuevaLista):-
-	append(ListaActual,[Obj1],NuevaLista).
-
-agregarALista(Lugar,Obj1,[_=>(_,_)|T],ListaActual,NuevaLista):-
-	agregarALista(Lugar,Obj1,T,ListaActual,NuevaLista).
+mostrarDiagnostico([],_,_):-
+	!.
+mostrarDiagnostico([Obj1|Resto],Ubicacion,KB):-
+	writeln("El objeto ": Obj1),
+	obtener_propiedades_completas_objeto(Obj1,KB,Propiedades),
+	obtener_lugar_visitar(Ubicacion,Propiedades,Lugar),
+	writeln("está en": Lugar),
+	mostrarDiagnostico(Resto,Ubicacion,KB).
 
 
 
