@@ -2264,33 +2264,25 @@ mostrarDiagnostico([Obj1|Resto],Ubicacion,KB):-
 % modulo de desición  --------------------------------------------------------------------------------------------------------
 % este modulo tiene como objetivo relizar una planeacion de acciones que nos lleven a un objetivo
 %-------------------------------------------------------------------------------------------------------------------------------
-toma_de_desiciones(ClientObj,KB,Decisiones):-
-	obtener_estantes(KB, ObjDesordenados),
-	append([entregar=>[ClientObj]], ObjDesordenados, Decisiones).
+toma_de_desiciones(ClientObj,KB,[entregar=>ClientObj|B]):-
+	obtener_estantes(KB,B).
 	
-obtener_estantes([],_).
+obtener_estantes([],[]).
 
-obtener_estantes([class(Class,escenario,_,_,O)|R],X):-
+obtener_estantes([class(Class,escenario,_,_,O)|R],[A|B]):-
 	write(Class), nl,
-	obtener_objetos_estantes(O, X),
-	obtener_estantes(R,X).
+	obtener_objetos_estantes(O, A),
+	obtener_estantes(R,B).
 
 obtener_estantes([_|R],X):-
 	obtener_estantes(R,X).
 
 obtener_objetos_estantes([],[]).
 
-obtener_objetos_estantes([[id=>Obj,[Prop|_],_]|R],[A|B]):-
-	%% write(Obj), nl, 
-	%% write(Prop), nl,
-	estado_objeto(Obj,Prop,A2,Edo),
-	%% agregar_objeto(YY, NLista, Edo),
-	%% append([YY],NLista,Y),
-	%% write(Y),nl,
+obtener_objetos_estantes([[id=>Obj,[Prop|_],_]|R],RR):-
+	estado_objeto(Obj,Prop,D,Edo),
 	obtener_objetos_estantes(R,BB),
-	append([A2],[BB],B).
-	%% append(Y,[],XX),
-	%% write(Y).
+	append(D,BB,RR).
 
 estado_objeto(Obj, [ubi_ideal=>(A,_),ubi_obs=>(A,_),ubi_inf=>(desconocido,0),_,_,_], [], ordenado):-
 	write('Ordenado:'), write(Obj), nl.
@@ -2298,16 +2290,13 @@ estado_objeto(Obj, [ubi_ideal=>(A,_),ubi_obs=>(A,_),ubi_inf=>(desconocido,0),_,_
 estado_objeto(Obj, [ubi_ideal=>(A,_),ubi_obs=>(desconocido,_),ubi_inf=>(desconocido,0),_,_,_], [], desconocido):-
 	write('No Sabemos:'), write(Obj), nl.
 
-estado_objeto(Obj, [ubi_ideal=>(A,_),ubi_obs=>(B,_),ubi_inf=>(desconocido,0),_,_,_], ObjDesordenado, desordenado):-
+estado_objeto([Obj], [ubi_ideal=>(A,_),ubi_obs=>(B,_),ubi_inf=>(desconocido,0),_,_,_], ObjDesordenado, desordenado):-
 	write('No Ordenado:'), write(Obj), nl, 
-	ObjDesordenado = ordenar=>Obj.
-
-
+	ObjDesordenado = [ordenar=>Obj].
 
 agregar_objeto(Obj,_,ordenado).
 agregar_objeto(Obj,_,desconocido).
 agregar_objeto(Obj,Y,desordenado).
-	%% append(Obj,[], Y).
 
 %% obtener_obj_desordenados(Obj,Prop,X,Edo):-
 %% 	estado_objeto(Obj,Prop,Y,Edo),
