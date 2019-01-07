@@ -1390,16 +1390,16 @@ borrar_relacion_con_objeto(_,[],[]).
 
 borrar_relacion_con_objeto(Object,[class(C,M,P,R,O)|T],[class(C,M,P,NewR,NewO)|NewT]):-
 	cancel_relation(Object,R,NewR),
-	write("Relaciones:"),
-	write(R),
+	%write("Relaciones:"),
+	%write(R),
 	del_relations(Object,O,NewO),
 	borrar_relacion_con_objeto(Object,T,NewT).
 
 del_relations(_,[],[]).
 
 del_relations(Object,[[id=>N,P,R]|T],[[id=>N,P,NewR]|NewT]):-
-	write("Resto:"),
-	write(R),
+	%write("Resto:"),
+	%write(R),
 	cancel_relation(Object,R,NewR),
 	del_relations(Object,T,NewT).
 
@@ -2159,62 +2159,70 @@ cambiar_peso_preferencia_relacion_individuo(ObjectName,Preferencia,PreferenciaNu
 comenzar_sis(KB,Producto,NewKB):-
 	write("Hola, ¿qué producto quieres?"),
 	nl,
-	%read(Producto),
-	obtenerDiagnostico(Producto,KB,NewKB),
-	writeln(NewKB).
+	read(Producto),
+	obtenerDiagnostico(Producto,KB,NewKB).
+	%writeln(NewKB).
 
 obtenerDiagnostico(Producto,KB,NewKB3):-
 	%write(Producto),
 	obtener_propiedades_completas_objeto(Producto,KB,Propiedades),
 	%writeln(Propiedades),
 	obtener_lugar_visitar(ubic_ideal,Propiedades,Lugar),
-	writeln(Lugar),
+	writeln(""),
+	atom_concat('Lugar a visitar: ', Lugar, MensajeLugar),
+	writeln(MensajeLugar),
 	%Obtener objetos del lugar obtenido
 	extension_de_clase(Lugar,KB,Individuos),
+	writeln('Observando los objetos': Individuos),
 	cambiar_ubicaciones_objetos(Individuos,KB,Lugar,NewKB1),
-	writeln("NewkB1"),
-	writeln(NewKB1),
+	%writeln("NewkB1"),
+	%writeln(NewKB1),
 	%Eliminar lugar que ya fue observado
 	eliminar_objeto(Lugar,NewKB1,NewKB2),
-	writeln("NewkB2"),
-	writeln(NewKB2),
+	atom_concat('Eliminando lugar visitado: ', Lugar, MensajeEliminar),
+	writeln(MensajeEliminar),
 	%Obtener resto de los objetos
 	extension_de_clase(lugares_por_visitar,NewKB2,DemasLugares),
 	obtener_demas_objetos(DemasLugares,NewKB2,[],DemasObjetos),
-	writeln(""),
-	writeln(DemasObjetos),
+	writeln('Inferir lugar de los objetos': DemasObjetos),
+	%Obtener tamaño de la lista de los objetos a inferir
 	length(DemasObjetos,NoElementos),
 	inferir_ubicaciones_resto(NoElementos,DemasLugares,DemasObjetos,NewKB2,NewKB3),
-	writeln(NewKB3),
+	%writeln(NewKB3),
 	% Mostrar todos los objetos para que sean mostrados en el diagnostico
+	writeln(''),
 	writeln("El diagnostico acerca de la ubicación actual de los productos es:"),
-	mostrarDiagnostico(Individuos,ubic_obs,NewKB3),
-	mostrarDiagnostico(DemasObjetos,ubic_inf,NewKB3).
+	mostrarDiagnostico(Individuos,ubic_obs,NewKB3, observado),
+	mostrarDiagnostico(DemasObjetos,ubic_inf,NewKB3, inferido).
 
 %Cuando solo queda una ubicacion
 inferir_ubicaciones_resto(_,[_|_],[],NewKB2,NewKB2).
 inferir_ubicaciones_resto(1,[UnicoLugar|T],[Obj1|Resto],NewKB2,NewKB3):-
 	%Cambiar ubicacion observada de Obj1
-	cambiar_valor_propiedad_objeto(Obj1,ubic_inf=>(_,0),ubic_inf=>(UnicoLugar,0),NewKB2,AuxNewKB2),
-	writeln(""),
-	obtener_propiedades_completas_objeto(Obj1,AuxNewKB2,Propiedades),
-	writeln(Propiedades),
+	cambiar_valor_propiedad_objeto(Obj1,ubic_inf=>(_,_),ubic_inf=>(UnicoLugar,0),NewKB2,AuxNewKB2),
+	atom_concat('Para el objeto ', Obj1, MensajeLugar),
+	atom_concat('El lugar inferido es: ', UnicoLugar, MensajeInferido),
+	writeln(MensajeLugar),
+	writeln(MensajeInferido),
+	%obtener_propiedades_completas_objeto(Obj1,AuxNewKB2,Propiedades),
+	%writeln(Propiedades),
 	inferir_ubicaciones_resto(1,[UnicoLugar|T],Resto,AuxNewKB2,NewKB3).
 %Cuando tienes mas de una ubicacion por visitar
 inferir_ubicaciones_resto(NoElementos,Lugares,[Obj1|Resto],NewKB2,NewKB3):-
 	%Elegir número random de rotaciones
-	random_between(0, NoElementos, NoRandom),
+	random(0, NoElementos, NoRandom),
+	writeln(NoRandom),
 	rotar(Lugares, Resultado, NoRandom),
 	obtener_cabeza(Resultado, Lugar),
-	writeln(""),
-	writeln(""),
-	writeln(NoRandom),
-	writeln(Lugar),
+	atom_concat('Para el objeto ', Obj1, MensajeLugar),
+	atom_concat('El lugar inferido es: ', Lugar, MensajeInferido),
+	writeln(MensajeLugar),
+	writeln(MensajeInferido),
 	%Cambiar ubicacion observada de Obj1
-	cambiar_valor_propiedad_objeto(Obj1,ubic_inf=>(_,0),ubic_inf=>(Lugar,0),NewKB2,AuxNewKB2),
-	writeln(""),
-	obtener_propiedades_completas_objeto(Obj1,AuxNewKB2,Propiedades),
-	writeln(Propiedades),
+	cambiar_valor_propiedad_objeto(Obj1,ubic_inf=>(_,_),ubic_inf=>(Lugar,0),NewKB2,AuxNewKB2),
+	%writeln(""),
+	%obtener_propiedades_completas_objeto(Obj1,AuxNewKB2,Propiedades),
+	%writeln(Propiedades),
 	inferir_ubicaciones_resto(NoElementos,Lugares,Resto,AuxNewKB2,NewKB3).
 
 %Rotar lista (derecha) para hacer random la inferencia del lugar
@@ -2222,6 +2230,9 @@ rotar(L,R, N):-
 	append(X, Y, L), 
 	size(X, N), 
 	append(Y, X, R).
+
+size([],0).
+size([_|Y], N):-size(Y, N1), N is N1+1.
 
 obtener_cabeza([Cabeza|_], Cabeza).
 
@@ -2239,23 +2250,26 @@ obtener_lugar_visitar(Ubicacion,[_|Resto],Lugar):-
 cambiar_ubicaciones_objetos([],KB,_,KB).
 cambiar_ubicaciones_objetos([Obj1|Resto],KB,Lugar,NuevaKB):-
 	%Cambiar ubicacion observada de Obj1
-	cambiar_valor_propiedad_objeto(Obj1,ubic_obs=>(_,0),ubic_obs=>(Lugar,0),KB,AuxNuevaKB),
-	writeln(""),
-	obtener_propiedades_completas_objeto(Obj1,AuxNuevaKB,Propiedades),
-	writeln(Obj1),
-	writeln(Propiedades),
+	cambiar_valor_propiedad_objeto(Obj1,ubic_obs=>(_,_),ubic_obs=>(Lugar,0),KB,AuxNuevaKB),
+	%writeln(""),
+	%obtener_propiedades_completas_objeto(Obj1,AuxNuevaKB,Propiedades),
+	%writeln(Obj1),
+	%writeln(Propiedades),
 	cambiar_ubicaciones_objetos(Resto,AuxNuevaKB,Lugar,NuevaKB).
 
-mostrarDiagnostico([],_,_):-
+mostrarDiagnostico([],_,_,_):-
 	!.
-mostrarDiagnostico([Obj1|Resto],Ubicacion,KB):-
-	writeln("El objeto ": Obj1),
+mostrarDiagnostico([Obj1|Resto],Ubicacion,KB,Metodo):-
 	obtener_propiedades_completas_objeto(Obj1,KB,Propiedades),
 	obtener_lugar_visitar(Ubicacion,Propiedades,Lugar),
-	writeln("está en": Lugar),
-	mostrarDiagnostico(Resto,Ubicacion,KB).
-
-
+	atom_concat('El objeto ', Obj1, MensajeObjeto),
+	atom_concat(' está en el lugar ', Lugar, MensajeLugar),
+	atom_concat(' *', Metodo, MensajeMetodo),
+	writeln(''),
+	write(MensajeObjeto),
+	write(MensajeLugar),
+	write(MensajeMetodo),
+	mostrarDiagnostico(Resto,Ubicacion,KB,Metodo).
 
 % modulo de desición  --------------------------------------------------------------------------------------------------------
 % este modulo tiene como objetivo relizar una planeacion de acciones que nos lleven a un objetivo
