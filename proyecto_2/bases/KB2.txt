@@ -9,6 +9,8 @@ class(acciones,top,[],[],
 	[id=>[colocar],[costo=>10],[]],
 	[id=>[buscar],[costo=>10],[]]
 ]),
+class(cliente,top,[[peticion=>(desconocido,0),obj_entregado=>(desconocido,0)],[]],
+[],[]),
 class(robot,top,[],[],
 [
 	[id=>[marvin],
