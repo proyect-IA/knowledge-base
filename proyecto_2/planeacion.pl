@@ -10,7 +10,7 @@ abrir(KB):-
 	%open('/Users/juan/Desktop/Proyecto Representacion del conocimiento/KnowledgeBase/basePrueba.txt',read,Stream),
 	%open('d:/maestria/inteligenciaArtif/knowledge-base/bases/KBArticulo.txt',read,Stream),
 	%open('d:/maestria/inteligenciaArtif/knowledge-base/bases/KBEjemploExamen.txt',read,Stream),
-	open('d:/maestria/inteligenciaArtif/knowledge-base/proyecto_2/bases/KB2.txt',read,Stream),
+	open('d:/maestria/inteligenciaArtif/knowledge-base/proyecto_2/bases/KBPruebasYoshio.txt',read,Stream),
 	readclauses(Stream,X),
 	close(Stream),
 	atom_to_term_conversion(X,KB).
@@ -65,6 +65,7 @@ cambiar_elemento(A,B,[H|T],[H|N]):-
 
 % ----------------------------------------------
 % ----  Buscar un elemento en una lista  -------
+%es_elemento(X,[]).
 es_elemento(X,[X|_]).
 es_elemento(X,[_|T]):-
     es_elemento(X,T).
@@ -2148,12 +2149,7 @@ cambiar_peso_preferencia_relacion_individuo(ObjectName,Preferencia,PreferenciaNu
 
 
 
-%--------------------------------------------------------------------------------------------------------
 
-iniciar(KB,R):-
-write('Hola, yo sere su mesero, que desea??'), nl,
-read(Orden), % se hace la lectura del teclado y se almacena en la variable Orden
-write('Muy bien, entonces le traire ->'),tab(1),write(Orden).
 
 
 % modulo de diagnostico --------------------------------------------------------------------------------------------------------
@@ -2163,7 +2159,7 @@ write('Muy bien, entonces le traire ->'),tab(1),write(Orden).
 comenzar_sis(KB,Producto,NewKB):-
 	write("Hola, ¿qué producto quieres?"),
 	nl,
-	read(Producto),
+	%read(Producto),
 	obtenerDiagnostico(Producto,KB,NewKB),
 	writeln(NewKB).
 
@@ -2265,7 +2261,7 @@ mostrarDiagnostico([Obj1|Resto],Ubicacion,KB):-
 % este modulo tiene como objetivo relizar una planeacion de acciones que nos lleven a un objetivo
 
 iniciar_modulo_planificacion(KB,Decisiones,Objeto,Plan):-
-	obtener_propiedades_completas_objeto(robocop,KB,PropRobo), 	% obtenemos las propiedades del robot las inicales antes de todo
+	obtener_propiedades_completas_objeto(marvin,KB,PropRobo), 	% obtenemos las propiedades del robot las inicales antes de todo
 	obtener_propiedades_clase(acciones,KB,ListaAcciones),
 	construir_arbol_busqueda(Decisiones,Decisiones,Arbol,KB,PropRobo),
 	CostoRecompensaPlan = [costo=>(0,0),recompensa=>(0,0)],
@@ -2577,33 +2573,229 @@ estado_producto_cliente([peticion=>(A,0), obj_entregado=>(desconocido,0)], P):- 
 % cada una de las acciones a ejecutar.
 % list [acc_0=>obj_0, acc_1=>obj_1, acc_2=>obj_2, acc_3=>obj_3... acc_n=>obj_n]
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% FUNCIONES   AUXILIARES  %%%%%%%%%%
+cambiar_ubicacion_robot(NuevaUbucacion,KB,NuevaKB):-
+	cambiar_elemento(class(robot,top,Propiedades,Relaciones,[[id=>[marvin],[[Ver,Ini,_,ManoDer, ManoIz,Entrega],PrefProp],Rels]]),
+                    class(robot,top,Propiedades,Relaciones,[[id=>[marvin],[[Ver,Ini,ubic_actual=>(NuevaUbucacion,0),ManoDer,ManoIz,Entrega],PrefProp],Rels]]),
+                    KB,NuevaKB).
 
-ejecutar_accion(moverse_a, Objeto):-
-	cambiar_propiedades_nivelIndividuo(ubic_actu=>).
+tomar_objeto_derecha_robot(Objeto,KB,NuevaKB):-
+	cambiar_elemento(class(robot,top,Propiedades,Relaciones,[[id=>[marvin],[[Ver,Ini,Actual,ManoDer, ManoIz,Entrega],PrefProp],Rels]]),
+                    class(robot,top,Propiedades,Relaciones,[[id=>[marvin],[[Ver,Ini,Actual,mano_der=>(Objeto,0),ManoIz,Entrega],PrefProp],Rels]]),
+                    KB,NuevaKB).
 
-% ejecutar_accion(colocar, Objeto):-
-%	cambiar_objeto_de_clase().
+tomar_objeto_izquierda_robot(Objeto,KB,NuevaKB):-
+	cambiar_elemento(class(robot,top,Propiedades,Relaciones,[[id=>[marvin],[[Ver,Ini,Actual,ManoDer, ManoIz,Entrega],PrefProp],Rels]]),
+                    class(robot,top,Propiedades,Relaciones,[[id=>[marvin],[[Ver,Ini,Actual,ManoDer,mano_izq=>(Objeto,0),Entrega],PrefProp],Rels]]),
+                    KB,NuevaKB).
 
-% ejecutar_accion(buscar, Objeto):-
-%	.
 
-% ejecutar_accion(tomar, Objeto):-
-%	.
+obtener_ubicacion_robot(UbicActual, KB):-
+	es_elemento(class(robot,top,Propiedades,Relaciones,[[id=>[marvin],[[Ver,Ini,ubic_actual=>(UbicActual,0),ManoDer,ManoIz,Entrega],PrefProp],Rels]]),KB).
+
+
+
+cambiar_propiedad_en_lista_objetos(_,_,[],[]).
+
+cambiar_propiedad_en_lista_objetos(Lugar,NuevaUbicacion,
+        [[id=>Ids,Prop,Rels]|T],[[id=>Ids,NewProps,Rels]|N]):-
+    cambiar_elemento([Ideal,ubic_obs=>(_,0),Infe,P1,P2,P3],[Ideal,ubic_obs=>(NuevaUbicacion,0),Infe,P1,P2,P3],Prop,NewProps),
+    cambiar_propiedad_en_lista_objetos(Lugar,NuevaUbicacion,T,N).
+
+cambiar_propiedad_en_lista_objetos(Lugar,NuevaUbicacion,[H|T],[H|N]):-
+    cambiar_propiedad_en_lista_objetos(Lugar,NuevaUbicacion,T,N).
+
+observar_objetos_en_lugar(UbicActual,KB,NewKB):-
+	cambiar_elemento(class(UbicActual,Padre,Propiedades,Relaciones,Objectos),
+                    class(UbicActual,Padre,Propiedades,Relaciones,NuevosObjetos),
+                    KB,NewKB),
+	cambiar_propiedad_en_lista_objetos(Lugar,UbicActual,Objectos,NuevosObjetos).
+
+%%% Validación de probabilidades
+obtener_probabilidad_colocar(Objeto, KB, Prob):-
+	es_elemento(class(Class,Padre,Prop,Rel,Objectos), KB),
+	es_elemento([id=>[Objeto],[[_, _, _, Accion=>(Prob,0),_,_],PrefProp],_],Objectos).
+
+obtener_probabilidad_buscar(Objeto, KB, Prob):-
+	es_elemento(class(Class,Padre,Prop,Rel,Objectos), KB),
+	es_elemento([id=>[Objeto],[[_, _, _, _, Accion=>(Prob,0),_],PrefProp],_],Objectos).
+
+obtener_probabilidad_agarrar(Objeto, KB, Prob):-
+	es_elemento(class(Class,Padre,Prop,Rel,Objectos), KB),
+	es_elemento([id=>[Objeto],[[_, _, _, _, _, Accion=>(Prob,0)],PrefProp],_],Objectos).
+
+es_probable_accion(0):-
+	!.
+
+es_probable_accion(Prob):-
+	random(A),
+	Prob > A.
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+verificar_lista_de_objetos(UbicActual,Objeto,KB):-
+	es_elemento(class(UbicActual,_,_,_,Objs),KB),
+	es_elemento([id=>Names,[[Ideal,Obs,Infe,_,_,_],A],B],Objs),
+	es_elemento(Objeto,Names),
+	nl, nl, write('El objeto ['), write(Objeto), write(']  esta en el '), 
+	write(UbicActual), nl, nl.
+
+verificar_lista_de_objetos(UbicActual,Objeto,KB):-
+	es_elemento(class(UbicActual,_,_,_,Objs),KB),
+	es_elemento([id=>Names,[[Ideal,Obs,Infe,_,_,_],A],B],Objs),
+	es_elemento(Objeto,Names),
+	nl, nl, write('El objeto ['), write(Objeto), write(']  esta en el '), 
+	write(UbicActual), nl, nl.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%   EJECUCION DE ACCIONES   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ejecutar_accion(buscar, Objeto, KB):-
+	write('Ejecutando accion....'), tab(3), nl,
+	tab(3), write('  buscar  -> '), tab(3), write(Objeto), nl,
+	obtener_ubicacion_robot(UbicActual, KB),
+	observar_objetos_en_lugar(UbicActual,KB,NewKB),
+	obtener_probabilidad_buscar(Objeto, KB ,Prob),
+	es_probable_accion(Prob),
+	verificar_lista_de_objetos(UbicActual,Objeto,KB),
+	write('Accion ejecutada exitosamente.'), nl, nl, nl,
+	guardar(NewKB).
+
+ejecutar_accion(buscar, Objeto, KB):-
+	write('Fallo .... Segundo intento'), tab(3), nl,
+	tab(3), write('  buscar  -> '), tab(3), write(Objeto), nl,
+	obtener_ubicacion_robot(UbicActual, KB),
+	observar_objetos_en_lugar(UbicActual,KB,NewKB),
+	obtener_probabilidad_buscar(Objeto, KB ,Prob),
+	es_probable_accion(Prob),
+	verificar_lista_de_objetos(UbicActual,Objeto,KB),
+	write('Accion ejecutada exitosamente.'), nl, nl, nl,
+	guardar(NewKB).
+
+ejecutar_accion(buscar, Objeto, KB):-
+	write('Fallo .... tercer intento'), tab(3), nl,
+	tab(3), write('  buscar  -> '), tab(3), write(Objeto), nl,
+	obtener_ubicacion_robot(UbicActual, KB),
+	observar_objetos_en_lugar(UbicActual,KB,NewKB),
+	obtener_probabilidad_buscar(Objeto, KB ,Prob),
+	es_probable_accion(Prob),
+	verificar_lista_de_objetos(UbicActual,Objeto,KB),
+	write('Accion ejecutada exitosamente.'), nl, nl, nl,
+	guardar(NewKB).
+
+ejecutar_accion(buscar, Objeto, KB):-
+	write('ERROR¡¡¡¡¡¡¡  Algo salio mal... :( ').
+
+
+ejecutar_accion(moverse_a, Lugar, KB):-
+	write('Ejecutando accion....'), tab(3), nl,
+	tab(3), write('  moviendome   a   ->   '), tab(3), write(Lugar), nl, 
+	cambiar_ubicacion_robot(Lugar,KB,Temp),
+	write('Accion ejecutada exitosamente.'), nl, nl, nl,
+	eliminar_objeto(Lugar, Temp, NewKB),
+	guardar(NewKB).
+
+ejecutar_accion(moverse_a, Lugar, KB):-
+	write('ERROR¡¡¡¡¡¡¡  Algo salio mal... :( ').
+
+
+ejecutar_accion(tomar_mano_derecha, Objeto, KB):-
+	write('Ejecutando accion....'), tab(3), nl,
+	tab(3), write('  tomar_mano_derecha   ->   '), tab(3), write(Objeto), nl, 
+	obtener_probabilidad_agarrar(Objeto, KB ,Prob),
+	es_probable_accion(Prob),
+	tomar_objeto_derecha_robot(Objeto,KB,NuevaKB),
+	write('Accion ejecutada exitosamente.'), nl, nl, nl,
+	guardar(NuevaKB).
+
+ejecutar_accion(tomar_mano_derecha, Objeto, KB):-
+	write('Fallo.... Segundo intento'), tab(3), nl,
+	tab(3), write('  tomar_mano_derecha   ->   '), tab(3), write(Objeto), nl, 
+	obtener_probabilidad_agarrar(Objeto, KB ,Prob),
+	es_probable_accion(Prob),
+	tomar_objeto_derecha_robot(Objeto,KB,NuevaKB),
+	write('Accion ejecutada exitosamente.'), nl, nl, nl,
+	guardar(NuevaKB).
+
+ejecutar_accion(tomar_mano_derecha, Objeto, KB):-
+	write('Fallo.... tercer intento'), tab(3), nl,
+	tab(3), write('  tomar_mano_derecha   ->   '), tab(3), write(Objeto), nl, 
+	obtener_probabilidad_agarrar(Objeto, KB ,Prob),
+	es_probable_accion(Prob),
+	tomar_objeto_derecha_robot(Objeto,KB,NuevaKB),
+	write('Accion ejecutada exitosamente.'), nl, nl, nl,
+	guardar(NuevaKB).
+
+ejecutar_accion(tomar_mano_derecha, Objeto, KB):-
+	write('ERROR¡¡¡¡¡¡¡  Algo salio mal... :( ').
+
+
+ejecutar_accion(tomar_mano_izquierda, Objeto, KB):-
+	write('Ejecutando accion....'), tab(3), nl,
+	tab(3), write('  tomar_mano_izquierda   ->   '), tab(3), write(Objeto), nl, 
+	obtener_probabilidad_agarrar(Objeto, KB ,Prob),
+	es_probable_accion(Prob),
+	tomar_objeto_izquierda_robot(Objeto,KB,NuevaKB),
+	write('Accion ejecutada exitosamente.'), nl, nl, nl,
+	guardar(NuevaKB).
+
+ejecutar_accion(tomar_mano_izquierda, Objeto, KB):-
+	write('Fallo ... segundo intento'), tab(3), nl,
+	tab(3), write('  tomar_mano_izquierda   ->   '), tab(3), write(Objeto), nl, 
+	obtener_probabilidad_agarrar(Objeto, KB ,Prob),
+	es_probable_accion(Prob),
+	tomar_objeto_izquierda_robot(Objeto,KB,NuevaKB),
+	write('Accion ejecutada exitosamente.'), nl, nl, nl,
+	guardar(NuevaKB).
+
+ejecutar_accion(tomar_mano_izquierda, Objeto, KB):-
+	write('Fallo... tercer intento'), tab(3), nl,
+	tab(3), write('  tomar_mano_izquierda   ->   '), tab(3), write(Objeto), nl, 
+	obtener_probabilidad_agarrar(Objeto, KB ,Prob),
+	es_probable_accion(Prob),
+	tomar_objeto_izquierda_robot(Objeto,KB,NuevaKB),
+	write('Accion ejecutada exitosamente.'), nl, nl, nl,
+	guardar(NuevaKB).
+
+ejecutar_accion(tomar_mano_izquierda, Objeto, KB):-
+	write('ERROR¡¡¡¡¡¡¡  Algo salio mal... :( ').
+
+
 
 % ejecutar_accion(entregar_a_cliente, Objeto):-
 %	.
 
+%ejecutar_accion(colocar, Objeto):-
+%	obtener_probabilidad
+%	cambiar_objeto_de_clase().
 
 
-get_action([H=>Obj|T], Res):-
+
+get_action([H=>Obj|T], KB):-
  	write('Accion: '), write(H), tab(3),
  	write('   Objectos:   '), write(Obj), nl,
-	get_action(T, Res).
+ 	ejecutar_accion(H, Obj, KB),
+	get_action(T, KB).
 
-get_action([], Res).
+get_action([], KB).
 
 
 ejecutar_plan(Plan, KB):-
 	write('Ejecutando plan:'), nl,
 	write('Lista acciones:'), tab(2), 
-	get_action(Plan, _).
+	get_action(Plan, KB).
+
+
+
+%--------------------------------------------------------------------------------------------------------
+
+iniciar(KB,R):-
+%write('Hola, yo sere su mesero, que desea??'), nl,
+%read(Orden), % se hace la lectura del teclado y se almacena en la variable Orden
+iniciar_modulo_planificacion(KB,[entregar=>coca],coca,Plan),
+ejecutar_plan(Plan,KB),
+write('Muy bien, entonces le traire ->'),tab(1),write(Orden).

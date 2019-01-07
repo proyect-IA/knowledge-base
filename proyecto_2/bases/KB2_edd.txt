@@ -18,6 +18,8 @@ class(robot,top,[],[],
 		mano_der=>(desconocido,0),
 		mano_izq=>(desconocido,0)],[]]
 ]),
+class(cliente,top,[peticion=>(desconocido,0),obj_entregado=>(desconocido,0)],
+[],[]),
 class(lugares_por_visitar,top,[],[],
 [
 	[id=>[estante_bebidas],[],[]],
