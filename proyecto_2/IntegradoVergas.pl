@@ -2587,7 +2587,7 @@ estado_objeto([Obj], [ubic_ideal=>(A,_),ubic_obs=>(B,_),ubic_inf=>(_,0),_,_,_], 
 %% Caso base
 obtener_producto_cliente([],[]).
 %% obtener solo la clase cliente y sus propiedades
-obtener_producto_cliente([class(cliente,_,Prop,_,_)|R],Producto):-
+obtener_producto_cliente([class(cliente,_,[Prop|_],_,_)|R],Producto):-
 	estado_producto_cliente(Prop,Producto).
 %% siguiente iteracion/clase de la KB
 obtener_producto_cliente([_|R],P):-
