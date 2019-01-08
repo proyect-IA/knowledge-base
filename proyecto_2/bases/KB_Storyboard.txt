@@ -1,1 +1,69 @@
-[class(top,none,[],[],[]),class(escenario,top,[],[],[]),class(acciones,top,[],[],[[id=>[moverse],[costo=>10],[]],[id=>[entregar],[costo=>10],[]],[id=>[tomar],[costo=>10],[]],[id=>[colocar],[costo=>10],[]],[id=>[buscar],[costo=>10],[]]]),class(cliente,top,[[peticion=>(coke,0),obj_entregado=>(desconocido,0)],[]],[],[]),class(robot,top,[],[],[[id=>[marvin],[[ver=>(nada,0),ubic_inicial=>(centro,0),ubic_actual=>(cliente,0),mano_der=>(desconocido,0),mano_izq=>(desconocido,0),en_entrega=>(si,0)],[]],[]]]),class(lugares_por_visitar,top,[],[],[[id=>[estante_food],[],[]]]),class(estante_drinks,escenario,[[dist_robot=>(10,0)],[]],[],[[id=>[heineken],[[ubic_ideal=>(estante_drinks,0),ubic_obs=>(estante_drinks,0),ubic_inf=>(estante_drinks,0),colocar=>(1,0),buscar=>(1,0),agarrar=>(1,0)],[]],[]],[id=>[noodles],[[ubic_ideal=>(estante_food,0),ubic_obs=>(_62676,0),ubic_inf=>(estante_drinks,0),colocar=>(1,0),buscar=>(1,0),prob_agarrar=>(1,0)],[]],[]]]),class(estante_food,escenario,[[dist_robo=>(10,0)],[]],[],[[id=>[kellogs],[[ubic_ideal=>(estante_food,0),ubic_obs=>(desconocido,0),ubic_inf=>(estante_food,0),colocar=>(1,0),buscar=>(1,0),agarrar=>(1,0)],[]],[]]]),class(estante_bread,escenario,[[dist_robot=>(10,0)],[]],[],[[id=>[bisquits],[[ubic_ideal=>(estante_bread,0),ubic_obs=>(desconocido,0),ubic_inf=>(estante_bread,0),colocar=>(1,0),buscar=>(1,0),agarrar=>(1,0)],[]],[]],[id=>[coke],[[ubic_ideal=>(estante_drinks,0),ubic_obs=>(_70068,0),ubic_inf=>(estante_bread,0),colocar=>(1,0),buscar=>(1,0),agarrar=>(1,0)],[]],[]]]),class(acciones,top,[[moverse_a=>(costo,1),moverse_a=>(recompensa,1),entregar=>(costo,10),entregar=>(recompensa,10),tomar=>(costo,10),tomar=>(recompensa,10),colocar=>(costo,10),colocar=>(recompensa,70),buscar=>(costo,100),buscar=>(recompensa,10),estante_comida=>(costo,100),estante_pan=>(costo,10),estante_bebidas=>(costo,10)],[]],[],[])]
+[
+class(top,none,[],[],[]),
+class(escenario,top,[],[],[]),
+class(acciones,top,[],[],
+[
+	[id=>[moverse],[costo=>10],[]],
+	[id=>[entregar],[costo=>10],[]],
+	[id=>[tomar],[costo=>10],[]],
+	[id=>[colocar],[costo=>10],[]],
+	[id=>[buscar],[costo=>10],[]]
+]),
+class(cliente,top,[[peticion=>(desconocido,0),obj_entregado=>(desconocido,0)],[]],
+[],[]),
+class(robot,top,[],[],
+[
+	[id=>[marvin],
+		[[ver=>(nada,0),
+		ubic_inicial=>(centro,0),
+		ubic_actual=>(estante_drinks,0),
+		mano_der=>(desconocido,0),
+		mano_izq=>(desconocido,0),
+		en_entrega=>(si,0)],[]],[]]
+]),
+class(lugares_por_visitar,top,[],[],
+[
+	[id=>[estante_drinks],[],[]],
+	[id=>[estante_food],[],[]],
+	[id=>[estante_bread],[],[]]
+]),
+class(estante_drinks,escenario,[[dist_robot=>(10,0)],[]],[],
+[ 
+	[id=>[heineken],[	
+		[ubic_ideal=>(estante_drinks,0),ubic_obs=>(desconocido,0),ubic_inf=>(desconocido,0),prob_colocar=>(1,0),
+		prob_buscar=>(1,0),prob_agarrar=>(1,0)],[]
+		],[]],
+	[id=>[noodles],[	
+		[ubic_ideal=>(estante_food,0),ubic_obs=>(desconocido,0),ubic_inf=>(desconocido,0),prob_colocar=>(1,0),
+		prob_buscar=>(1,0),prob_agarrar=>(1,0)],[]
+		],[]]
+]),
+
+class(estante_food,escenario,[[dist_robo=>(10,0)],[]],[],
+[
+	[id=>[kellogs],[
+		[ubic_ideal=>(estante_food,0),ubic_obs=>(desconocido,0),ubic_inf=>(desconocido,0),prob_colocar=>(1,0),
+		prob_buscar=>(1,0),prob_agarrar=>(1,0)],[]],[]]
+]),
+class(estante_bread,escenario,[[dist_robot=>(10,0)],[]],[],[
+	[id=>[bisquits],[
+		[ubic_ideal=>(estante_bread,0),ubic_obs=>(desconocido,0),ubic_inf=>(desconocido,0),prob_colocar=>(1,0),
+		prob_buscar=>(1,0),prob_agarrar=>(1,0)],[]],[]],
+	[id=>[coke],[
+		[ubic_ideal=>(estante_drinks,0),ubic_obs=>(desconocido,0),ubic_inf=>(desconocido,0),prob_colocar=>(1,0),
+		prob_buscar=>(1,0),prob_agarrar=>(1,0)],[]],[]]
+]),
+class(acciones,top,
+	[
+		[
+			moverse_a=>(costo,1),moverse_a=>(recompensa,1),
+			entregar=>(costo,10),entregar=>(recompensa,10),
+			tomar=>(costo,10),tomar=>(recompensa,10),
+			colocar=>(costo,10),colocar=>(recompensa,70),
+			buscar=>(costo,100),buscar=>(recompensa,10),
+			estante_comida=>(costo,100),
+			estante_pan=>(costo,10),
+			estante_bebidas=>(costo,10)
+		],[]
+	],[],[])
+]
