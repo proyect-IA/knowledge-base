@@ -7,11 +7,12 @@
 
 %predicado para abrir un archivo -------------------------------------------------------------------------
 abrir(KB):- 
-	open('/Users/juan/Desktop/KB2.txt',read,Stream),
+	% open('/Users/juan/Desktop/KB2.txt',read,Stream),
 	% open('d:/maestria/inteligenciaArtif/knowledge-base/bases/KBArticulo.txt',read,Stream),
 	% open('d:/maestria/inteligenciaArtif/knowledge-base/bases/KBEjemploExamen.txt',read,Stream),
 	% open('d:/maestria/inteligenciaArtif/knowledge-base/proyecto_2/bases/KBPruebasYoshio.txt',read,Stream),
-	% open('d:/maestria/inteligenciaArtif/knowledge-base/proyecto_2/bases/KB2.txt',read,Stream),
+	open('d:/maestria/inteligenciaArtif/knowledge-base/proyecto_2/bases/KB2.txt',read,Stream),
+	% open('d:/maestria/inteligenciaArtif/knowledge-base/proyecto_2/bases/KB_Storyboard.txt',read,Stream),
 	%open('/home/raul/Escritorio/baseProyecto2.txt',read,Stream),
 	readclauses(Stream,X),
 	close(Stream),
@@ -19,10 +20,11 @@ abrir(KB):-
 
 % predicado para guardar un archivo ---------------------------------------------------------------------
 guardar(KB):-
-	open('/Users/juan/Desktop/KB2.txt',write,Stream),
+	% open('/Users/juan/Desktop/KB2.txt',write,Stream),
 	% open('d:/maestria/inteligenciaArtif/knowledge-base/basePrueba.txt',write,Stream),
 	% open('d:/maestria/inteligenciaArtif/knowledge-base/proyecto_2/KB2.txt',write,Stream),
-	% open('d:/maestria/inteligenciaArtif/knowledge-base/proyecto_2/bases/KB2.txt',write,Stream),
+	open('d:/maestria/inteligenciaArtif/knowledge-base/proyecto_2/bases/KB2.txt',write,Stream),
+	% open('d:/maestria/inteligenciaArtif/knowledge-base/proyecto_2/bases/KB_Storyboard.txt',write,Stream),
 	%open('/home/raul/Escritorio/IA/Project1/basePrueba.txt',write,Stream),
 	writeq(Stream,KB),
 	close(Stream).
@@ -2164,6 +2166,7 @@ comenzar_sis(KB):-
 	write("Hola,que producto quieres?"),nl,
 	read(Producto),
 	diagnostico_desicion_plan_simular(Producto,KB,NewKB),
+	nl, write("Peticion entregada, Hasta pronto...  :)  "),nl, nl,
 	guardar(NewKB).	
 
 %predicado recursivo
