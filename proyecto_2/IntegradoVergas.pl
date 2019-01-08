@@ -2176,7 +2176,10 @@ obtenerDiagnostico(Producto,KB,NewKB3):-
 	nl, write(' -----   Diagnostico ---->'), nl, nl,
 	obtener_propiedades_completas_objeto(Producto,KB,Propiedades),
 	% writeln(Propiedades),
-	obtener_lugar_visitar(ubic_ideal,Propiedades,Lugar),
+	obtener_propiedades_completas_objeto(marvin,KB,PropiedadesRobot),
+	obtener_lugar_visitar(ubic_actual,PropiedadesRobot,LugarRobot),
+	obtener_propiedades_completas_objeto(Producto,KB,PropiedadesProducto),
+	definir_lugar(LugarRobot,PropiedadesProducto,Lugar),
 	% writeln(""),
 	% atom_concat('Lugar a visitar: ', Lugar, MensajeLugar),
 	% writeln(MensajeLugar),
@@ -2202,6 +2205,12 @@ obtenerDiagnostico(Producto,KB,NewKB3):-
 	writeln("El diagnostico acerca de la ubicacion actual de los productos es:"),
 	mostrarDiagnostico(Individuos,ubic_obs,NewKB3, observado),
 	mostrarDiagnostico(DemasObjetos,ubic_inf,NewKB3, inferido).
+
+%En caso de que el robot esté en el centro
+definir_lugar(centro,PropiedadesProducto,Lugar):-
+	obtener_lugar_visitar(ubic_ideal,PropiedadesProducto,Lugar).
+%En caso de que el robor esté en un estante específico
+definir_lugar(Lugar,_,Lugar).
 
 %Cuando solo queda una ubicacion
 inferir_ubicaciones_resto(_,[_|_],[],NewKB2,NewKB2).
@@ -2250,7 +2259,6 @@ obtener_demas_objetos([Lug1|Resto],NewKB2,ObjetosActuales,DemasObjetos):-
 	append(ObjetosActuales,AuxObjetos,AuxDemasObjetos),
 	obtener_demas_objetos(Resto,NewKB2,AuxDemasObjetos,DemasObjetos).
 
-obtener_lugar_visitar(_, [],"desconocido").
 obtener_lugar_visitar(Ubicacion, [Ubicacion=>(Lugar,_)|_],Lugar).
 obtener_lugar_visitar(Ubicacion,[_|Resto],Lugar):-
 	obtener_lugar_visitar(Ubicacion,Resto,Lugar).
