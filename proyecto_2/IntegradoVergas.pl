@@ -11,7 +11,8 @@ abrir(KB):-
 	% open('d:/maestria/inteligenciaArtif/knowledge-base/bases/KBArticulo.txt',read,Stream),
 	% open('d:/maestria/inteligenciaArtif/knowledge-base/bases/KBEjemploExamen.txt',read,Stream),
 	% open('d:/maestria/inteligenciaArtif/knowledge-base/proyecto_2/bases/KBPruebasYoshio.txt',read,Stream),
-	open('d:/maestria/inteligenciaArtif/knowledge-base/proyecto_2/bases/KB2.txt',read,Stream),
+	% open('d:/maestria/inteligenciaArtif/knowledge-base/proyecto_2/bases/KB2.txt',read,Stream),
+	open('/home/raul/Escritorio/baseProyecto2.txt',read,Stream),
 	readclauses(Stream,X),
 	close(Stream),
 	atom_to_term_conversion(X,KB).
@@ -21,7 +22,8 @@ guardar(KB):-
 	% open('/Users/juan/Desktop/KB2.txt',write,Stream),
 	% open('d:/maestria/inteligenciaArtif/knowledge-base/basePrueba.txt',write,Stream),
 	% open('d:/maestria/inteligenciaArtif/knowledge-base/proyecto_2/KB2.txt',write,Stream),
-	open('d:/maestria/inteligenciaArtif/knowledge-base/proyecto_2/bases/KB2.txt',write,Stream),
+	% open('d:/maestria/inteligenciaArtif/knowledge-base/proyecto_2/bases/KB2.txt',write,Stream),
+	open('/home/raul/Escritorio/IA/Project1/basePrueba.txt',write,Stream),
 	writeq(Stream,KB),
 	close(Stream).
 
@@ -2167,6 +2169,7 @@ comenzar_sis(KB,Producto,NewKB):-
 %predicado recursivo
 diagnostico_desicion_plan_simular(Objeto,KB,KBN):-
 	obtenerDiagnostico(Objeto,KB,KB2), 				% modulo de diagnostico Raul
+	%writeln(KB2),
 	cambiar_valor_propiedad_clase(cliente, peticion, _ ,Objeto, KB2, KB3),
 	toma_de_desiciones(Decision,KB3), 				% modulo de toma de desiciones de Andrik <3
 	iniciar_modulo_planificacion(KB3,Decision,Objeto,Plan),
@@ -2267,15 +2270,15 @@ cambiar_ubicaciones_objetos([],KB,_,KB).
 cambiar_ubicaciones_objetos([Obj1|Resto],KB,Lugar,NuevaKB):-
 	%Cambiar ubicacion observada de Obj1
 	cambiar_valor_propiedad_objeto(Obj1,ubic_obs=>(_,_),ubic_obs=>(Lugar,0),KB,AuxNuevaKB),
+	cambiar_valor_propiedad_objeto(Obj1,ubic_inf=>(_,_),ubic_inf=>(Lugar,0),AuxNuevaKB,AuxNuevaKB2),
 	%writeln(""),
-	%obtener_propiedades_completas_objeto(Obj1,AuxNuevaKB,Propiedades),
+	%obtener_propiedades_completas_objeto(Obj1,AuxNuevaKB2,Propiedades),
 	%writeln(Obj1),
 	%writeln(Propiedades),
-	cambiar_ubicaciones_objetos(Resto,AuxNuevaKB,Lugar,NuevaKB).
+	cambiar_ubicaciones_objetos(Resto,AuxNuevaKB2,Lugar,NuevaKB).
 
 
-mostrarDiagnostico([],_,_,_):-
-	!.
+mostrarDiagnostico([],_,_,_).
 mostrarDiagnostico([Obj1|Resto],Ubicacion,KB,Metodo):-
 	obtener_propiedades_completas_objeto(Obj1,KB,Propiedades),
 	obtener_lugar_visitar(Ubicacion,Propiedades,Lugar),
