@@ -7,23 +7,23 @@
 
 %predicado para abrir un archivo -------------------------------------------------------------------------
 abrir(KB):- 
-	% open('/Users/juan/Desktop/KB2.txt',read,Stream),
+	open('/Users/juan/Desktop/KB2.txt',read,Stream),
 	% open('d:/maestria/inteligenciaArtif/knowledge-base/bases/KBArticulo.txt',read,Stream),
 	% open('d:/maestria/inteligenciaArtif/knowledge-base/bases/KBEjemploExamen.txt',read,Stream),
 	% open('d:/maestria/inteligenciaArtif/knowledge-base/proyecto_2/bases/KBPruebasYoshio.txt',read,Stream),
 	% open('d:/maestria/inteligenciaArtif/knowledge-base/proyecto_2/bases/KB2.txt',read,Stream),
-	open('/home/raul/Escritorio/baseProyecto2.txt',read,Stream),
+	%open('/home/raul/Escritorio/baseProyecto2.txt',read,Stream),
 	readclauses(Stream,X),
 	close(Stream),
 	atom_to_term_conversion(X,KB).
 
 % predicado para guardar un archivo ---------------------------------------------------------------------
 guardar(KB):-
-	% open('/Users/juan/Desktop/KB2.txt',write,Stream),
+	open('/Users/juan/Desktop/KB2.txt',write,Stream),
 	% open('d:/maestria/inteligenciaArtif/knowledge-base/basePrueba.txt',write,Stream),
 	% open('d:/maestria/inteligenciaArtif/knowledge-base/proyecto_2/KB2.txt',write,Stream),
 	% open('d:/maestria/inteligenciaArtif/knowledge-base/proyecto_2/bases/KB2.txt',write,Stream),
-	open('/home/raul/Escritorio/IA/Project1/basePrueba.txt',write,Stream),
+	%open('/home/raul/Escritorio/IA/Project1/basePrueba.txt',write,Stream),
 	writeq(Stream,KB),
 	close(Stream).
 
@@ -2160,8 +2160,8 @@ cambiar_peso_preferencia_relacion_individuo(ObjectName,Preferencia,PreferenciaNu
 % este modulo tiene como objetivo consultar el conocimiento en la base de datos
 % Arranque: abrir(KB), comenzar_sis(KB,Producto,NewKB).
 %-------------------------------------------------------------------------------------------------------------------------------
-comenzar_sis(KB,Producto,NewKB):-
-	write("Hola, ¿que producto quieres?"),nl,
+comenzar_sis(KB):-
+	write("Hola,que producto quieres?"),nl,
 	read(Producto),
 	diagnostico_desicion_plan_simular(Producto,KB,NewKB),
 	guardar(NewKB).	
@@ -2297,9 +2297,10 @@ iniciar_modulo_planificacion(KB,Desiciones,Objeto,Plan):-
 	obtener_propiedades_completas_objeto(marvin,KB,PropRobo), 	% obtenemos las propiedades del robot las inicales antes de todo
 	obtener_propiedades_clase(acciones,KB,ListaAcciones),
 	limpiar_arbol(Desiciones,D), nl,
-	write('El conjunto de decisiones es:   '), tab(3), write(D), nl,
+	eliminar_repetidos_lista_decision(D,Objeto,D2),
+	write('El conjunto de decisiones es:   '), tab(3), write(D2), nl,
 	nl, write(' -----   Toma decisiones ---->'), nl, nl,
-	construir_arbol_busqueda(D,D,Arbol,KB,PropRobo),
+	construir_arbol_busqueda(D2,D2,Arbol,KB,PropRobo),
 	CostoRecompensaPlan = [costo=>(0,0),recompensa=>(0,0)],
 	CostoInicial = [costo=>(1000000,0),recompensa=>(0,0)],
 	obtener_mejor_plan_en_arbol(CostoRecompensaPlan,[],CostoInicial,[],Arbol,ListaAcciones,Objeto,si,A,Plan),
@@ -2308,16 +2309,29 @@ iniciar_modulo_planificacion(KB,Desiciones,Objeto,Plan):-
 	write(Plan),
 	nl.
 
+eliminar_repetidos_lista_decision([],_,[]).
+
+eliminar_repetidos_lista_decision([entregar=>O|T],O,[entregar=>O|C]):-
+	eliminar_repetidos_lista_decision(T,O,C).
+
+eliminar_repetidos_lista_decision([Accion=>O|T],O,C):-
+	eliminar_repetidos_lista_decision(T,O,C).
+
+	eliminar_repetidos_lista_decision([Accion=>Dif|T],O,[Accion=>Dif|C]):-
+	eliminar_repetidos_lista_decision(T,O,C).
+
 limpiar_arbol([],[]).
 
 limpiar_arbol([[]|R],Lista):-
 	limpiar_arbol(R,Lista).
 
-limpiar_arbol([[H]|T],[H|C]):-
+limpiar_arbol([Accion=>Objeto|T],[Accion=>Objeto|C]):-
 		limpiar_arbol(T,C).
 
-limpiar_arbol([H|T],[H|C]):-
-		limpiar_arbol(T,C).
+limpiar_arbol([H|T],C):-
+		limpiar_arbol(H,A),
+		limpiar_arbol(T,B),
+		append(A,B,C).
 
 limpiar_arbol([[Lista,[]]],Lista).
 limpiar_arbol([[],Lista,[]],Lista).
