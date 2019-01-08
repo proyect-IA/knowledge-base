@@ -2292,7 +2292,7 @@ mostrarDiagnostico([Obj1|Resto],Ubicacion,KB,Metodo):-
 % modulo de desición  --------------------------------------------------------------------------------------------------------
 % este modulo tiene como objetivo relizar una planeacion de acciones que nos lleven a un objetivo
 
-iniciar_modulo_planificacion(KB,Desiciones,Objeto,Plan):-
+iniciar_modulo_planificacion(KB,Desiciones,Objeto,Plan2):-
 	nl, write(' -----   planificacion ---->'), nl, nl,
 	obtener_propiedades_completas_objeto(marvin,KB,PropRobo), 	% obtenemos las propiedades del robot las inicales antes de todo
 	obtener_propiedades_clase(acciones,KB,ListaAcciones),
@@ -2306,8 +2306,31 @@ iniciar_modulo_planificacion(KB,Desiciones,Objeto,Plan):-
 	obtener_mejor_plan_en_arbol(CostoRecompensaPlan,[],CostoInicial,[],Arbol,ListaAcciones,Objeto,si,A,Plan),
 	nl,
 	write('Mi plan es:'),nl,
-	write(Plan),
+	reversa(Plan,Plan3),
+	eliminar_repetidos_a(Plan3,buscar=>Objeto,Plan4),
+	reversa(Plan4,Plan2),
+	nl,
+	write(Plan2),
 	nl.
+
+eliminar_repetidos_a([],_,[]).
+
+eliminar_repetidos_a([Accion=>Objeto|D],PropIndi,R):-
+	eliminar_repetidos_a(D,PropIndi,R2),
+	buscar_propiedad_a(Accion=>Objeto,R2,_,X),
+	verificar_resultado_repetido(X,Accion=>Objeto,R2,R).
+
+%si no se encuentra la propiedad se dice que no
+buscar_propiedad_a(_,[],1000,desconocido).
+
+%propiedades que son positivas
+buscar_propiedad_a(Propiedad, [Propiedad|_],Peso,existe).
+
+buscar_propiedad_a(Propiedad,[_|T],Peso,Valor):-
+	buscar_propiedad_a(Propiedad,T,Peso,Valor).
+
+
+
 
 eliminar_repetidos_lista_decision([],_,[]).
 
