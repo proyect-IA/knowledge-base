@@ -10,6 +10,7 @@ abrir(KB):-
 	% open('/Users/juan/Desktop/KB2.txt',read,Stream),
 	% open('d:/maestria/inteligenciaArtif/knowledge-base/bases/KBArticulo.txt',read,Stream),
 	% open('d:/maestria/inteligenciaArtif/knowledge-base/bases/KBEjemploExamen.txt',read,Stream),
+	% open('d:/maestria/inteligenciaArtif/knowledge-base/proyecto_2/bases/KBPruebasYoshio.txt',read,Stream),
 	open('d:/maestria/inteligenciaArtif/knowledge-base/proyecto_2/bases/KB2.txt',read,Stream),
 	readclauses(Stream,X),
 	close(Stream),
@@ -20,7 +21,7 @@ guardar(KB):-
 	% open('/Users/juan/Desktop/KB2.txt',write,Stream),
 	% open('d:/maestria/inteligenciaArtif/knowledge-base/basePrueba.txt',write,Stream),
 	% open('d:/maestria/inteligenciaArtif/knowledge-base/proyecto_2/KB2.txt',write,Stream),
-	open('d:/maestria/inteligenciaArtif/knowledge-base/proyecto_2/bases/KB2.txt',read,Stream),
+	open('d:/maestria/inteligenciaArtif/knowledge-base/proyecto_2/bases/KB2.txt',write,Stream),
 	writeq(Stream,KB),
 	close(Stream).
 
@@ -1785,24 +1786,24 @@ obtener_clases_objeto(ObjectName, KB, Clases):-
 % Inciso e)
 % predicados para obtener todas las propiedades de una clase -------------
 obtener_propiedades_completas_clase(ClaseBuscar,KB,Propiedades):-
-	buscar_propiedades_clase(top,ClaseBuscar,KB,[],[],Propiedades).% ,
+	buscar_propiedades_clase(top,ClaseBuscar,KB,[],[],Propiedades).%,
 	% imprime_lista_resultados(Propiedades).
 
 %predicado que se encarga de obtener todas las propiedades de un objeto especifico
 obtener_propiedades_completas_objeto(Individuo,KB,Resultado):-
-	obtener_propiedades_completas_por_objeto(top,KB,Individuo,[],[],Resultado).% , llama al predicado principal que recorre el arbol recursivamente
+	obtener_propiedades_completas_por_objeto(top,KB,Individuo,[],[],Resultado).%, %llama al predicado principal que recorre el arbol recursivamente
 	% imprime_lista_resultados(Resultado).
 
 % ------------------------------------------------------------
 % Inciso f)
 % predicados para obtener todas las relaciones de un objeto ---------------
 obtener_relaciones_completas_clase(ClaseBuscar,KB,Relaciones):-
-	buscar_relaciones_clase(top,ClaseBuscar,KB,[],[],Relaciones),
-	imprime_lista_resultados(Relaciones).
+	buscar_relaciones_clase(top,ClaseBuscar,KB,[],[],Relaciones). %,
+	% imprime_lista_resultados(Relaciones).
 
 obtener_relaciones_completas_objeto(Individuo,KB,Resultado):-
-	obtener_relaciones_completas_por_objeto(top,KB,Individuo,[],[],Resultado,KB),
-	imprime_lista_resultados(Resultado).
+	obtener_relaciones_completas_por_objeto(top,KB,Individuo,[],[],Resultado,KB).%,
+	% imprime_lista_resultados(Resultado).
 
 % Ejercicio 1 -> Extensiones clases, objetos, propiedades, relaciones y preferencias
 % ------------------------------------------------------------------------------------
@@ -2158,7 +2159,7 @@ cambiar_peso_preferencia_relacion_individuo(ObjectName,Preferencia,PreferenciaNu
 % Arranque: abrir(KB), comenzar_sis(KB,Producto,NewKB).
 %-------------------------------------------------------------------------------------------------------------------------------
 comenzar_sis(KB,Producto,NewKB):-
-	write("Hola, ¿qué producto quieres?"),nl,
+	write("Hola, ¿que producto quieres?"),nl,
 	read(Producto),
 	diagnostico_desicion_plan_simular(Producto,KB,NewKB),
 	guardar(NewKB).	
@@ -2218,13 +2219,13 @@ inferir_ubicaciones_resto(1,[UnicoLugar|T],[Obj1|Resto],NewKB2,NewKB3):-
 inferir_ubicaciones_resto(NoElementos,Lugares,[Obj1|Resto],NewKB2,NewKB3):-
 	%Elegir número random de rotaciones
 	random(0, NoElementos, NoRandom),
-	writeln(NoRandom),
+	% writeln(NoRandom),
 	rotar(Lugares, Resultado, NoRandom),
 	obtener_cabeza(Resultado, Lugar),
-	atom_concat('Para el objeto ', Obj1, MensajeLugar),
-	atom_concat('El lugar inferido es: ', Lugar, MensajeInferido),
-	writeln(MensajeLugar),
-	writeln(MensajeInferido),
+	%atom_concat('Para el objeto ', Obj1, MensajeLugar),
+	%atom_concat('El lugar inferido es: ', Lugar, MensajeInferido),
+	%writeln(MensajeLugar),
+	%writeln(MensajeInferido),
 	%Cambiar ubicacion observada de Obj1
 	cambiar_valor_propiedad_objeto(Obj1,ubic_inf=>(_,_),ubic_inf=>(Lugar,0),NewKB2,AuxNewKB2),
 	%writeln(""),
@@ -2284,15 +2285,28 @@ iniciar_modulo_planificacion(KB,Desiciones,Objeto,Plan):-
 	nl, write(' -----   planificacion ---->'), nl, nl,
 	obtener_propiedades_completas_objeto(marvin,KB,PropRobo), 	% obtenemos las propiedades del robot las inicales antes de todo
 	obtener_propiedades_clase(acciones,KB,ListaAcciones),
-	limpiar_arbol(Desiciones,D),
+	limpiar_arbol(Desiciones,D), nl,
+	write('El conjunto de decisiones es:   '), tab(3), write(D), nl,
+	nl, write(' -----   Toma decisiones ---->'), nl, nl,
 	construir_arbol_busqueda(D,D,Arbol,KB,PropRobo),
 	CostoRecompensaPlan = [costo=>(0,0),recompensa=>(0,0)],
 	CostoInicial = [costo=>(1000000,0),recompensa=>(0,0)],
 	obtener_mejor_plan_en_arbol(CostoRecompensaPlan,[],CostoInicial,[],Arbol,ListaAcciones,Objeto,si,A,Plan),
 	nl,
-	write('mi plan es:'),nl,
+	write('Mi plan es:'),nl,
 	write(Plan),
 	nl.
+
+limpiar_arbol([],[]).
+
+limpiar_arbol([[]|R],Lista):-
+	limpiar_arbol(R,Lista).
+
+limpiar_arbol([[H]|T],[H|C]):-
+		limpiar_arbol(T,C).
+
+limpiar_arbol([H|T],[H|C]):-
+		limpiar_arbol(T,C).
 
 limpiar_arbol([[Lista,[]]],Lista).
 limpiar_arbol([[],Lista,[]],Lista).
@@ -2543,7 +2557,6 @@ buscar_obtener_clase(X,ClaseBuscar,[class(_,_,_,_,_)|R]):-
 %% Decision -> lista de salida con las acciones/desisciones tomadas
 %% KB -> la base de conocimiento
 toma_de_desiciones(Decision,KB):-
-	nl, write(' -----   Toma decisiones ---->'), nl, nl,
 	obtener_estantes_escenario(KB,AuxDecision),
 	obtener_producto_cliente(KB,Producto),
 	append(Producto,AuxDecision,Decision).
@@ -2553,7 +2566,7 @@ toma_de_desiciones(Decision,KB):-
 obtener_estantes_escenario([],[]).
 %% obtener solo aquellos cuyo padre sea escenario (donde residen los estantes)
 obtener_estantes_escenario([class(Class,escenario,_,_,O)|R],[A|B]):-
-	write(Class), nl,
+	write('['), write(Class), write(']'), nl,
 	obtener_objetos_estantes(O,A),
 	obtener_estantes_escenario(R,B).
 %% siguiente iteracion
@@ -2572,13 +2585,13 @@ obtener_objetos_estantes([[id=>Obj,[Prop|_],_]|R],RR):-
 %%*** Predicados que indican el estado de un objeto (ordenado, desordenado, desconocido)
 %% Estado que indica que el objeto está ordenado (en su estante correcto)
 estado_objeto(Obj, [ubic_ideal=>(A,_),ubic_obs=>(A,_),ubic_inf=>(_,0),_,_,_], [], ordenado):-
-	write('Ordenado:'), write(Obj), nl.
+	write('   - Ordenado:'), write(Obj), nl.
 %% Estado que indica que el lugar del objeto es desconodico (aun on ha sido explorado)
 estado_objeto(Obj, [ubic_ideal=>(A,_),ubic_obs=>(desconocido,_),ubic_inf=>(_,0),_,_,_], [], desconocido):-
-	write('Desconocido:'), write(Obj), nl.
+	write('   - Desconocido:'), write(Obj), nl.
 %% Estado que indica que el objeto está desordenado (en su estante incorrecto)
 estado_objeto([Obj], [ubic_ideal=>(A,_),ubic_obs=>(B,_),ubic_inf=>(_,0),_,_,_], ObjDesordenado, desordenado):-
-	write('Desordenado:'), write(Obj), nl, 
+	write('   - Desordenado:'), write(Obj), nl, 
 	ObjDesordenado = [ordenar=>Obj].
 
 %%*** Predicados para estado del producto solicitado por el cliente
@@ -2696,7 +2709,7 @@ verificar_lista_de_objetos(UbicActual,Objeto,KB):-
 
 %predicado que se encarga de realizar la colocacion de un objeto
 ejecutar_accion(colocar, Objeto,KB,KB2,T):-
-	write('Ejecutando accion....'),nl,	
+	write('   Ejecutando accion....'),nl,	
 	obtener_ubicacion_robot(UbicActual, KB), 			 			% se obtiene la ubicacion del robot
 	obtener_probabilidad_accion(Objeto,colocar,KB,Prob),			% obtenermos la probabilidad
 	es_probable_accion(Prob,Permiso), 					 			%verificamos si es posible realizar la acción
@@ -2704,7 +2717,7 @@ ejecutar_accion(colocar, Objeto,KB,KB2,T):-
 
 %predicado que se encarga de realizar la busqueda de los elementos
 ejecutar_accion(buscar, Objeto,KB,KB2,T):-
-	write('Ejecutando accion....'),nl,
+	write('   Ejecutando accion....'),nl,
 	obtener_ubicacion_robot(UbicActual, KB), 						% se obtiene la ubicacion del robot, nos sirve para ver que es lo que puede ver	
 	obtener_probabilidad_accion(Objeto,buscar,KB,Prob), 			% primero obtenemos la probabilidad de poder verlo	
 	es_probable_accion(Prob,Permiso), 								% dependiento de lo que me diga la probabilidad, se toma la desición de hacerlo o mandar error
@@ -2712,27 +2725,27 @@ ejecutar_accion(buscar, Objeto,KB,KB2,T):-
 
 %predicado que unifica con la acción de moverse de estante
 ejecutar_accion(moverse_a, Lugar,KB,KB2,T):-
-	write('Ejecutando accion....'), nl,	
+	write('   Ejecutando accion....'), nl,	
 	cambiar_valor_propiedad_objeto(marvin,ubic_actual=>(F,0),ubic_actual=>(Lugar,0),KB,Temp), %cambiamos la ubicacion actual de marvin	
-	write('Accion ejecutada exitosamente.'),												  %mostramos aviso de accion ejecutada
+	write('Accion ejecutada exitosamente.'), nl,												  %mostramos aviso de accion ejecutada
 	eliminar_objeto(Lugar, Temp, KB3),														  %preguntar a Edgar de esto, porque se hace
 	get_action(T,KB3,KB2). % recorrremos para el siguiente elemento
 
 %predicado que simula la acción de tomar un objeto
 ejecutar_accion(tomar, Objeto,KB,KB2,T):-
-	write('Ejecutando accion....'), nl,	
+	write('   Ejecutando accion....'), nl,	
 	obtener_probabilidad_accion(Objeto,agarrar,KB,Prob),   % obtenemos la probabilidad de agarrar un objeto	
 	es_probable_accion(Prob,Permiso),					   % obtenemos el permiso de ejecutar la acción
 	evaluar_probabilidad_agarrar(Permiso,Objeto,X,KB,KB2,T). %evaluamos el permiso para ejecutar la acción
 
 ejecutar_accion(tomar_mano_derecha, Objeto, KB,KB2):-
-	write('Ejecutando accion....'), nl,
+	write('   Ejecutando accion....'), nl,
 	tab(3), write('  tomar_mano_derecha   ->   '), tab(3), write(Objeto), nl, 
 	obtener_probabilidad_accion(Objeto,agarrar,KB,Prob),
 	%obtener_probabilidad_agarrar(Objeto, KB ,Prob),
 	es_probable_accion(Prob),
 	tomar_objeto_derecha_robot(Objeto,KB,KB2),
-	write('Accion ejecutada exitosamente.').
+	write('Accion ejecutada exitosamente.'), nl.
 	%guardar(KB2).
 
 ejecutar_accion(tomar_mano_derecha, Objeto, KB,KB2):-
@@ -2742,7 +2755,7 @@ ejecutar_accion(tomar_mano_derecha, Objeto, KB,KB2):-
 	obtener_probabilidad_accion(Objeto,agarrar,KB,Prob),
 	es_probable_accion(Prob),
 	tomar_objeto_derecha_robot(Objeto,KB,KB2),
-	write('Accion ejecutada exitosamente.').
+	write('Accion ejecutada exitosamente.'), nl.
 	%guardar(KB2).
 
 ejecutar_accion(tomar_mano_derecha, Objeto, KB,KB2):-
@@ -2752,7 +2765,7 @@ ejecutar_accion(tomar_mano_derecha, Objeto, KB,KB2):-
 	obtener_probabilidad_accion(Objeto,agarrar,KB,Prob),
 	es_probable_accion(Prob),
 	tomar_objeto_derecha_robot(Objeto,KB,KB2),
-	write('Accion ejecutada exitosamente.').
+	write('Accion ejecutada exitosamente.'), nl.
 	%guardar(KB2).
 
 ejecutar_accion(tomar_mano_derecha, Objeto, KB,KB):-
@@ -2760,13 +2773,13 @@ ejecutar_accion(tomar_mano_derecha, Objeto, KB,KB):-
 
 
 ejecutar_accion(tomar_mano_izquierda, Objeto, KB,KB2):-
-	write('Ejecutando accion....'),nl,
+	write('   Ejecutando accion....'),nl,
 	tab(3), write('  tomar_mano_izquierda   ->   '), tab(3), write(Objeto), nl, 
 	%obtener_probabilidad_agarrar(Objeto, KB ,Prob),
 	obtener_probabilidad_accion(Objeto,agarrar,KB,Prob),
 	es_probable_accion(Prob),
 	tomar_objeto_izquierda_robot(Objeto,KB,KB2),
-	write('Accion ejecutada exitosamente.').
+	write('Accion ejecutada exitosamente.'), nl.
 	%guardar(KB2).
 
 ejecutar_accion(tomar_mano_izquierda, Objeto, KB,KB2):-
@@ -2776,7 +2789,7 @@ ejecutar_accion(tomar_mano_izquierda, Objeto, KB,KB2):-
 	obtener_probabilidad_accion(Objeto,agarrar,KB,Prob),
 	es_probable_accion(Prob),
 	tomar_objeto_izquierda_robot(Objeto,KB,KB2),
-	write('Accion ejecutada exitosamente.').
+	write('Accion ejecutada exitosamente.'), nl.
 	%guardar(KB2).
 
 ejecutar_accion(tomar_mano_izquierda, Objeto, KB,KB2):-
@@ -2786,7 +2799,7 @@ ejecutar_accion(tomar_mano_izquierda, Objeto, KB,KB2):-
 	obtener_probabilidad_accion(Objeto,agarrar,KB,Prob),
 	es_probable_accion(Prob),
 	tomar_objeto_izquierda_robot(Objeto,KB,KB2),
-	write('Accion ejecutada exitosamente.').
+	write('Accion ejecutada exitosamente.'), nl.
 	%guardar(KB2).
 
 ejecutar_accion(tomar_mano_izquierda, _,A,A):-
@@ -2800,7 +2813,7 @@ evaluar_probabilidad_busqueda(puede_ejecutar,Objeto,UbiActual,KB,KB2,T):-
 
 % si cae en este predicado entonces quiere decir que no es posible ejecitar la acción y se envia un error
 evaluar_probabilidad_busqueda(_,Objeto,_,KB,KB2,_):-
-	nl,write('Error'),nl,
+	nl,write('Error  : (   !!!!!'),nl,
 	diagnostico_desicion_plan_simular(Objeto,KB,KB2).
 
 % es posible ejecutar la acción ahora solo queda cambiar la nueva ubicacion del objeto
@@ -2809,17 +2822,17 @@ evaluar_probabilidad_colocar(puede_ejecutar,Objeto,UbicActual,KB,KB2,T):-
 
 %esto nos indica que no fue posible colocar el objeto en el lugar correcto
 evaluar_probabilidad_colocar(_,Objeto,UbicActual,KB,KB2,_):-
-	nl,write('Error'),nl,
+	nl,write('Error   : (   !!!!!'),nl,
 	diagnostico_desicion_plan_simular(Objeto,KB,KB2).
 
 %indicamos que fue correcto
 evaluar_probabilidad_agarrar(puede_ejecutar,Objeto,UbiActual,KB,KB2,T):-
-	write('Accion ejecutada exitosamente.'),
+	write('Accion ejecutada exitosamente.'), nl,
 	get_action(T,KB,KB2). % recorrremos para el siguiente elemento
 
 %indicamos que ocurrio un error
 evaluar_probabilidad_agarrar(_,Objeto,UbiActual,KB,KB2,_):-
-	nl,write('Error'),nl,
+	nl,write('Error   : (   !!!!!'),nl,
 	diagnostico_desicion_plan_simular(Objeto,KB,KB2).
 
 %cuando se encuentra el individuo, se unifica la pila con el arreglo respuesta
@@ -2836,12 +2849,12 @@ buscar_individuo_en_lista(_,[],no_encontrado).
 %si encontramos el objeto entonces procedemos a realizar el cambio de ubicación observada
 ejecutar_simulacion_busqueda(encontrado,Objeto,Estante,KB,KB2,T):-
 	cambiar_valor_propiedad_objeto(Objeto,ubic_obs=>(F,0),ubic_obs=>(Estante,0),KB,KB3), % con esta acción establecemos la propiedad correcta
-	write('Accion ejecutada exitosamente.'), 										   % indicamos que la acción fue correcta
+	write('Accion ejecutada exitosamente.'), nl,							   % indicamos que la acción fue correcta
 	get_action(T,KB3,KB2). % recorrremos para el siguiente elemento
 
 %indicamos error y hacemos un nuevo diagnostico
 ejecutar_simulacion_busqueda(no_encontrado,Objeto,Estante,KB,KB2,_):-
-	nl, write('Error'), nl,diagnostico_desicion_plan_simular(Objeto,KB,KB2).
+	nl, write('Error   : (   !!!!!'), nl,diagnostico_desicion_plan_simular(Objeto,KB,KB2).
 
 % ejecutar_accion(entregar_a_cliente, Objeto):-
 %	.
@@ -2853,7 +2866,7 @@ ejecutar_simulacion_busqueda(no_encontrado,Objeto,Estante,KB,KB2,_):-
 
 %predicado que itera por la lisya de acciones recursivamente
 get_action([H=>Obj|T], KB,KB2):-
-	nl,write('Accion: '),tab(3),write(H),tab(3),write(Obj),nl,
+	nl,write('  -Accion: '),tab(3),write(H),tab(3),write(Obj),nl,
  	ejecutar_accion(H, Obj,KB,KB2,T). %mandamos ejecutar la accion recurisavamente
 	%get_action(T,KB3,KB2). % recorrremos para el siguiente elemento
 
@@ -2863,7 +2876,7 @@ get_action([],A,A).
 %predicado principal para ejecutar la simulación
 ejecutar_plan(Plan,KB,KB2):-
 	nl,
-	write('Ejecutando plan:'),
+	write('-Ejecutando plan:'),
 	get_action(Plan,KB,KB2).
 
 
