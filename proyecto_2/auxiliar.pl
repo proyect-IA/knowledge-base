@@ -7,19 +7,21 @@
 
 %predicado para abrir un archivo -------------------------------------------------------------------------
 abrir(KB):- 
-	open('/Users/juan/Desktop/KB2.txt',read,Stream),
-	%open('d:/maestria/inteligenciaArtif/knowledge-base/bases/KBArticulo.txt',read,Stream),
-	%open('d:/maestria/inteligenciaArtif/knowledge-base/bases/KBEjemploExamen.txt',read,Stream),
-	%open('d:/maestria/inteligenciaArtif/knowledge-base/proyecto_2/bases/KBPruebasYoshio.txt',read,Stream),
+	% open('/Users/juan/Desktop/KB2.txt',read,Stream),
+	% open('d:/maestria/inteligenciaArtif/knowledge-base/bases/KBArticulo.txt',read,Stream),
+	% open('d:/maestria/inteligenciaArtif/knowledge-base/bases/KBEjemploExamen.txt',read,Stream),
+	% open('d:/maestria/inteligenciaArtif/knowledge-base/proyecto_2/bases/KBPruebasYoshio.txt',read,Stream),
+	open('d:/maestria/inteligenciaArtif/knowledge-base/proyecto_2/bases/KB2.txt',read,Stream),
 	readclauses(Stream,X),
 	close(Stream),
 	atom_to_term_conversion(X,KB).
 
 % predicado para guardar un archivo ---------------------------------------------------------------------
 guardar(KB):-
-	open('/Users/juan/Desktop/KB2.txt',write,Stream),
-	%open('d:/maestria/inteligenciaArtif/knowledge-base/basePrueba.txt',write,Stream),
-	%open('d:/maestria/inteligenciaArtif/knowledge-base/proyecto_2/KB2.txt',write,Stream),
+	% open('/Users/juan/Desktop/KB2.txt',write,Stream),
+	% open('d:/maestria/inteligenciaArtif/knowledge-base/basePrueba.txt',write,Stream),
+	% open('d:/maestria/inteligenciaArtif/knowledge-base/proyecto_2/KB2.txt',write,Stream),
+	open('d:/maestria/inteligenciaArtif/knowledge-base/proyecto_2/bases/KB2.txt',read,Stream),
 	writeq(Stream,KB),
 	close(Stream).
 
@@ -1784,24 +1786,24 @@ obtener_clases_objeto(ObjectName, KB, Clases):-
 % Inciso e)
 % predicados para obtener todas las propiedades de una clase -------------
 obtener_propiedades_completas_clase(ClaseBuscar,KB,Propiedades):-
-	buscar_propiedades_clase(top,ClaseBuscar,KB,[],[],Propiedades),
-	imprime_lista_resultados(Propiedades).
+	buscar_propiedades_clase(top,ClaseBuscar,KB,[],[],Propiedades).%,
+	% imprime_lista_resultados(Propiedades).
 
 %predicado que se encarga de obtener todas las propiedades de un objeto especifico
 obtener_propiedades_completas_objeto(Individuo,KB,Resultado):-
-	obtener_propiedades_completas_por_objeto(top,KB,Individuo,[],[],Resultado), %llama al predicado principal que recorre el arbol recursivamente
-	imprime_lista_resultados(Resultado).
+	obtener_propiedades_completas_por_objeto(top,KB,Individuo,[],[],Resultado).%, %llama al predicado principal que recorre el arbol recursivamente
+	% imprime_lista_resultados(Resultado).
 
 % ------------------------------------------------------------
 % Inciso f)
 % predicados para obtener todas las relaciones de un objeto ---------------
 obtener_relaciones_completas_clase(ClaseBuscar,KB,Relaciones):-
-	buscar_relaciones_clase(top,ClaseBuscar,KB,[],[],Relaciones),
-	imprime_lista_resultados(Relaciones).
+	buscar_relaciones_clase(top,ClaseBuscar,KB,[],[],Relaciones). %,
+	% imprime_lista_resultados(Relaciones).
 
 obtener_relaciones_completas_objeto(Individuo,KB,Resultado):-
-	obtener_relaciones_completas_por_objeto(top,KB,Individuo,[],[],Resultado,KB),
-	imprime_lista_resultados(Resultado).
+	obtener_relaciones_completas_por_objeto(top,KB,Individuo,[],[],Resultado,KB).%,
+	% imprime_lista_resultados(Resultado).
 
 % Ejercicio 1 -> Extensiones clases, objetos, propiedades, relaciones y preferencias
 % ------------------------------------------------------------------------------------
@@ -2171,34 +2173,33 @@ diagnostico_desicion_plan_simular(Objeto,KB,KBN):-
 	ejecutar_plan(Plan, KB3,KBN).
 
 obtenerDiagnostico(Producto,KB,NewKB3):-
-	%write(Producto),
+	nl, write(' -----   Diagnostico ---->'), nl, nl,
 	obtener_propiedades_completas_objeto(Producto,KB,Propiedades),
-	%writeln(Propiedades),
+	% writeln(Propiedades),
 	obtener_lugar_visitar(ubic_ideal,Propiedades,Lugar),
-	writeln(""),
-	atom_concat('Lugar a visitar: ', Lugar, MensajeLugar),
-	writeln(MensajeLugar),
-	%Obtener objetos del lugar obtenido
+	% writeln(""),
+	% atom_concat('Lugar a visitar: ', Lugar, MensajeLugar),
+	% writeln(MensajeLugar),
+	% Obtener objetos del lugar obtenido
 	extension_de_clase(Lugar,KB,Individuos),
-	writeln('Observando los objetos': Individuos),
+	% writeln('Observando los objetos': Individuos),
 	cambiar_ubicaciones_objetos(Individuos,KB,Lugar,NewKB1),
-	%writeln("NewkB1"),
-	%writeln(NewKB1),
-	%Eliminar lugar que ya fue observado
+	% writeln("NewkB1"),
+	% writeln(NewKB1),
+	% --- Eliminar lugar que ya fue observado  ----
 	eliminar_objeto(Lugar,NewKB1,NewKB2),
-	atom_concat('Eliminando lugar visitado: ', Lugar, MensajeEliminar),
-	writeln(MensajeEliminar),
-	%Obtener resto de los objetos
+	% atom_concat('Eliminando lugar visitado: ', Lugar, MensajeEliminar),
+	% writeln(MensajeEliminar),
+	% Obtener resto de los objetos
 	extension_de_clase(lugares_por_visitar,NewKB2,DemasLugares),
 	obtener_demas_objetos(DemasLugares,NewKB2,[],DemasObjetos),
-	writeln('Inferir lugar de los objetos': DemasObjetos),
-	%Obtener tamaño de la lista de los objetos a inferir
+	% writeln('Inferir lugar de los objetos': DemasObjetos),
+	% Obtener tamaño de la lista de los objetos a inferir
 	length(DemasObjetos,NoElementos),
 	inferir_ubicaciones_resto(NoElementos,DemasLugares,DemasObjetos,NewKB2,NewKB3),
-	%writeln(NewKB3),
+	% writeln(NewKB3),
 	% Mostrar todos los objetos para que sean mostrados en el diagnostico
-	writeln(''),
-	writeln("El diagnostico acerca de la ubicación actual de los productos es:"),
+	writeln("El diagnostico acerca de la ubicacion actual de los productos es:"),
 	mostrarDiagnostico(Individuos,ubic_obs,NewKB3, observado),
 	mostrarDiagnostico(DemasObjetos,ubic_inf,NewKB3, inferido).
 
@@ -2207,24 +2208,24 @@ inferir_ubicaciones_resto(_,[_|_],[],NewKB2,NewKB2).
 inferir_ubicaciones_resto(1,[UnicoLugar|T],[Obj1|Resto],NewKB2,NewKB3):-
 	%Cambiar ubicacion observada de Obj1
 	cambiar_valor_propiedad_objeto(Obj1,ubic_inf=>(_,_),ubic_inf=>(UnicoLugar,0),NewKB2,AuxNewKB2),
-	atom_concat('Para el objeto ', Obj1, MensajeLugar),
-	atom_concat('El lugar inferido es: ', UnicoLugar, MensajeInferido),
-	writeln(MensajeLugar),
-	writeln(MensajeInferido),
-	%obtener_propiedades_completas_objeto(Obj1,AuxNewKB2,Propiedades),
-	%writeln(Propiedades),
+	% atom_concat('Para el objeto ', Obj1, MensajeLugar),
+	% atom_concat('El lugar inferido es: ', UnicoLugar, MensajeInferido),
+	% writeln(MensajeLugar),
+	% writeln(MensajeInferido),
+	% obtener_propiedades_completas_objeto(Obj1,AuxNewKB2,Propiedades),
+	% writeln(Propiedades),
 	inferir_ubicaciones_resto(1,[UnicoLugar|T],Resto,AuxNewKB2,NewKB3).
 %Cuando tienes mas de una ubicacion por visitar
 inferir_ubicaciones_resto(NoElementos,Lugares,[Obj1|Resto],NewKB2,NewKB3):-
 	%Elegir número random de rotaciones
 	random(0, NoElementos, NoRandom),
-	writeln(NoRandom),
+	% writeln(NoRandom),
 	rotar(Lugares, Resultado, NoRandom),
 	obtener_cabeza(Resultado, Lugar),
-	atom_concat('Para el objeto ', Obj1, MensajeLugar),
-	atom_concat('El lugar inferido es: ', Lugar, MensajeInferido),
-	writeln(MensajeLugar),
-	writeln(MensajeInferido),
+	%atom_concat('Para el objeto ', Obj1, MensajeLugar),
+	%atom_concat('El lugar inferido es: ', Lugar, MensajeInferido),
+	%writeln(MensajeLugar),
+	%writeln(MensajeInferido),
 	%Cambiar ubicacion observada de Obj1
 	cambiar_valor_propiedad_objeto(Obj1,ubic_inf=>(_,_),ubic_inf=>(Lugar,0),NewKB2,AuxNewKB2),
 	%writeln(""),
@@ -2270,13 +2271,9 @@ mostrarDiagnostico([],_,_,_):-
 mostrarDiagnostico([Obj1|Resto],Ubicacion,KB,Metodo):-
 	obtener_propiedades_completas_objeto(Obj1,KB,Propiedades),
 	obtener_lugar_visitar(Ubicacion,Propiedades,Lugar),
-	atom_concat('El objeto ', Obj1, MensajeObjeto),
-	atom_concat(' está en el lugar ', Lugar, MensajeLugar),
-	atom_concat(' *', Metodo, MensajeMetodo),
-	writeln(''),
-	write(MensajeObjeto),
-	write(MensajeLugar),
-	write(MensajeMetodo),
+	write('El objeto ['), write(Obj1), write(']'), nl,
+	write('   esta en  ['),write(Lugar), write(']'), nl,
+	write('   *'), write(Metodo), nl, nl,
 	mostrarDiagnostico(Resto,Ubicacion,KB,Metodo).
 
 
@@ -2285,6 +2282,7 @@ mostrarDiagnostico([Obj1|Resto],Ubicacion,KB,Metodo):-
 % este modulo tiene como objetivo relizar una planeacion de acciones que nos lleven a un objetivo
 
 iniciar_modulo_planificacion(KB,Desiciones,Objeto,Plan):-
+	nl, write(' -----   planificacion ---->'), nl, nl,
 	obtener_propiedades_completas_objeto(marvin,KB,PropRobo), 	% obtenemos las propiedades del robot las inicales antes de todo
 	obtener_propiedades_clase(acciones,KB,ListaAcciones),
 	limpiar_arbol(Desiciones,D),
@@ -2559,6 +2557,7 @@ buscar_obtener_clase(X,ClaseBuscar,[class(_,_,_,_,_)|R]):-
 toma_de_desiciones(Decision,KB):-
 	obtener_estantes_escenario(KB,AuxDecision),
 	obtener_producto_cliente(KB,Producto),
+	nl, write(' -----   Toma decisiones ---->'), nl, nl,
 	append(Producto,AuxDecision,Decision).
 	
 %%*** Predicados para obtener los estantes del supermercado
