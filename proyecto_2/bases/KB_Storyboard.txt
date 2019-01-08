@@ -16,7 +16,7 @@ class(robot,top,[],[],
 	[id=>[marvin],
 		[[ver=>(nada,0),
 		ubic_inicial=>(centro,0),
-		ubic_actual=>(estante_bebida,0),
+		ubic_actual=>(estante_drinks,0),
 		mano_der=>(desconocido,0),
 		mano_izq=>(desconocido,0),
 		en_entrega=>(si,0)],[]],[]]
