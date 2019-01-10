@@ -1,0 +1,10 @@
+C:\Users\edgar\source\repos\minimax\minimax\bin\Debug\minimax.exe.config
+C:\Users\edgar\source\repos\minimax\minimax\bin\Debug\minimax.exe
+C:\Users\edgar\source\repos\minimax\minimax\bin\Debug\minimax.pdb
+C:\Users\edgar\source\repos\minimax\minimax\obj\Debug\minimax.csprojResolveAssemblyReference.cache
+C:\Users\edgar\source\repos\minimax\minimax\obj\Debug\minimax.Minimax.resources
+C:\Users\edgar\source\repos\minimax\minimax\obj\Debug\minimax.Properties.Resources.resources
+C:\Users\edgar\source\repos\minimax\minimax\obj\Debug\minimax.csproj.GenerateResource.Cache
+C:\Users\edgar\source\repos\minimax\minimax\obj\Debug\minimax.csproj.CoreCompileInputs.cache
+C:\Users\edgar\source\repos\minimax\minimax\obj\Debug\minimax.exe
+C:\Users\edgar\source\repos\minimax\minimax\obj\Debug\minimax.pdb
