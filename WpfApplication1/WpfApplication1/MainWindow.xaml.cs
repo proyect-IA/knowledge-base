@@ -52,7 +52,7 @@ namespace WpfApplication1
         /// <param name="e"></param>
         private void Button_Click(object sender, RoutedEventArgs e)
         {            
-            controlVisual.iniciarConstruccionDeArbol();
+            controlVisual.obtenerInformacionDeArbol();
         }
 
 

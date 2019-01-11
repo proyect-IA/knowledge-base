@@ -16,9 +16,20 @@ namespace WpfApplication1.Servicios
         /// <param name="amiga"></param>
         /// <param name="enemiga"></param>
         /// <returns></returns>
-        public static Nodo iniciarConstruccionArbol(InfoUnidad amiga, InfoUnidad enemiga)
+
+        private const int MAX_RECURSIVE_CALLS = 100;
+        public static Nodo construirArbol(Nodo raiz)
         {
-            Nodo raiz = new Nodo();
+
+            if (raiz.funcion_generadora == "Retirada")
+                return raiz;
+            if (raiz.funcion_generadora == "Exito")
+                return raiz;
+
+
+            generarHijos(raiz);
+            foreach (Nodo i in raiz.hijos)
+                construirArbol(i);
 
             return raiz;
         }
@@ -62,39 +73,70 @@ namespace WpfApplication1.Servicios
             float threshold_elements = 500;
             // private static int threshold = 500;
 
-            Nodo n1 = new Nodo();
-            n1.unidad = obtenerCopia(nodo.unidad);
-        
+            // Caso base del algoritmo
+            if (nodo.funcion_generadora == "Retirada")
+                return false;
+            if (nodo.unidad.superioridad > 0.8)
+                return false;
+
+
+            Nodo n1    = new Nodo();
+            n1.unidad  = obtenerCopia(nodo.unidad);
+            n1.enemiga = obtenerCopia(nodo.enemiga);
+            n1.hijos = new List<Nodo>();
+
+            // Genera nodo hijo con accion desplazamiento
             if (nodo.unidad.distancia_entre_elementos > threshold_distance)
             {
                 n1.unidad.distancia_entre_elementos -= 100;
                 n1.funcion_generadora = "Dezplazamiento";
+                n1.unidad.superioridad = calcularSuperioridad(n1.unidad, n1.enemiga);
                 nodo.hijos.Add(n1);
-                
 
+                // Genera nodo hijo con accion ataque indirecto
                 n1.unidad.distancia_entre_elementos += 100;
-                n1.unidad.elementos -= 100;
+                n1.unidad.elementos -= 200;
                 n1.unidad.recursos -= 1;
                 n1.funcion_generadora = "Ataque Indirecto";
+                n1.unidad.superioridad = calcularSuperioridad(n1.unidad, n1.enemiga);
                 nodo.hijos.Add(n1);
             }
             else
             {
-                n1.unidad.elementos += 50;
+                // Genera nodo hijo con accion ataque directo
+                n1.unidad.elementos += 80;
                 n1.unidad.recursos -= 1;
                 n1.funcion_generadora = "Ataque directo";
+                n1.unidad.superioridad = calcularSuperioridad(n1.unidad, n1.enemiga);
                 nodo.hijos.Add(n1);
             }
 
+            if (nodo.unidad.superioridad < 0.3)
+            {
+                Nodo n2   = new Nodo();
+                n2.unidad = obtenerCopia(nodo.unidad);
+                n2.funcion_generadora = "Retirada";
+                n2.hijos = new List<Nodo>();
+                nodo.hijos.Add(n2);
+            }
+
+            if (nodo.unidad.superioridad > 0.7)
+            {
+                Nodo n2 = new Nodo();
+                n2.unidad = obtenerCopia(nodo.unidad);
+                n2.funcion_generadora = "Exito";
+                n2.hijos = new List<Nodo>();
+                nodo.hijos.Add(n2);
+            }
+
+            // Genera nodo hijo con segregación
+            /*
             if (nodo.unidad.elementos > threshold_elements)
             {
                 Nodo n2 = new Nodo();
                 n2.unidad   = obtenerCopia(nodo.unidad);
-                
-                // if()
-
             }
-
+            */
             return true;
         }
 

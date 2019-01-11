@@ -22,7 +22,7 @@ namespace WpfApplication1
         /// <summary>
         /// Método que inicia con la construcción del árbol
         /// </summary>
-        public void iniciarConstruccionDeArbol()
+        public void obtenerInformacionDeArbol()
         {
             //carga la situación de la unidad ia
             InfoUnidad ia  = new InfoUnidad();
@@ -42,6 +42,17 @@ namespace WpfApplication1
             enemiga.superioridad = 1.0f - ia.superioridad;
             Console.WriteLine("Superioridad IA:  " + ia.superioridad);
             Console.WriteLine("Superioridad Enemigo:  " + enemiga.superioridad);
+
+            //Construccion del nodo raíz
+            Nodo raiz = new Nodo();
+            raiz.enemiga = enemiga;
+            raiz.unidad = ia;
+            raiz.funcion_generadora = "top";
+            raiz.hijos = new List<Nodo>();
+
+            //Generación del arbol de busqueda
+            raiz = Servicios.ServiciosArbol.construirArbol(raiz);
+
         }
 
         public void correrSimulacionIA()
