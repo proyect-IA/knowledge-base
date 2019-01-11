@@ -79,9 +79,9 @@ namespace WpfApplication1.Servicios
             float diff_armas       = amiga.armas - enemiga.armas;
             float diff_nivel_armas = amiga.nivel_armas - enemiga.nivel_armas;
 
-            superioridad += (0.5f / 3) * (diff_elements / (amiga.elementos + enemiga.elementos));
-            superioridad += (0.5f / 3) * (diff_armas / (amiga.armas + enemiga.armas));
-            superioridad += (0.5f / 3) * (diff_nivel_armas / (amiga.nivel_armas + enemiga.nivel_armas));
+            superioridad += (0.5f*2 / 6) * (diff_elements / (amiga.elementos + enemiga.elementos));
+            superioridad += (0.5f / 2) * (diff_armas / (amiga.armas + enemiga.armas));
+            superioridad += (0.5f*2 / 6) * (diff_nivel_armas / (amiga.nivel_armas + enemiga.nivel_armas));
 
             Console.WriteLine("Superioridad:   " + superioridad);
             return superioridad;
@@ -197,6 +197,11 @@ namespace WpfApplication1.Servicios
             copia.distancia_entre_elementos = uni.distancia_entre_elementos;
             copia.superioridad              = uni.superioridad;
             return copia;
-        } 
+        }
+
+        public static float obtenerOperatividad(Unidad u)
+        {
+            return u.nivel_operatividad;
+        }
     }
 }
