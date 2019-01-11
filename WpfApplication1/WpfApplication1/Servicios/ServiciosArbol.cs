@@ -58,22 +58,42 @@ namespace WpfApplication1.Servicios
             /// Genera los posibles hijos desde un nodo.
             /// Las posibles acciones son:  
             /// [Ataque directo, Ataque indirecto, segregar, retirada, movilizarte]
-            
+            int threshold_distance = 500;
+            float threshold_elements = 500;
+            // private static int threshold = 500;
+
             Nodo n1 = new Nodo();
             n1.unidad = obtenerCopia(nodo.unidad);
-            nodo.hijos.Add(n1);
+        
+            if (nodo.unidad.distancia_entre_elementos > threshold_distance)
+            {
+                n1.unidad.distancia_entre_elementos -= 100;
+                n1.funcion_generadora = "Dezplazamiento";
+                nodo.hijos.Add(n1);
+                
 
-            Nodo n2 = nodo;
-            nodo.hijos.Add(n2);
+                n1.unidad.distancia_entre_elementos += 100;
+                n1.unidad.elementos -= 100;
+                n1.unidad.recursos -= 1;
+                n1.funcion_generadora = "Ataque Indirecto";
+                nodo.hijos.Add(n1);
+            }
+            else
+            {
+                n1.unidad.elementos += 50;
+                n1.unidad.recursos -= 1;
+                n1.funcion_generadora = "Ataque directo";
+                nodo.hijos.Add(n1);
+            }
 
-            Nodo n3 = nodo;
-            nodo.hijos.Add(n3);
+            if (nodo.unidad.elementos > threshold_elements)
+            {
+                Nodo n2 = new Nodo();
+                n2.unidad   = obtenerCopia(nodo.unidad);
+                
+                // if()
 
-            Nodo n4 = nodo;
-            nodo.hijos.Add(n4);
-
-            Nodo n5 = nodo;
-            nodo.hijos.Add(n5);
+            }
 
             return true;
         }
