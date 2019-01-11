@@ -95,69 +95,85 @@ namespace WpfApplication1.Servicios
             /// Las posibles acciones son:  
             /// [Ataque directo, Ataque indirecto, segregar, retirada, movilizarte]
             int threshold_distance = 500;
-            float threshold_elements = 500;
+            Random rnd = new Random();
             // private static int threshold = 500;
 
             // Caso base del algoritmo
             if (nodo.funcion_generadora == "Retirada")
                 return false;
-            if (nodo.unidad.superioridad > 0.8f)
+            if (nodo.unidad.superioridad > 1.0f)
                 return false;
             if (nodo.unidad.superioridad < 0.0f)
                 return false;
 
-
-            Nodo n1     = new Nodo();
-            n1.unidad   = obtenerCopia(nodo.unidad);
-            n1.enemiga  = obtenerCopia(nodo.enemiga);
-            n1.visitado = false;
-            n1.hijos    = new List<Nodo>();
-
             // Genera nodo hijo con accion desplazamiento
             if (nodo.unidad.distancia_entre_elementos > threshold_distance)
             {
-                n1.unidad.distancia_entre_elementos -= 100;
-                n1.funcion_generadora = "Desplazamiento";
-                n1.unidad.superioridad = calcularSuperioridad(n1.unidad, n1.enemiga);
-                n1.nivel = nodo.nivel +1;
-                nodo.hijos.Add(n1);
-
                 // Genera nodo hijo con accion ataque indirecto
-                n1.unidad.distancia_entre_elementos += 100;
+                Nodo n1 = new Nodo();
+                n1.unidad = obtenerCopia(nodo.unidad);
+                n1.enemiga = obtenerCopia(nodo.enemiga);
+                n1.visitado = false;
+                n1.hijos = new List<Nodo>();
                 n1.enemiga.elementos -= 200;
                 n1.unidad.recursos -= 1;
                 n1.funcion_generadora = "Ataque Indirecto";
                 n1.unidad.superioridad = calcularSuperioridad(n1.unidad, n1.enemiga);
                 n1.nivel = nodo.nivel + 1;
                 nodo.hijos.Add(n1);
+
+                Nodo n2 = new Nodo();
+                n2.unidad = obtenerCopia(nodo.unidad);
+                n2.enemiga = obtenerCopia(nodo.enemiga);
+                n2.visitado = false;
+                n2.hijos = new List<Nodo>();
+                n2.unidad.distancia_entre_elementos -= 100;
+                n2.funcion_generadora = "Desplazamiento";
+                n2.unidad.superioridad = calcularSuperioridad(n2.unidad, n2.enemiga) + (float)rnd.Next(-100, 100)/500;
+                n2.nivel = nodo.nivel +1;
+                nodo.hijos.Add(n2);
             }
             else
             {
                 // Genera nodo hijo con accion ataque directo
-                n1.enemiga.elementos += 40;
-                n1.unidad.recursos -= 1;
-                n1.funcion_generadora = "Ataque directo";
-                n1.unidad.superioridad = calcularSuperioridad(n1.unidad, n1.enemiga);
-                n1.nivel = nodo.nivel + 1;
-                nodo.hijos.Add(n1);
+                Nodo n3 = new Nodo();
+                n3.unidad = obtenerCopia(nodo.unidad);
+                n3.enemiga = obtenerCopia(nodo.enemiga);
+                n3.visitado = false;
+                n3.hijos = new List<Nodo>();
+                n3.enemiga.elementos += 40;
+                n3.unidad.recursos -= 1;
+                n3.funcion_generadora = "Ataque directo";
+                n3.unidad.superioridad = calcularSuperioridad(n3.unidad, n3.enemiga);
+                n3.nivel = nodo.nivel + 1;
+                nodo.hijos.Add(n3);
             }
 
             if (nodo.unidad.superioridad < 0.3)
             {
-                Nodo n2   = new Nodo();
-                n2.unidad = obtenerCopia(nodo.unidad);
-                n2.funcion_generadora = "Retirada";
-                n2.hijos = new List<Nodo>();
-                nodo.hijos.Add(n2);
-            }
+                // Genera nodo hijo con accion ataque directo
+                Nodo n4 = new Nodo();
+                n4.unidad = obtenerCopia(nodo.unidad);
+                n4.enemiga = obtenerCopia(nodo.enemiga);
+                n4.visitado = false;
+                n4.hijos = new List<Nodo>();
+                n4.funcion_generadora = "Retirada";
+                n4.unidad.superioridad = 0.99f;
+                n4.nivel = nodo.nivel + 1;
+                nodo.hijos.Add(n4);
+           }
 
             if (nodo.unidad.superioridad > 0.7)
             {
-                Nodo n2 = new Nodo();
-                n2.unidad = obtenerCopia(nodo.unidad);
-                n2.funcion_generadora = "Exito";
-                n2.hijos = new List<Nodo>();
-                nodo.hijos.Add(n2);
+                Nodo n5 = new Nodo();
+                n5.unidad = obtenerCopia(nodo.unidad);
+                n5.enemiga = obtenerCopia(nodo.enemiga);
+                n5.visitado = false;
+                n5.hijos = new List<Nodo>();
+                n5.funcion_generadora = "Exito";
+                n5.unidad.superioridad = 0.99f;
+                n5.nivel = nodo.nivel + 1;
+                nodo.hijos.Add(n5);
             }
 
             // Genera nodo hijo con segregación
