@@ -41,5 +41,11 @@ namespace WpfApplication1
         }
 
 
+        public void correrSimulacionIA()
+        {
+
+        }
+
+
     }
 }

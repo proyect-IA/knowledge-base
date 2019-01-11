@@ -20,15 +20,29 @@ namespace WpfApplication1
     /// </summary>
     public partial class MainWindow : Window
     {
-        private ControlVisual controlVisual { get; set; }
-               
+
+        /// <summary>
+        /// control visual principal
+        /// </summary>
+        private ControlVisual controlVisual                 { get; set; }
+
+        /// <summary>
+        /// Control visual del lienzo
+        /// </summary>
+        private ControlVisualSimulacion controlVisualLienzo { get; set; }
+
         /// <summary>
         /// Constructor de la clase
         /// </summary>
         public MainWindow()
         {
             InitializeComponent();
-            controlVisual = new ControlVisual(this);
+
+            //Inicia la propiedad del componente
+            controlVisual       = new ControlVisual(this);
+
+            //Inicia el control visual del lienzo
+            controlVisualLienzo = new ControlVisualSimulacion(this.lienzo);
         }
         
         /// <summary>
@@ -37,14 +51,15 @@ namespace WpfApplication1
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void Button_Click(object sender, RoutedEventArgs e)
-        {
+        {            
             controlVisual.iniciarConstruccionDeArbol();
         }
 
 
         private void correr_simulacion(object sender, RoutedEventArgs e)
         {
-
+            this.btnIniciar.IsEnabled = false;
+            controlVisualLienzo.iniciarSimulacion();
         }
     }
 }

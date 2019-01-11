@@ -55,8 +55,17 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ControlVisual\ControlVisualSimulacion.cs" />
+    <Compile Include="Estados\Atacar.cs" />
+    <Compile Include="Estados\Desplazar.cs" />
+    <Compile Include="Estados\Retirada.cs" />
+    <Compile Include="Estados\Segregar.cs" />
     <Compile Include="Informacion\Accion.cs" />
     <Compile Include="Informacion\NodoSolucion.cs" />
+    <Compile Include="Informacion\Unidad.cs" />
+    <Compile Include="Interfaces\IAccionAutonoma.cs" />
+    <Compile Include="Interfaces\IUnidad.cs" />
+    <Compile Include="Servicios\ServicioDibujar.cs" />
     <Compile Include="Servicios\ServiciosArbol.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
