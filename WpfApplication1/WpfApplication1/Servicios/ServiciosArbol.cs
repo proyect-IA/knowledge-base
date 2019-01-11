@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,7 +28,8 @@ namespace WpfApplication1.Servicios
 
             generarHijos(raiz);
             foreach (Nodo i in raiz.hijos)
-                construirArbol(i);
+                if(raiz.nivel <= 20)
+                    construirArbol(i);
 
             return raiz;
         }
@@ -41,12 +41,14 @@ namespace WpfApplication1.Servicios
         /// <returns></returns>
         public static List<NodoSolucion> obtenerCaminoSolucion()
         {
-            //Lista del camino solución
+            //Implementanción de DFS
             List<NodoSolucion> caminoSolucion = new List<NodoSolucion>();
 
             return caminoSolucion;
         }
 
+
+        
         public static float calcularSuperioridad(InfoUnidad amiga, InfoUnidad enemiga)
         {
             //Lista del camino solución
@@ -62,6 +64,7 @@ namespace WpfApplication1.Servicios
             Console.WriteLine("Superioridad:   " + superioridad);
             return superioridad;
         }
+
 
 
         public static bool generarHijos(Nodo nodo)
@@ -91,6 +94,7 @@ namespace WpfApplication1.Servicios
                 n1.unidad.distancia_entre_elementos -= 100;
                 n1.funcion_generadora = "Dezplazamiento";
                 n1.unidad.superioridad = calcularSuperioridad(n1.unidad, n1.enemiga);
+                n1.nivel = nodo.nivel +1;
                 nodo.hijos.Add(n1);
 
                 // Genera nodo hijo con accion ataque indirecto
@@ -99,6 +103,7 @@ namespace WpfApplication1.Servicios
                 n1.unidad.recursos -= 1;
                 n1.funcion_generadora = "Ataque Indirecto";
                 n1.unidad.superioridad = calcularSuperioridad(n1.unidad, n1.enemiga);
+                n1.nivel = nodo.nivel + 1;
                 nodo.hijos.Add(n1);
             }
             else
@@ -108,6 +113,7 @@ namespace WpfApplication1.Servicios
                 n1.unidad.recursos -= 1;
                 n1.funcion_generadora = "Ataque directo";
                 n1.unidad.superioridad = calcularSuperioridad(n1.unidad, n1.enemiga);
+                n1.nivel = nodo.nivel + 1;
                 nodo.hijos.Add(n1);
             }
 
@@ -149,7 +155,6 @@ namespace WpfApplication1.Servicios
             copia.recursos                  = uni.recursos;
             copia.distancia_entre_elementos = uni.distancia_entre_elementos;
             copia.superioridad              = uni.superioridad;
-
             return copia;
         } 
     }

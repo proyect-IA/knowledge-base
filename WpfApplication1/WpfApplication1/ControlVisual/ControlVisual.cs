@@ -26,10 +26,10 @@ namespace WpfApplication1
         {
             //carga la situación de la unidad ia
             InfoUnidad ia  = new InfoUnidad();
-            ia.elementos   = Convert.ToInt32(_vista.elemento_ia.Text);
-            ia.armas       = Convert.ToInt32(_vista.armas_ia.Text);
-            ia.nivel_armas = Convert.ToInt32(_vista.nivel_armas_ia.Text);
-            ia.recursos    = Convert.ToInt32(_vista.recursos_ia.Text);
+            ia.elementos   = Convert.ToInt32(_vista.elemento.Text);
+            ia.armas       = Convert.ToInt32(_vista.armas.Text);
+            ia.nivel_armas = Convert.ToInt32(_vista.nivel_armas.Text);
+            ia.recursos    = Convert.ToInt32(_vista.recursos.Text);
 
             //carga la situación de la unidad enemiga
             InfoUnidad enemiga  = new InfoUnidad();
@@ -48,12 +48,13 @@ namespace WpfApplication1
             raiz.enemiga = enemiga;
             raiz.unidad = ia;
             raiz.funcion_generadora = "top";
+            raiz.nivel = 0;
             raiz.hijos = new List<Nodo>();
 
             //Generación del arbol de busqueda
             raiz = Servicios.ServiciosArbol.construirArbol(raiz);
-
         }
+
 
         public void correrSimulacionIA()
         {

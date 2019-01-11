@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using WpfApplication1.Informacion;
 
 namespace WpfApplication1
 {
@@ -42,7 +43,14 @@ namespace WpfApplication1
             controlVisual       = new ControlVisual(this);
 
             //Inicia el control visual del lienzo
-            controlVisualLienzo = new ControlVisualSimulacion(this.lienzo);
+            controlVisualLienzo = new ControlVisualSimulacion(this);
+
+            
+        }
+
+        public void establecerOperatividadAutonoma(Unidad unidad)
+        {
+            this.TablaUnidadAutonoma.ItemsSource = new List<Unidad>() { unidad };
         }
         
         /// <summary>
@@ -60,6 +68,31 @@ namespace WpfApplication1
         {
             this.btnIniciar.IsEnabled = false;
             controlVisualLienzo.iniciarSimulacion();
+        }
+
+        private void bajando(object sender, KeyEventArgs e)
+        {
+            switch (e.Key)
+            {
+                case Key.Down:
+
+                    controlVisualLienzo.enemiga.y+=5;
+                    break;
+
+                case Key.Up:
+                    controlVisualLienzo.enemiga.y-=5;
+                    break;
+
+                case Key.Left:
+                    controlVisualLienzo.enemiga.x-=5;
+                    break;
+
+                case Key.Right:
+                    controlVisualLienzo.enemiga.x+=5;
+                    break;
+            }
+            
+           
         }
     }
 }

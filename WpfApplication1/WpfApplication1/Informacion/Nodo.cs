@@ -14,22 +14,28 @@ namespace WpfApplication1.Informacion
         /// <summary>
         /// Propiedad que inicia el estado de la unidad
         /// </summary>
-        public InfoUnidad unidad          { get; set; }
+        public InfoUnidad unidad { get; set; }
 
         /// <summary>
-        /// Propiedad que inicia el estado de la unidad
+        /// Propiedad que inicia el estado de la unidad enemiga
         /// </summary>
-        public InfoUnidad enemiga         { get; set; }
+        public InfoUnidad enemiga { get; set; }
+
 
         /// <summary>
-        /// Propiedad que indica la accion previa que dio origen al estado
+        /// Propiedad que inidica de cual funcion proviene este estado
         /// </summary>
-        public string funcion_generadora  { get; set; }
+        public string funcion_generadora { get; set; }
+
+        /// <summary>
+        /// Propiedad que inidica de cual funcion proviene este estado
+        /// </summary>
+        public int nivel { get; set; }
 
 
         /// <summary>
         /// Propiedad que contiene la lista de hijos
         /// </summary>
-        public List<Nodo> hijos           { get; set; }
+        public List<Nodo> hijos    { get; set; }
     }
 }

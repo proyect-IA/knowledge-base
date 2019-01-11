@@ -5,14 +5,21 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApplication1"
         mc:Ignorable="d"
+        KeyDown="bajando"
         ResizeMode="NoResize"
         Title="Carga de Información" 
-        Height="620"
-        Width="620">
+        Height="670"
+        Background="#FF78909C"
+        Width="1500">
     
     <Grid>
 
         <Grid.ColumnDefinitions>
+            
+            <ColumnDefinition />
+            <ColumnDefinition />
+            <ColumnDefinition />
+            <ColumnDefinition />
             <ColumnDefinition />
             <ColumnDefinition />
             <ColumnDefinition />
@@ -33,190 +40,514 @@
             <RowDefinition Height="50"/>
             <RowDefinition Height="50"/>
             <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
         </Grid.RowDefinitions>
 
-        <Label
-            Content="Usuario" 
+        <GroupBox
+            BorderBrush="Black"
             Grid.Column="0"
-            FontWeight="Bold"
-            VerticalAlignment="Center"
-            HorizontalAlignment="Center"
-            Grid.Row="0"/>      
-
-        <Label
-            Content="#Elementos" 
-            Grid.Column="0"
-            VerticalAlignment="Center"
-            HorizontalAlignment="Center"
-            Grid.Row="1"/>
-
-        <TextBox
-            Name="elemento"
-            Grid.Column="0"
-            Grid.Row="2"
-            Width="70"
-            Height="30"
-            Text="1000"/>
-
-        <Label
-            Content="#Armas" 
-            Grid.Column="0"
-            VerticalAlignment="Center"
-            HorizontalAlignment="Center"
-            Grid.Row="3"/>
-
-        <TextBox
-            Name="armas"
-            Grid.Column="0"
-            Grid.Row="4"
-            Width="70"
-            Height="30"
-            Text="1000"/>
-
-        <Label
-            Content="#Nivel Armas" 
-            Grid.Column="0"
-            VerticalAlignment="Center"
-            HorizontalAlignment="Center"
-            Grid.Row="5"/>
-        
-        <TextBox
-            Name="nivel_armas"
-            Grid.Column="0"
-            Grid.Row="6"
-            Width="70"
-            Height="30"
-            Text="5"/>
-
-        <Label
-            Content="#Recursos" 
-            Grid.Column="0"
-            VerticalAlignment="Center"
-            HorizontalAlignment="Center"
-            Grid.Row="7"/>
-
-        <TextBox
-            Name="recursos"
-            Grid.Column="0"
-            Grid.Row="8"
-            Width="70"
-            Height="30"
-            Text="5"/>
-
-        <Label 
-            Content="Distancia entre elementos"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
+            Grid.Row="0"
+            Background="#FFCFD8DC"
             Grid.ColumnSpan="2"
-            Grid.Column="0"
-            Grid.Row="9"/>
+            Grid.RowSpan="13"
+            Margin="5">
+            
+            <Grid>
+                
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
 
-        <TextBox
-            Name="distancia"
-            Grid.Column="0"
-            Grid.ColumnSpan="2"
-            Grid.Row="10"
-            Width="150"
-            Height="30"
-            Text="1000"/>
-        
-        <Button
-            Content="Superioridad"
-            Grid.Column="0"
-            Grid.Row="11"
-            Height="27"
-            Margin="5"
-            Click="Button_Click"
-            Background="#FFF9F9F9"/>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="27"/>
+                    <RowDefinition Height="27"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="27"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="27"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="27"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="27"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="27"/>
+                    
+                </Grid.RowDefinitions>
+                
+                <Label
+                    Content="Configuración de parametros"
+                    FontWeight="Bold"
+                    Grid.ColumnSpan="2"
+                    FontSize="14"
+                    Grid.Row="0" />
 
-        <Label
-            Content="IA" 
-            Grid.Column="1"
-            FontWeight="Bold"
-            VerticalAlignment="Center"
-            HorizontalAlignment="Center"
-            Grid.Row="0"/>      
+                <Label
+                    Content="Usuario" 
+                    Grid.Column="0"
+                    FontWeight="Bold"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Grid.Row="1"/>
 
-        <Label
-            Content="#Elementos" 
-            Grid.Column="1"
-            VerticalAlignment="Center"
-            HorizontalAlignment="Center"
-            Grid.Row="1"/>
+                <Label
+                    Content="#Elementos" 
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Grid.Row="2"/>
 
-        <TextBox
-            Name="elemento_ia"
-            Grid.Column="1"
-            Grid.Row="2"
-            Width="70"
-            Height="30"
-            Text="2000"/>
+                <TextBox
+                    VerticalAlignment="Top"
+                    Name="elemento"
+                    Grid.Column="0"
+                    BorderBrush="Black"
+                    Grid.Row="3"
+                    Width="70"
+                    Height="30"
+                    Text="1000"/>
 
-        <Label
-            Content="#Armas" 
-            Grid.Column="1"
-            VerticalAlignment="Center"
-            HorizontalAlignment="Center"
-            Grid.Row="3"/>
+                <Label
+                    Content="#Armas" 
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Grid.Row="4"/>
 
-        <TextBox
-            Name="armas_ia"
-            Grid.Column="1"
-            Grid.Row="4"
-            Width="70"
-            Height="30"
-            Text="1000"/>
+                <TextBox
+                    Name="armas"
+                    Grid.Column="0"
+                    BorderBrush="Black"
+                    VerticalAlignment="Top"
+                    Grid.Row="5"
+                    Width="70"
+                    Height="30"
+                    Text="1000"/>
 
-        <Label
-            Content="#Nivel Armas" 
-            Grid.Column="1"
-            VerticalAlignment="Center"
-            HorizontalAlignment="Center"
-            Grid.Row="5"/>
+                <Label
+                    Content="#Nivel Armas" 
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Grid.Row="6"/>
 
-        <TextBox
-            Name="nivel_armas_ia"
-            Grid.Column="1"
-            Grid.Row="6"
-            Width="70"
-            Height="30"
-            Text="8"/>
+                <TextBox
+                    Name="nivel_armas"
+                    Grid.Column="0"
+                    BorderBrush="Black"
+                    Grid.Row="7"
+                    VerticalAlignment="Top"
+                    Width="70"
+                    Height="30"
+                    Text="10"/>
 
-        <Label
-            Content="#Recursos" 
-            Grid.Column="1"
-            VerticalAlignment="Center"
-            HorizontalAlignment="Center"
-            Grid.Row="7"/>
+                <Label
+                    Content="#Recursos" 
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Grid.Row="8"/>
 
-        <TextBox
-            Name="recursos_ia"
-            Grid.Column="1"
-            Grid.Row="8"
-            Width="70"
-            Height="30"
-            Text="8"/>
+                <TextBox
+                    Name="recursos"
+                    Grid.Column="0"
+                    BorderBrush="Black"
+                    VerticalAlignment="Top"
+                    Grid.Row="9"
+                    Width="70"
+                    Height="30"
+                    Text="5"/>
 
-        <Button
-            Name="btnIniciar"
-            Content="Correr"
-            Grid.Column="1"
-            Grid.Row="11"
-            Height="27"
-            Margin="5"
-            Click="correr_simulacion"
-            Background="#FFF9F9F9"/>
+                <Label 
+                    Content="Distancia entre elementos[m]"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Grid.ColumnSpan="2"
+                    Grid.Column="0"
+                    Grid.Row="10"/>
+
+                <TextBox
+                    Name="distancia"
+                    BorderBrush="Black"
+                    VerticalAlignment="Top"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2"
+                    Grid.Row="11"
+                    Width="150"
+                    Height="30"
+                    Text="1000"/>
+
+                <Button
+                    Content="Superioridad"
+                    Grid.Column="0"
+                    Grid.Row="12"
+                    Height="27"
+                    Margin="5"
+                    Click="Button_Click"/>
+
+                <Label
+                    Content="IA" 
+                    Grid.Column="1"
+                    FontWeight="Bold"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Grid.Row="1"/>
+
+                <Label
+                    Content="#Elementos" 
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Grid.Row="2"/>
+
+                <TextBox
+                    Name="elemento_ia"
+                    BorderBrush="Black"
+                    VerticalAlignment="Top"
+                    Grid.Column="1"
+                    Grid.Row="3"
+                    Width="70"
+                    Height="30"
+                    Text="1000"/>
+
+                <Label
+                    Content="#Armas" 
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Grid.Row="4"/>
+
+                <TextBox
+                    Name="armas_ia"
+                    BorderBrush="Black"
+                    VerticalAlignment="Top"
+                    Grid.Column="1"
+                    Grid.Row="5"
+                    Width="70"
+                    Height="30"
+                    Text="2000"/>
+
+                <Label
+                    Content="#Nivel Armas" 
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Grid.Row="6"/>
+
+                <TextBox
+                    Name="nivel_armas_ia"
+                    VerticalAlignment="Top"
+                    Grid.Column="1"
+                    BorderBrush="Black"
+                    Grid.Row="7"
+                    Width="70"
+                    Height="30"
+                    Text="8"/>
+
+                <Label
+                    Content="#Recursos" 
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Grid.Row="8"/>
+
+                <TextBox
+                    Name="recursos_ia"
+                    BorderBrush="Black"
+                    Grid.Column="1"
+                    VerticalAlignment="Top"
+                    Grid.Row="9"
+                    Width="70"
+                    Height="30"
+                    Text="8"/>
+
+                <Button
+                    Name="btnIniciar"
+                    Content="Correr"
+                    Grid.Column="1"
+                    Grid.Row="12"
+                    Height="27"
+                    Margin="5"
+                    Click="correr_simulacion"/>
+                
+            </Grid>
+            
+        </GroupBox>       
+       
 
         <GroupBox 
-            Header="Simulación"
             Grid.Column="2"
             Grid.Row="0"
             Margin="5"
-            Grid.ColumnSpan="3"
-            Grid.RowSpan="12">
+            Background="#FFCFD8DC"
+            Grid.ColumnSpan="4"
+            KeyUp="bajando"
+            BorderBrush="Black"
+            Grid.RowSpan="13">
 
-            <Canvas
-                    Name="lienzo" />
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                
+                <Label
+                    Content="Simulación"
+                    FontWeight="Bold"
+                    FontSize="14"
+                    Grid.Row="0" />
+                
+                <Canvas                    
+                    Name="lienzo" 
+                    Grid.Row="1"/>
+                
+            </Grid>
+            
+            
+        </GroupBox>
+
+        <GroupBox
+            Grid.Column="6"
+            Background="#FFCFD8DC"
+            Grid.ColumnSpan="3"
+            Grid.RowSpan="6"
+            BorderBrush="Black"
+            Margin="5">
+
+            <Grid>
+                
+                <Grid.ColumnDefinitions>                    
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="27"/>
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <Label
+                    Content="Propiedades unidad autonoma"
+                    Grid.Column="0"
+                    FontWeight="Bold"
+                    FontSize="14"
+                    Grid.Row="0"/>
+                
+                <DataGrid Name="TablaUnidadAutonoma"
+                              Grid.Row="1"
+                              Grid.RowSpan="6"
+                              Grid.Column="0"
+                              Width="Auto"
+                              Height="Auto"
+                              Margin="10"
+                              AlternatingRowBackground="#FFEEEEEE"
+                              AlternationCount="2"
+                              AutoGenerateColumns="False"
+                              Background="White"
+                              GridLinesVisibility="None"
+                              IsReadOnly="True"
+                              RowBackground="White" Grid.ColumnSpan="2">
+                    
+                    <DataGrid.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                        </Style>
+                    </DataGrid.CellStyle>
+                    
+                    <DataGrid.Columns>
+
+                        <DataGridTextColumn Width="*"
+                                                Binding="{Binding Path=accionActual}"
+                                                CanUserReorder="False"
+                                                CanUserResize="False"
+                                                ClipboardContentBinding="{x:Null}"
+                                                Header="Estado actual"
+                                                IsReadOnly="True" />
+
+                        <DataGridTextColumn Width="*"
+                                                Binding="{Binding Path=personal}"
+                                                CanUserReorder="False"
+                                                CanUserResize="False"
+                                                ClipboardContentBinding="{x:Null}"
+                                                Header="Numero personal"
+                                                IsReadOnly="True" />
+
+                        <DataGridTemplateColumn Width="*" Header="% Operacional">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        
+                                        <ProgressBar Name="nivelOperativo"
+                                                         Height="20"
+                                                         Maximum="100"
+                                                         Minimum="0"
+                                                         Value="{Binding Path=nivel_operatividad}">
+
+                                            <ProgressBar.Style>
+                                                <Style TargetType="{x:Type ProgressBar}">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding estado}" Value="verde">
+                                                            <Setter Property="Foreground" Value="#FF00BF00" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding estado}" Value="naranja">
+                                                            <Setter Property="Foreground" Value="#FFFFBB40" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding estado}" Value="rojo">
+                                                            <Setter Property="Foreground" Value="#FFFF3E3E" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </ProgressBar.Style>
+
+                                        </ProgressBar>
+
+                                        <TextBlock HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"
+                                                       Text="{Binding ElementName=nivelOperativo,
+                                                                      Path=Value,
+                                                                      StringFormat={}{0:0}%}" />
+
+
+                                    </Grid>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                    </DataGrid.Columns>
+
+                </DataGrid>
+
+            </Grid>
+            
+
+        </GroupBox>
+
+        <GroupBox            
+            Grid.Column="6"
+            Grid.ColumnSpan="3"
+            Grid.RowSpan="7"
+            Grid.Row="6"
+            Background="#FFCFD8DC"
+            BorderBrush="Black"
+            Margin="5">
+
+            <Grid>
+                
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30" />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <Label
+                    Content="Propiedades unidad autonoma"
+                    Grid.Column="0"
+                    FontSize="14"
+                    FontWeight="Bold"
+                    Grid.Row="0"/>
+                
+                <DataGrid Name="TablaUnidadEnemiga"
+                              Grid.Row="1"
+                              Grid.RowSpan="6"
+                              Grid.Column="0"
+                              Width="Auto"
+                              Height="Auto"
+                              Margin="10"
+                              AlternatingRowBackground="#FFEEEEEE"
+                              AlternationCount="2"
+                              AutoGenerateColumns="False"
+                              Background="White"
+                              GridLinesVisibility="None"
+                              IsReadOnly="True"
+                              RowBackground="White" Grid.ColumnSpan="2">
+
+                    <DataGrid.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                        </Style>
+                    </DataGrid.CellStyle>
+
+                    <DataGrid.Columns>
+
+                        <DataGridTextColumn Width="*"
+                                                Binding="{Binding Path=accionActual}"
+                                                CanUserReorder="False"
+                                                CanUserResize="False"
+                                                ClipboardContentBinding="{x:Null}"
+                                                Header="Estado actual"
+                                                IsReadOnly="True" />
+
+                        <DataGridTextColumn Width="*"
+                                                Binding="{Binding Path=personal}"
+                                                CanUserReorder="False"
+                                                CanUserResize="False"
+                                                ClipboardContentBinding="{x:Null}"
+                                                Header="Numero personal"
+                                                IsReadOnly="True" />
+
+                        <DataGridTemplateColumn Width="*" Header="% Operacional">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Grid>
+
+                                        <ProgressBar Name="nivelOperativo"
+                                                         Height="20"
+                                                         Maximum="100"
+                                                         Minimum="0"
+                                                         Value="{Binding Path=nivel_operatividad}">
+
+                                            <ProgressBar.Style>
+                                                <Style TargetType="{x:Type ProgressBar}">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding estado}" Value="verde">
+                                                            <Setter Property="Foreground" Value="#FF00BF00" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding estado}" Value="naranja">
+                                                            <Setter Property="Foreground" Value="#FFFFBB40" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding estado}" Value="rojo">
+                                                            <Setter Property="Foreground" Value="#FFFF3E3E" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </ProgressBar.Style>
+
+                                        </ProgressBar>
+
+                                        <TextBlock HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"
+                                                       Text="{Binding ElementName=nivelOperativo,
+                                                                      Path=Value,
+                                                                      StringFormat={}{0:0}%}" />
+
+
+                                    </Grid>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                    </DataGrid.Columns>
+
+                </DataGrid>
+
+            </Grid>
             
         </GroupBox>
 
