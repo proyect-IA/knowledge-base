@@ -18,6 +18,7 @@ namespace WpfApplication1.Servicios
         
         public static Nodo construirArbol(Nodo raiz)
         {
+            int nivelMaximo = 3;
 
             if (raiz.funcion_generadora == "Retirada")
                 return raiz;
@@ -27,7 +28,7 @@ namespace WpfApplication1.Servicios
 
             generarHijos(raiz);
             foreach (Nodo i in raiz.hijos)
-                if(raiz.nivel <= 8)
+                if(raiz.nivel <= nivelMaximo)
                     construirArbol(i);
 
             return raiz;
@@ -116,7 +117,7 @@ namespace WpfApplication1.Servicios
             if (nodo.unidad.distancia_entre_elementos > threshold_distance)
             {
                 n1.unidad.distancia_entre_elementos -= 100;
-                n1.funcion_generadora = "Dezplazamiento";
+                n1.funcion_generadora = "Desplazamiento";
                 n1.unidad.superioridad = calcularSuperioridad(n1.unidad, n1.enemiga);
                 n1.nivel = nodo.nivel +1;
                 nodo.hijos.Add(n1);
