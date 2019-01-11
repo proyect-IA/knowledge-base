@@ -8,7 +8,7 @@ namespace WpfApplication1.Informacion
 {
     public class Unidad
     {
-        public int personal { get; set; }
+        public InfoUnidad detalles { get; set; }
 
         /// <summary>
         /// Propiedad que indica la cantidad de muertos
@@ -18,6 +18,28 @@ namespace WpfApplication1.Informacion
         public int x { get; set; }
         public int y { get; set; }
         public int nivel_operatividad { get; set; }
+
+        public string accionActualAutonoma
+        {
+            set
+            {
+                switch (value)
+                {
+                    case "Desplazamiento":
+                        estadoActual = Accion.MOVERCE;
+                        break;
+
+                    case "Ataque directo":
+                    case "Ataque Indirecto":
+                        estadoActual = Accion.ATACAR_DIRECTO;
+                        break;
+
+                    case "Retirada":
+                        estadoActual = Accion.RETIRADA;
+                        break;
+                }
+            }
+        }
 
         public string accionActual
         {
@@ -38,6 +60,10 @@ namespace WpfApplication1.Informacion
                     case Accion.ATACAR_DIRECTO:
                     case Accion.ATAQUE_INDIRECTO:
                         valor = "atacando";
+                        break;
+
+                    case Accion.RETIRADA:
+                        valor = "retirada";
                         break;
                 }
 

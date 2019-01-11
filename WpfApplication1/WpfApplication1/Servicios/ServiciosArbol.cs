@@ -10,6 +10,33 @@ namespace WpfApplication1.Servicios
     public class ServiciosArbol
     {
         /// <summary>
+        /// Método que permite obtener la mejor desición dados los recursos disponibles
+        /// </summary>
+        /// <param name="ia"></param>
+        /// <param name="enemiga"></param>
+        /// <returns></returns>
+        public static string obtenerNuevoEstado(InfoUnidad ia, InfoUnidad enemiga)
+        {
+            //Construccion del nodo raíz
+            Nodo raiz    = new Nodo();
+            raiz.enemiga = enemiga;
+            raiz.unidad  = ia;
+            raiz.funcion_generadora = "top";
+            raiz.nivel    = 0;
+            raiz.visitado = false;
+            raiz.hijos    = new List<Nodo>();
+
+            //Generación del arbol de busqueda
+            raiz = Servicios.ServiciosArbol.construirArbol(raiz);
+
+            //Busqueda en el arbol con DFS 
+            List<Nodo> mejorRutaAcciones = new List<Nodo>();
+            mejorRutaAcciones            = obtenerCaminoSolucion(raiz);
+
+            return mejorRutaAcciones[0].funcion_generadora;
+        }
+
+        /// <summary>
         /// Método que construye el árbol de busqueda, con todas las posibles acciones
         /// </summary>
         /// <param name="amiga"></param>
@@ -61,8 +88,8 @@ namespace WpfApplication1.Servicios
                         n = hijo;
                         superioridad_ia = hijo.unidad.superioridad;
                     }
-                    Console.WriteLine("Acciones   hijo: " + hijo.funcion_generadora);
-                    Console.WriteLine("   superioridad: " + hijo.unidad.superioridad);
+                    //Console.WriteLine("Acciones   hijo: " + hijo.funcion_generadora);
+                    //Console.WriteLine("   superioridad: " + hijo.unidad.superioridad);
                 }
                 caminoSolucion.Add(n);
             }
@@ -83,7 +110,7 @@ namespace WpfApplication1.Servicios
             superioridad += (0.5f / 3) * (diff_armas / (amiga.armas + enemiga.armas));
             superioridad += (0.5f / 3) * (diff_nivel_armas / (amiga.nivel_armas + enemiga.nivel_armas));
 
-            Console.WriteLine("Superioridad:   " + superioridad);
+            //Console.WriteLine("Superioridad:   " + superioridad);
             return superioridad;
         }
 

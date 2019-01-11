@@ -268,7 +268,6 @@
                     Text="8"/>
 
                 <Button
-                    IsEnabled="False"
                     Name="btnIniciar"
                     Content="Correr"
                     Grid.Column="1"
@@ -376,7 +375,7 @@
                                                 IsReadOnly="True" />
 
                         <DataGridTextColumn Width="*"
-                                                Binding="{Binding Path=personal}"
+                                                Binding="{Binding Path=detalles.elementos}"
                                                 CanUserReorder="False"
                                                 CanUserResize="False"
                                                 ClipboardContentBinding="{x:Null}"
@@ -505,7 +504,7 @@
                                                 IsReadOnly="True" />
 
                         <DataGridTextColumn Width="*"
-                                                Binding="{Binding Path=personal}"
+                                                Binding="{Binding Path=detalles.elementos}"
                                                 CanUserReorder="False"
                                                 CanUserResize="False"
                                                 ClipboardContentBinding="{x:Null}"

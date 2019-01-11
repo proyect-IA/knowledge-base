@@ -52,7 +52,7 @@ namespace WpfApplication1.Estados
         /// <summary>
         /// Propiedad que contiene el punto de ubicación para la unidad inteligente
         /// </summary>
-        public Point unidad_IA  { get; set; }        
+        public Point unidad_IA; 
 
         /// <summary>
         /// Propiedad que permite ejecutar una acción autonoma

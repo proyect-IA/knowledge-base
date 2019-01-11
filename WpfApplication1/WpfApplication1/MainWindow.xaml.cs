@@ -66,7 +66,6 @@ namespace WpfApplication1
 
         private void correr_simulacion(object sender, RoutedEventArgs e)
         {
-            this.btnIniciar.IsEnabled = false;
             controlVisualLienzo.iniciarSimulacion();
         }
 
