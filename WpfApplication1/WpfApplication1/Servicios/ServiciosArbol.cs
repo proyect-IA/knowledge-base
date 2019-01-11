@@ -27,7 +27,7 @@ namespace WpfApplication1.Servicios
 
             generarHijos(raiz);
             foreach (Nodo i in raiz.hijos)
-                if(raiz.nivel <= 20)
+                if(raiz.nivel <= 8)
                     construirArbol(i);
 
             return raiz;
@@ -54,11 +54,15 @@ namespace WpfApplication1.Servicios
                 peak.visitado = true;
                 // Obtiene el nodo con mayor superioridad
                 foreach (Nodo hijo in peak.hijos)
+                {
                     if (hijo.visitado == false && hijo.unidad.superioridad > superioridad_ia)
                     {
                         n = hijo;
                         superioridad_ia = hijo.unidad.superioridad;
                     }
+                    Console.WriteLine("Acciones   hijo: " + hijo.funcion_generadora);
+                    Console.WriteLine("   superioridad: " + hijo.unidad.superioridad);
+                }
                 caminoSolucion.Add(n);
             }
             return caminoSolucion;
@@ -96,7 +100,9 @@ namespace WpfApplication1.Servicios
             // Caso base del algoritmo
             if (nodo.funcion_generadora == "Retirada")
                 return false;
-            if (nodo.unidad.superioridad > 0.8)
+            if (nodo.unidad.superioridad > 0.8f)
+                return false;
+            if (nodo.unidad.superioridad < 0.0f)
                 return false;
 
 
@@ -117,7 +123,7 @@ namespace WpfApplication1.Servicios
 
                 // Genera nodo hijo con accion ataque indirecto
                 n1.unidad.distancia_entre_elementos += 100;
-                n1.unidad.elementos -= 200;
+                n1.enemiga.elementos -= 200;
                 n1.unidad.recursos -= 1;
                 n1.funcion_generadora = "Ataque Indirecto";
                 n1.unidad.superioridad = calcularSuperioridad(n1.unidad, n1.enemiga);
@@ -127,7 +133,7 @@ namespace WpfApplication1.Servicios
             else
             {
                 // Genera nodo hijo con accion ataque directo
-                n1.unidad.elementos += 80;
+                n1.enemiga.elementos += 40;
                 n1.unidad.recursos -= 1;
                 n1.funcion_generadora = "Ataque directo";
                 n1.unidad.superioridad = calcularSuperioridad(n1.unidad, n1.enemiga);

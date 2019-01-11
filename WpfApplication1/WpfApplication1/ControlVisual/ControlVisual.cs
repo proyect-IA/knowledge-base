@@ -30,6 +30,7 @@ namespace WpfApplication1
             ia.armas       = Convert.ToInt32(_vista.armas.Text);
             ia.nivel_armas = Convert.ToInt32(_vista.nivel_armas.Text);
             ia.recursos    = Convert.ToInt32(_vista.recursos.Text);
+            ia.distancia_entre_elementos = Convert.ToInt32(_vista.distancia.Text);
 
             //carga la situación de la unidad enemiga
             InfoUnidad enemiga  = new InfoUnidad();
@@ -37,6 +38,7 @@ namespace WpfApplication1
             enemiga.armas       = Convert.ToInt32(_vista.armas.Text);
             enemiga.nivel_armas = Convert.ToInt32(_vista.nivel_armas.Text);
             enemiga.recursos    = Convert.ToInt32(_vista.recursos.Text);
+            enemiga.distancia_entre_elementos = Convert.ToInt32(_vista.distancia.Text);
 
             ia.superioridad = Servicios.ServiciosArbol.calcularSuperioridad(ia, enemiga);
             enemiga.superioridad = 1.0f - ia.superioridad;
@@ -55,8 +57,13 @@ namespace WpfApplication1
             //Generación del arbol de busqueda
             raiz = Servicios.ServiciosArbol.construirArbol(raiz);
 
-            cargarDatosUnidades(ia, enemiga);
+            //Busqueda en el arbol con DFS 
+            List<Nodo> mejorRutaAcciones = new List<Nodo>();
+            mejorRutaAcciones = Servicios.ServiciosArbol.obtenerCaminoSolucion(raiz);
+            Console.WriteLine("Mejor acción: " + mejorRutaAcciones[0].funcion_generadora);
 
+
+            cargarDatosUnidades(ia, enemiga);
             _vista.btnIniciar.IsEnabled = true;
         }
 
