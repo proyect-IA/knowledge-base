@@ -15,8 +15,7 @@ namespace WpfApplication1.Servicios
         /// <param name="amiga"></param>
         /// <param name="enemiga"></param>
         /// <returns></returns>
-
-        private const int MAX_RECURSIVE_CALLS = 100;
+        
         public static Nodo construirArbol(Nodo raiz)
         {
 
@@ -39,11 +38,29 @@ namespace WpfApplication1.Servicios
         /// Método que obtiene el camino solución
         /// </summary>
         /// <returns></returns>
-        public static List<NodoSolucion> obtenerCaminoSolucion()
+        public static List<Nodo> obtenerCaminoSolucion(Nodo raiz)
         {
-            //Implementanción de DFS
-            List<NodoSolucion> caminoSolucion = new List<NodoSolucion>();
+            //Implementanción de DFS para recuperar la mejor solución
+            List<Nodo> caminoSolucion = new List<Nodo>();
+            float superioridad_ia       = 0.0f;
+            Nodo n = new Nodo();
+            Stack<Nodo> path = new Stack<Nodo>();
 
+            // Se ingresa el nodo raíz
+            path.Push(raiz);
+            while(path.Count >0)
+            {
+                Nodo peak = path.Pop();
+                peak.visitado = true;
+                // Obtiene el nodo con mayor superioridad
+                foreach (Nodo hijo in peak.hijos)
+                    if (hijo.visitado == false && hijo.unidad.superioridad > superioridad_ia)
+                    {
+                        n = hijo;
+                        superioridad_ia = hijo.unidad.superioridad;
+                    }
+                caminoSolucion.Add(n);
+            }
             return caminoSolucion;
         }
 
@@ -83,10 +100,11 @@ namespace WpfApplication1.Servicios
                 return false;
 
 
-            Nodo n1    = new Nodo();
-            n1.unidad  = obtenerCopia(nodo.unidad);
-            n1.enemiga = obtenerCopia(nodo.enemiga);
-            n1.hijos = new List<Nodo>();
+            Nodo n1     = new Nodo();
+            n1.unidad   = obtenerCopia(nodo.unidad);
+            n1.enemiga  = obtenerCopia(nodo.enemiga);
+            n1.visitado = false;
+            n1.hijos    = new List<Nodo>();
 
             // Genera nodo hijo con accion desplazamiento
             if (nodo.unidad.distancia_entre_elementos > threshold_distance)

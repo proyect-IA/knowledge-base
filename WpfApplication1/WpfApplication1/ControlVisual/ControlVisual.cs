@@ -49,6 +49,7 @@ namespace WpfApplication1
             raiz.unidad = ia;
             raiz.funcion_generadora = "top";
             raiz.nivel = 0;
+            raiz.visitado = false;
             raiz.hijos = new List<Nodo>();
 
             //Generación del arbol de busqueda

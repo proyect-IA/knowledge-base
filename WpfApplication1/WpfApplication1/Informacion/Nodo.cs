@@ -32,6 +32,12 @@ namespace WpfApplication1.Informacion
         /// </summary>
         public int nivel { get; set; }
 
+        /// <summary>
+        /// Propiedad que inidica si el nodo ya fue explorado util para 
+        /// recuperar el camino solución 
+        /// </summary>
+        public bool visitado { get; set; }
+
 
         /// <summary>
         /// Propiedad que contiene la lista de hijos
