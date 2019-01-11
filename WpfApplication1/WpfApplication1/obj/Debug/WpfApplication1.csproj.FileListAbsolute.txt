@@ -12,3 +12,5 @@ c:\users\juan\documents\visual studio 2015\Projects\WpfApplication1\WpfApplicati
 c:\users\juan\documents\visual studio 2015\Projects\WpfApplication1\WpfApplication1\obj\Debug\WpfApplication1.csproj.GenerateResource.Cache
 c:\users\juan\documents\visual studio 2015\Projects\WpfApplication1\WpfApplication1\obj\Debug\WpfApplication1.exe
 c:\users\juan\documents\visual studio 2015\Projects\WpfApplication1\WpfApplication1\obj\Debug\WpfApplication1.pdb
+C:\Users\juan\documents\visual studio 2015\Projects\WpfApplication1\WpfApplication1\obj\Debug\Dictionary1.baml
+C:\Users\juan\documents\visual studio 2015\Projects\WpfApplication1\WpfApplication1\obj\Debug\WpfApplication1.Resource1.resources

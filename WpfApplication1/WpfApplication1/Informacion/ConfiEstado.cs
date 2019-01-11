@@ -6,12 +6,7 @@ using System.Threading.Tasks;
 
 namespace WpfApplication1.Informacion
 {
-    public enum Accion
+    public class ConfiEstado
     {
-        ATACAR_DIRECTO = 1,
-        ATAQUE_INDIRECTO = 2,
-        SEGREGAR = 3,
-        RETIRADA = 4,
-        MOVERCE = 5
-    };
+    }
 }
