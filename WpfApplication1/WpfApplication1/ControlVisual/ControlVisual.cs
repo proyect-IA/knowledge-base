@@ -62,24 +62,43 @@ namespace WpfApplication1
             mejorRutaAcciones = Servicios.ServiciosArbol.obtenerCaminoSolucion(raiz);
             Console.WriteLine("Mejor acción: " + mejorRutaAcciones[0].funcion_generadora);
             
-            cargarDatosUnidades(ia, enemiga);
             _vista.btnIniciar.IsEnabled = true;
         }
 
-        public void cargarDatosUnidades(InfoUnidad ia, InfoUnidad enem)
+        /// <summary>
+        /// Método que permite obtener la configuración de la unidad autonoma
+        /// </summary>
+        /// <returns></returns>
+        public InfoUnidad obtenerConfiguracionAutonoma()
         {
-            _vista.controlVisualLienzo.autonoma.personal = ia.elementos;
-            _vista.controlVisualLienzo.enemiga.personal = enem.elementos;
+            //carga la situación de la unidad ia
+            InfoUnidad ia  = new InfoUnidad();
+            ia.elementos   = Convert.ToInt32(_vista.elemento_ia.Text);
+            ia.armas       = Convert.ToInt32(_vista.armas_ia.Text);
+            ia.nivel_armas = Convert.ToInt32(_vista.nivel_armas_ia.Text);
+            ia.recursos    = Convert.ToInt32(_vista.recursos_ia.Text);
+            ia.distancia_entre_elementos = Convert.ToInt32(_vista.distancia.Text);
+
+            return ia;
         }
 
-
-
-
-        public void correrSimulacionIA()
+        /// <summary>
+        /// Método qye permite obtener la configuración para la unidad enemiga
+        /// </summary>
+        /// <returns></returns>
+        public InfoUnidad obtenerConfiguracionEnemiga()
         {
+            //carga la situación de la unidad enemiga
+            InfoUnidad enemiga = new InfoUnidad();
+            enemiga.elementos = Convert.ToInt32(_vista.elemento.Text);
+            enemiga.armas = Convert.ToInt32(_vista.armas.Text);
+            enemiga.nivel_armas = Convert.ToInt32(_vista.nivel_armas.Text);
+            enemiga.recursos = Convert.ToInt32(_vista.recursos.Text);
+            enemiga.distancia_entre_elementos = Convert.ToInt32(_vista.distancia.Text);
 
+            return enemiga;
         }
 
-
+        
     }
 }

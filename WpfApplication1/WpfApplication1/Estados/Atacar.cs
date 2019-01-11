@@ -139,7 +139,7 @@ namespace WpfApplication1.Estados
 
                 if (ServicioColiciones.verificarColicion(new Unidad() { x = (int)disparo.X, y = (int)disparo.Y}, c.enemiga, 15))
                 {
-                    c.enemiga.personal -= 10;
+                    c.enemiga.detalles.elementos -= 10;
                     c.enemiga.muertos += 10;
                     c.enemiga.nivel_operatividad -= 1;
                 }

@@ -100,7 +100,9 @@ namespace WpfApplication1.Estados
 
             if (unidad_IA.X == c.autonoma.x && unidad_IA.Y == c.autonoma.y)
             {
+                en_ejecucion = false;
                 unidad_IA = generarCoordenada(c);
+                PublicadorEventoCambioEstado.obtenerInstancia().LanzarEvento(this, new EventoCambioEstado());
             }
 
             c._vista.TablaUnidadAutonoma.ItemsSource = new List<Unidad>() { c.autonoma };
