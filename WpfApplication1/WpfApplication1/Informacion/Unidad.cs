@@ -6,12 +6,7 @@ using System.Threading.Tasks;
 
 namespace WpfApplication1.Informacion
 {
-    public enum Accion
+    public class Unidad
     {
-        ATACAR_DIRECTO,
-        ATAQUE_INDIRECTO,
-        SEGREGAR,
-        RETIRADA,
-        MOVERCE
     }
 }
