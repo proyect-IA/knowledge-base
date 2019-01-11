@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -138,11 +138,17 @@ namespace WpfApplication1
         /// <param name="e"></param>
         private void ControlVisualSimulacion_eventoCambio(object sender, EventoCambioEstado e)
         {
+            if (autonoma.estadoActual != Accion.RETIRADA)
+            {
+                autonoma.detalles.superioridad = Servicios.ServiciosArbol.calcularSuperioridad(autonoma.detalles, enemiga.detalles);
+                enemiga.detalles.superioridad = 1.0f - autonoma.detalles.superioridad;
+                autonoma.accionActualAutonoma = ServiciosArbol.obtenerNuevoEstado(autonoma.detalles, enemiga.detalles);
+            }
+            else
+            {
+                autonoma.estadoActual = Accion.MOVERCE;
+            }
 
-            autonoma.detalles.superioridad = Servicios.ServiciosArbol.calcularSuperioridad(autonoma.detalles, enemiga.detalles);
-            enemiga.detalles.superioridad  = 1.0f - autonoma.detalles.superioridad;
-            autonoma.accionActualAutonoma  = ServiciosArbol.obtenerNuevoEstado(autonoma.detalles, enemiga.detalles);
-            
             Atacar.Instancia.disparo.X = autonoma.x;
             Atacar.Instancia.disparo.Y = autonoma.y;
             Atacar.Instancia.objetivo.X = enemiga.x;
