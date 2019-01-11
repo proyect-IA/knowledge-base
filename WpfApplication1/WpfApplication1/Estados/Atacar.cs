@@ -78,7 +78,7 @@ namespace WpfApplication1.Estados
         {
             c.canvas.Children.Clear();
 
-            if (disparo.X == objetivo.X && disparo.Y == objetivo.Y)
+            if (disparo.X == objetivo.X || disparo.Y == objetivo.Y)
             {
                 objetivo.X = c.enemiga.x;
                 objetivo.Y = c.enemiga.y;
@@ -92,23 +92,27 @@ namespace WpfApplication1.Estados
             }
             else
             { 
-                if (disparo.X > objetivo.X)
-                {
-                    disparo.X -= 1;
-                }
-                
-                if (disparo.X < objetivo.X)
+                if (objetivo.X > disparo.X && objetivo.Y < disparo.Y)
                 {
                     disparo.X += 1;
-                }
-                if (disparo.Y > objetivo.Y)
-                {
                     disparo.Y -= 1;
                 }
-                if (disparo.Y < objetivo.Y)
+                else  if (objetivo.X < disparo.X && objetivo.Y < disparo.Y)
                 {
+                    disparo.X -= 1;
+                    disparo.Y -= 1;
+                }
+                else if(objetivo.X > disparo.X && objetivo.Y > disparo.Y)
+                {
+                    disparo.X += 1;
                     disparo.Y += 1;
                 }
+                else if (objetivo.X < disparo.X && objetivo.Y > disparo.Y)
+                {
+                    disparo.X -= 1;
+                    disparo.Y += 1;
+                }
+                
                 c._vista.TablaUnidadAutonoma.ItemsSource = new List<Unidad>() { c.autonoma };
                 c._vista.TablaUnidadEnemiga.ItemsSource  = new List<Unidad>() { c.enemiga };
 
@@ -135,6 +139,8 @@ namespace WpfApplication1.Estados
 
                 if (ServicioColiciones.verificarColicion(new Unidad() { x = (int)disparo.X, y = (int)disparo.Y}, c.enemiga, 15))
                 {
+                    c.enemiga.personal -= 10;
+                    c.enemiga.muertos += 10;
                     c.enemiga.nivel_operatividad -= 1;
                 }
             }

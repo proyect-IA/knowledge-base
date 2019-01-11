@@ -54,7 +54,19 @@ namespace WpfApplication1
 
             //Generación del arbol de busqueda
             raiz = Servicios.ServiciosArbol.construirArbol(raiz);
+
+            cargarDatosUnidades(ia, enemiga);
+
+            _vista.btnIniciar.IsEnabled = true;
         }
+
+        public void cargarDatosUnidades(InfoUnidad ia, InfoUnidad enem)
+        {
+            _vista.controlVisualLienzo.autonoma.personal = ia.elementos;
+            _vista.controlVisualLienzo.enemiga.personal = enem.elementos;
+        }
+
+
 
 
         public void correrSimulacionIA()

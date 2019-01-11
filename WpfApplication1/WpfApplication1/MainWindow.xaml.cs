@@ -25,12 +25,12 @@ namespace WpfApplication1
         /// <summary>
         /// control visual principal
         /// </summary>
-        private ControlVisual controlVisual                 { get; set; }
+        public ControlVisual controlVisual                 { get; set; }
 
         /// <summary>
         /// Control visual del lienzo
         /// </summary>
-        private ControlVisualSimulacion controlVisualLienzo { get; set; }
+        public ControlVisualSimulacion controlVisualLienzo { get; set; }
 
         /// <summary>
         /// Constructor de la clase

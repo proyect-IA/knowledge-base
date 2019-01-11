@@ -9,6 +9,11 @@ namespace WpfApplication1.Informacion
     public class Unidad
     {
         public int personal { get; set; }
+
+        /// <summary>
+        /// Propiedad que indica la cantidad de muertos
+        /// </summary>
+        public int muertos  { get; set; }
         public Accion estadoActual { get; set; }
         public int x { get; set; }
         public int y { get; set; }
