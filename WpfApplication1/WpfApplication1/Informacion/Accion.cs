@@ -8,6 +8,10 @@ namespace WpfApplication1.Informacion
 {
     public enum Accion
     {
-        ATACAR , SEGREGAR, RETIRADA
+        ATAQUE_DIRECTO,
+        ATAQUE_INDIRECTO,
+        SEGREGAR,
+        RETIRADA,
+        MOVILIZARTE
     }
 }

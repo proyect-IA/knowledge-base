@@ -14,12 +14,12 @@ namespace WpfApplication1.Informacion
         /// <summary>
         /// Propiedad que inicia el estado de la unidad
         /// </summary>
-        public InfoUnidad unidad { get; set; }
+        public InfoUnidad unidad  { get; set; }
 
 
         /// <summary>
         /// Propiedad que contiene la lista de hijos
         /// </summary>
-        public List<Nodo> hijo    { get; set; }
+        public List<Nodo> hijos    { get; set; }
     }
 }
