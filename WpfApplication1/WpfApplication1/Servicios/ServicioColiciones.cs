@@ -21,5 +21,17 @@ namespace WpfApplication1.Servicios
 
             return false;
         }
+
+        /// <summary>
+        /// Método que permite obtener la distancia entre dos puntos
+        /// </summary>
+        /// <param name="autonoma"></param>
+        /// <param name="enemiga"></param>
+        /// <returns></returns>
+        public static int obtenerDistanciaEntrePuntos(Unidad autonoma, Unidad enemiga)
+        {
+            return (int)Math.Sqrt((int)Math.Pow(autonoma.x - enemiga.x, 2) + (int)Math.Pow(autonoma.y - enemiga.y, 2));
+        }
+
     }
 }

@@ -76,7 +76,8 @@
                     <RowDefinition Height="27"/>
                     <RowDefinition Height="50"/>
                     <RowDefinition Height="50"/>
-                    <RowDefinition Height="27"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
                     
                 </Grid.RowDefinitions>
                 
@@ -267,6 +268,7 @@
                     Text="8"/>
 
                 <Button
+                    IsEnabled="False"
                     Name="btnIniciar"
                     Content="Correr"
                     Grid.Column="1"
@@ -378,7 +380,15 @@
                                                 CanUserReorder="False"
                                                 CanUserResize="False"
                                                 ClipboardContentBinding="{x:Null}"
-                                                Header="Numero personal"
+                                                Header="Número personal"
+                                                IsReadOnly="True" />
+
+                        <DataGridTextColumn Width="*"
+                                                Binding="{Binding Path=muertos}"
+                                                CanUserReorder="False"
+                                                CanUserResize="False"
+                                                ClipboardContentBinding="{x:Null}"
+                                                Header="Número muertos"
                                                 IsReadOnly="True" />
 
                         <DataGridTemplateColumn Width="*" Header="% Operacional">
@@ -500,6 +510,14 @@
                                                 CanUserResize="False"
                                                 ClipboardContentBinding="{x:Null}"
                                                 Header="Numero personal"
+                                                IsReadOnly="True" />
+                        
+                        <DataGridTextColumn Width="*"
+                                                Binding="{Binding Path=muertos}"
+                                                CanUserReorder="False"
+                                                CanUserResize="False"
+                                                ClipboardContentBinding="{x:Null}"
+                                                Header="Número muertos"
                                                 IsReadOnly="True" />
 
                         <DataGridTemplateColumn Width="*" Header="% Operacional">

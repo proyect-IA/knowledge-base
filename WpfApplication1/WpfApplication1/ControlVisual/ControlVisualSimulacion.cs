@@ -174,6 +174,7 @@ namespace WpfApplication1
                         break;
 
                     case Accion.RETIRADA:
+                        _canvas = Retirada.Instancia.ejecutarAccionAutonomo(this);
                         break;
 
                     case Accion.ATACAR_DIRECTO:
